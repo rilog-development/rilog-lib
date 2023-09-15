@@ -13,10 +13,10 @@ const axiosInterceptor = {
     onResponse: (data: TRilogPushResponse) => {
         const preparedResponse = axiosAdapterResponse(data);
 
-        if(!preparedResponse) return;
+        if (!preparedResponse) return;
 
         pushResponse(preparedResponse);
     },
-}
+};
 
 export { axiosInterceptor };

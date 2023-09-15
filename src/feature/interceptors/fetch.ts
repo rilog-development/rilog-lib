@@ -7,7 +7,7 @@ const fetchInterceptor = {
         const { fetch: originalFetch } = window;
 
         window.fetch = async (...args) => {
-            const [resource, config ] = args;
+            const [resource, config] = args;
 
             fetchInterceptor.onRequest(args);
 
@@ -25,13 +25,13 @@ const fetchInterceptor = {
 
         pushRequest(preparedRequest);
     },
-     onResponse: (data: TRilogPushResponse) => {
-         const prepareResponse = fetchAdapterResponse(data);
+    onResponse: (data: TRilogPushResponse) => {
+        const prepareResponse = fetchAdapterResponse(data);
 
-         if (prepareResponse) return;
+        if (prepareResponse) return;
 
-         pushRequest(prepareResponse);
-     },
+        pushRequest(prepareResponse);
+    },
 };
 
 export { fetchInterceptor };

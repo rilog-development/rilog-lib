@@ -12,12 +12,12 @@ const pushRequest = (request: IRilogRequest) => {
 
     const timedRequest: IRilogRequestTimed | null = request
         ? {
-            ...request,
-            timestamp: Date.now(),
-            locationOrigin: window.location?.origin || null,
-            locationHref: window.location?.href || null,
-            localStorage: JSON.stringify(localStorage),
-        }
+              ...request,
+              timestamp: Date.now(),
+              locationOrigin: window.location?.origin || null,
+              locationHref: window.location?.href || null,
+              localStorage: JSON.stringify(localStorage),
+          }
         : null;
 
     startShortTimer();

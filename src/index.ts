@@ -1,21 +1,14 @@
-// adapters
-import { axiosAdapterRequest, axiosAdapterResponse } from './adapters';
 // types
-import {
-    TRilogInit,
-    TRilogPushRequest,
-    TRilogPushResponse,
-} from './types';
+import { TRilogInit, TRilogPushRequest, TRilogPushResponse } from './types';
 // state
 import { updatePartState } from './state';
 // api
 import { initRequest } from './api';
 // tokens
 import { getUserUniqToken } from './utils';
-import { pushRequest, pushResponse } from './feature/requests';
 import { getExternalInfo } from './utils/browser';
 import { axiosInterceptor } from './feature/interceptors/axios';
-
+import { fetchInterceptor } from './feature/interceptors/fetch';
 
 /**
  * RILOG object/typed
@@ -26,7 +19,6 @@ type TRilog = {
     interceptRequestAxios: (data: TRilogPushRequest) => void;
     interceptResponseAxios: (data: TRilogPushResponse) => void;
 };
-
 
 const Rilog = {
     // methods
@@ -50,11 +42,11 @@ const Rilog = {
             init: true,
             config: config || null,
         });
+
+        fetchInterceptor.init();
     },
     interceptRequestAxios: axiosInterceptor.onRequest,
     interceptResponseAxios: axiosInterceptor.onResponse,
 } as TRilog;
-
-
 
 export { Rilog };

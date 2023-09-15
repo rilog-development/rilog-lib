@@ -1,7 +1,7 @@
-import { Rilog } from '..';
 import { saveRequests } from './requests';
 import { LONG_TIMER_LIMIT, SHORT_TIMER_LIMIT } from '../constants';
 import { state, updatePartState } from '../state';
+import { pushResponse } from '../feature/requests/index';
 import { IRilogRequestItem } from '../types';
 
 /**
@@ -11,7 +11,7 @@ const startShortTimer = () => {
     updatePartState({
         shortTimer: setTimeout(() => {
             // push empty response
-            Rilog.pushResponse({});
+            pushResponse({});
         }, state.config?.timeout || SHORT_TIMER_LIMIT),
     });
 };
