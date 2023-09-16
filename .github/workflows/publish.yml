@@ -3,17 +3,32 @@ name: "publish npm"
 on: push
 
 jobs:
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-node@v3
+          with:
+            node-version: 16
+        - run: npm install
+        - run: npm run build
+
     publish:
+        needs: build
         runs-on: ubuntu-latest
+        permissions:
+          packages: write
+          contents: read
         steps:
             - name: checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
             - name: node
-              uses: actions/setup-node@v2
+              uses: actions/setup-node@v3
               with:
                   node-version: 16
                   registry-url: https://registry.npmjs.org
-            - name: publish
-              run: npm publish --access public
+            - run: npm install
+            - run: npm run build
+            - run: npm publish --access public
               env:
                   NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
