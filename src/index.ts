@@ -16,6 +16,7 @@ import { fetchInterceptor } from './feature/interceptors/fetch';
 
 type TRilog = {
     init: (data: TRilogInit) => void;
+    initFetchInterceptor: () => void;
     interceptRequestAxios: (data: TRilogPushRequest) => void;
     interceptResponseAxios: (data: TRilogPushResponse) => void;
 };
@@ -45,6 +46,7 @@ const Rilog = {
 
         fetchInterceptor.init();
     },
+    initFetchInterceptor: fetchInterceptor.init,
     interceptRequestAxios: axiosInterceptor.onRequest,
     interceptResponseAxios: axiosInterceptor.onResponse,
 } as TRilog;
