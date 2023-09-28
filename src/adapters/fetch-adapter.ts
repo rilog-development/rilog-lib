@@ -14,8 +14,8 @@ const checkEmptyRequest = (request: IRilogRequest): boolean => {
 const fetchAdapterRequest = (data: TRilogPushRequest) => {
     console.log('[fetchAdapterRequest] data', data);
     let requestFull: IRilogRequest = {
-        url: '',
-        method: '',
+        url: 'Unknown',
+        method: 'Unknown',
         headers: {},
         data: {},
         locationOrigin: null,
@@ -26,7 +26,7 @@ const fetchAdapterRequest = (data: TRilogPushRequest) => {
     data?.url && (requestFull = { ...requestFull, url: data.url });
     data?.config && (requestFull = { ...requestFull, data: data.config });
 
-    return data;
+    return checkEmptyRequest(requestFull) ? null : requestFull;
 };
 
 const checkEmptyResponse = (response: IRilogResponse): boolean => {
@@ -38,7 +38,7 @@ const checkEmptyResponse = (response: IRilogResponse): boolean => {
 };
 
 const fetchAdapterResponse = (data: TRilogPushResponse) => {
-    console.log('[fetchAdapterResponse] data ', data, 'data.data ', data.data, 'data.body ', data.body);
+    console.log('[fetchAdapterResponse] data ', data, 'data.body ', data.body.data);
 
     let responseFull: IRilogResponse = {
         data: {},

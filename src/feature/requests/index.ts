@@ -5,6 +5,8 @@ import { createRequestFilter } from '../../filters';
 import { pushRequests } from '../../utils/requests';
 
 const pushRequest = (request: IRilogRequest) => {
+    console.log('[pushRequest] ', request);
+
     // exit if recording is stopped
     if (!state.recording) {
         return;
@@ -37,6 +39,7 @@ const pushRequest = (request: IRilogRequest) => {
 };
 
 const pushResponse = (response: IRilogResponse) => {
+    console.log('[pushResponse] ', response);
     // exit if recording is stopped
     if (!state.recording) {
         return;
