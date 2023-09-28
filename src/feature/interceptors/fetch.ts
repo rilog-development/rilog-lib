@@ -7,7 +7,7 @@ const fetchInterceptor = {
         const { fetch: originalFetch } = window;
 
         window.fetch = async (...args) => {
-            console.log("fetch works");
+            console.log('fetch works');
             const [resource, config] = args;
 
             fetchInterceptor.onRequest(args);
