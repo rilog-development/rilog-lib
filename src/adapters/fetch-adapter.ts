@@ -29,18 +29,12 @@ const fetchAdapterRequest = (data: TRilogPushRequest) => {
     return checkEmptyRequest(requestFull) ? null : requestFull;
 };
 
-const checkEmptyResponse = (response: IRilogResponse): boolean => {
-    let empty = false;
-
-    Object.keys(response.data).length === 0 && (empty = true);
-
-    return empty;
-};
-
 const fetchAdapterResponse = (data: TRilogPushResponse) => {
     console.log('[fetchAdapterResponse] data ', data);
 
     const responseData = data.json();
+
+    console.log('[fetchAdapterResponse] responseData ', responseData);
 
     if (Object.keys(data).length === 0) {
         return null;
@@ -51,7 +45,9 @@ const fetchAdapterResponse = (data: TRilogPushResponse) => {
         status: data?.response?.status?.toString() || data?.status?.toString() || null,
     };
 
-    return checkEmptyResponse(responseFull) ? null : responseFull;
+    console.log('[fetchAdapterResponse] responseFull ', responseFull);
+
+    return responseFull;
 };
 
 export { fetchAdapterRequest, fetchAdapterResponse };
