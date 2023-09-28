@@ -38,28 +38,18 @@ const checkEmptyResponse = (response: IRilogResponse): boolean => {
 };
 
 const fetchAdapterResponse = (data: TRilogPushResponse) => {
-    console.log('[fetchAdapterResponse] data ', data, 'data.body ', data.body.data);
+    console.log('[fetchAdapterResponse] data ', data);
 
-    let responseFull: IRilogResponse = {
-        data: {},
-        status: null,
-    };
+    const responseData = data.json();
 
     if (Object.keys(data).length === 0) {
         return null;
     }
 
-    if (data?.status?.toString()[0] !== SUCCESS_RESPONSE_STATUS_START_CODE) {
-        return { data: data.response.data, status: data.status?.toString() };
-    }
-
-    if (data?.data) {
-        responseFull = {
-            ...responseFull,
-            data: data.data,
-            status: data?.response?.status?.toString() || data?.status?.toString() || null,
-        };
-    }
+    const responseFull: IRilogResponse = {
+        data: responseData || 'No data.',
+        status: data?.response?.status?.toString() || data?.status?.toString() || null,
+    };
 
     return checkEmptyResponse(responseFull) ? null : responseFull;
 };
