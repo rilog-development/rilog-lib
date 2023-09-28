@@ -29,10 +29,10 @@ const fetchAdapterRequest = (data: TRilogPushRequest) => {
     return checkEmptyRequest(requestFull) ? null : requestFull;
 };
 
-const fetchAdapterResponse = (data: TRilogPushResponse) => {
+const fetchAdapterResponse = async (data: TRilogPushResponse) => {
     console.log('[fetchAdapterResponse] data ', data);
 
-    const responseData = data.json();
+    const responseData = await data.json();
 
     console.log('[fetchAdapterResponse] responseData ', responseData);
 
