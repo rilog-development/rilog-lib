@@ -1,23 +1,22 @@
 import { TRilogPushRequest, TRilogPushResponse } from '../../types';
 import { fetchAdapterRequest, fetchAdapterResponse } from '../../adapters/fetch-adapter';
 import { pushRequest } from '../requests';
+import { register } from 'fetch-intercept';
 
 const fetchInterceptor = {
     init: () => {
-        const { fetch: originalFetch } = window;
-
-        window.fetch = async (...args) => {
-            console.log('fetch works');
-            const [resource, config] = args;
-
-            fetchInterceptor.onRequest(args);
-
-            const response = await originalFetch(resource, config);
-
-            fetchInterceptor.onResponse(response);
-
-            return response;
-        };
+        register({
+            request: (url, config) => {
+                // Modify the url or config here
+                fetchInterceptor.onRequest([url, config]);
+                return [url, config];
+            },
+            response: (response) => {
+                // Modify the reponse object
+                fetchInterceptor.onResponse(response);
+                return response;
+            },
+        });
     },
     onRequest: (data: TRilogPushRequest) => {
         const preparedRequest = fetchAdapterRequest(data);
