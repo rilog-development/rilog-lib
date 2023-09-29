@@ -34,7 +34,7 @@ const fetchAdapterResponse = ({ resepose, responseData }: TRilogPushResponse) =>
 
     console.log('[fetchAdapterResponse] responseData ', responseData);
 
-    if (Object.keys(data).length === 0) {
+    if (Object.keys(resepose).length === 0) {
         return null;
     }
 
