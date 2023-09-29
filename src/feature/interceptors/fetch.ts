@@ -13,7 +13,7 @@ const fetchInterceptor = {
 
             const response = await originalFetch(resource, config);
 
-            fetchInterceptor.onResponse(response);
+            fetchInterceptor.onResponse({ response, responseData: response.json() });
 
             return response;
         };
