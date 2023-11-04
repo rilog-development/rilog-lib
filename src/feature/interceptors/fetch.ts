@@ -2,7 +2,6 @@ import { TRilogPushRequest, TRilogPushResponse } from '../../types';
 import { fetchAdapterRequest, fetchAdapterResponse } from '../../adapters/fetch-adapter';
 import { pushRequest, pushResponse } from '../requests';
 
-
 const fetchInterceptor = {
     init: () => {
         window.fetch = (url, options) => {
