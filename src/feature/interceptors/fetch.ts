@@ -2,20 +2,31 @@ import { TRilogPushRequest, TRilogPushResponse } from '../../types';
 import { fetchAdapterRequest, fetchAdapterResponse } from '../../adapters/fetch-adapter';
 import { pushRequest, pushResponse } from '../requests';
 
+
 const fetchInterceptor = {
     init: () => {
-        const { fetch: originalFetch } = window;
+        window.fetch = (url, options) => {
+            return fetch(url, options).then((response) => {
+                // Clone the response to read it and store it in the array
+                const clonedResponse = response.clone();
+                const requestData = {
+                    url,
+                    options,
+                    response: null, // Initialize response as null
+                };
 
-        window.fetch = async (...args) => {
-            const [resource, config] = args;
+                fetchInterceptor.onRequest({ url: requestData.url, options: requestData.options });
 
-            fetchInterceptor.onRequest({ url: resource, config });
+                // Read the response and store it in the array
+                clonedResponse.text().then((data) => {
+                    fetchInterceptor.onResponse({
+                        status: response.status,
+                        data,
+                    });
+                });
 
-            const response = await originalFetch(resource, config);
-
-            fetchInterceptor.onResponse({ response, responseData: response.json() });
-
-            return response;
+                return response;
+            });
         };
     },
     onRequest: (data: TRilogPushRequest) => {
