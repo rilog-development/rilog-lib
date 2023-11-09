@@ -57,8 +57,8 @@ const pushResponse = (response: IRilogResponse) => {
             response: timedResponse,
         };
 
-        console.log("[pushResponse] fullRequest ", fullRequest);
-        
+        console.log('[pushResponse] fullRequest ', fullRequest);
+
         clearLongTimer();
 
         pushRequests(fullRequest);
