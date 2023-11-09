@@ -4,28 +4,23 @@ import { pushRequest, pushResponse } from '../requests';
 
 const fetchInterceptor = {
     init: () => {
-        window.fetch = (url, options) => {
-            return fetch(url, options).then((response) => {
-                // Clone the response to read it and store it in the array
-                const clonedResponse = response.clone();
-                const requestData = {
-                    url,
-                    options,
-                    response: null, // Initialize response as null
-                };
+        const { fetch: originalFetch } = window;
 
-                fetchInterceptor.onRequest({ url: requestData.url, options: requestData.options });
+        window.fetch = async (url, options) => {
+            fetchInterceptor.onRequest({ url, options });
 
-                // Read the response and store it in the array
-                clonedResponse.text().then((data) => {
-                    fetchInterceptor.onResponse({
-                        status: response.status,
-                        data,
-                    });
+            const response = await originalFetch(url, options);
+
+            const clonedResponse = response.clone();
+
+            clonedResponse.text().then((data) => {
+                fetchInterceptor.onResponse({
+                    status: response.status,
+                    data,
                 });
-
-                return response;
             });
+
+            return response;
         };
     },
     onRequest: (data: TRilogPushRequest) => {
