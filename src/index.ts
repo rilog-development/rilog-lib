@@ -43,8 +43,6 @@ const Rilog = {
             init: true,
             config: config || null,
         });
-
-        fetchInterceptor.init();
     },
     initFetchInterceptor: fetchInterceptor.init,
     interceptRequestAxios: axiosInterceptor.onRequest,
