@@ -5,6 +5,7 @@ import { createRequestFilter } from '../../filters';
 import { pushRequests } from '../../utils/requests';
 
 const pushRequest = (request: IRilogRequest) => {
+    console.log('[pushRequest] request ', request);
     // exit if recording is stopped
     if (!state.recording) {
         return;

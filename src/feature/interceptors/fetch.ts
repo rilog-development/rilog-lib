@@ -25,6 +25,7 @@ const fetchInterceptor = {
     },
     onRequest: (data: TRilogPushRequest) => {
         const preparedRequest = fetchAdapterRequest(data);
+        console.log("[onRequest] preparedRequest", preparedRequest);
 
         if (!preparedRequest) return;
 
