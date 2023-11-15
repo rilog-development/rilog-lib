@@ -1,10 +1,11 @@
 import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, IRilogResponseTimed } from '../../types';
-import { state, updatePartState } from '../../state';
+import { getState, updatePartState } from '../../state';
 import { clearLongTimer, clearShortTimer, startShortTimer } from '../../utils/timers';
 import { createRequestFilter } from '../../filters';
 import { pushRequests } from '../../utils/requests';
 
 const pushRequest = (request: IRilogRequest) => {
+    const state = getState();
     console.log('[pushRequest] request ', request, 'state', state);
     // exit if recording is stopped
     if (!state.recording) {
@@ -40,6 +41,7 @@ const pushRequest = (request: IRilogRequest) => {
 };
 
 const pushResponse = (response: IRilogResponse) => {
+    const state = getState();
     // exit if recording is stopped
     if (!state.recording) {
         return;

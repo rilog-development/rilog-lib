@@ -10,10 +10,10 @@ import { startLongTimer } from './timers';
  * @param data
  */
 const pushRequests = (data: IRilogRequestItem) => {
-    console.log("[pushRequests] data", data);
+    console.log('[pushRequests] data', data);
 
     const requests: string | null = localStorage.getItem(RIL_REQUESTS);
-    console.log("[pushRequests] requests", requests);
+    console.log('[pushRequests] requests', requests);
     const requestArray: IRilogRequestItem[] = requests ? JSON.parse(requests) : [];
 
     if (requestArray) {

@@ -1,7 +1,7 @@
 // types
 import { TRilogInit, TRilogPushRequest, TRilogPushResponse } from './types';
 // state
-import { updatePartState } from './state';
+import { initState, updatePartState } from './state';
 // api
 import { initRequest } from './api';
 // tokens
@@ -24,6 +24,8 @@ type TRilog = {
 const Rilog = {
     // methods
     init: async ({ key, config }: TRilogInit) => {
+        initState();
+
         const token = getUserUniqToken();
 
         /**

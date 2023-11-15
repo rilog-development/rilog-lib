@@ -1,6 +1,6 @@
 import { saveRequests } from './requests';
 import { LONG_TIMER_LIMIT, SHORT_TIMER_LIMIT } from '../constants';
-import { state, updatePartState } from '../state';
+import { getState, updatePartState } from '../state';
 import { pushResponse } from '../feature/requests/index';
 import { IRilogRequestItem } from '../types';
 
@@ -8,6 +8,8 @@ import { IRilogRequestItem } from '../types';
  * Start/Clear timers
  */
 const startShortTimer = () => {
+    const state = getState();
+
     updatePartState({
         shortTimer: setTimeout(() => {
             // push empty response
@@ -17,7 +19,10 @@ const startShortTimer = () => {
 };
 
 const clearShortTimer = () => {
+    const state = getState();
+
     clearTimeout(state.shortTimer);
+
     updatePartState({ shortTimer: null });
 };
 
@@ -30,6 +35,8 @@ const startLongTimer = (data: IRilogRequestItem[]) => {
 };
 
 const clearLongTimer = () => {
+    const state = getState();
+
     clearTimeout(state.longTimer);
     updatePartState({ longTimer: null });
 };

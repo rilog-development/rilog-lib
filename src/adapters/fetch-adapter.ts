@@ -24,7 +24,7 @@ const fetchAdapterRequest = (data: TRilogPushRequest) => {
         localStorage: null,
     };
 
-    console.log("[fetchAdapterRequest] requestFull", requestFull);
+    console.log('[fetchAdapterRequest] requestFull', requestFull);
 
     return checkEmptyRequest(requestFull) ? null : requestFull;
 };
