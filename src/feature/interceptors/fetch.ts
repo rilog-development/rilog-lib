@@ -1,6 +1,7 @@
 import { TRilogPushRequest, TRilogPushResponse } from '../../types';
 import { fetchAdapterRequest, fetchAdapterResponse } from '../../adapters/fetch-adapter';
 import { pushRequest, pushResponse } from '../requests';
+import { requestIsSelfSensetive } from '../../utils/requests';
 
 const fetchInterceptor = {
     init: () => {
@@ -28,6 +29,7 @@ const fetchInterceptor = {
         console.log('[onRequest] preparedRequest', preparedRequest);
 
         if (!preparedRequest) return;
+        if (requestIsSelfSensetive(preparedRequest.url)) return;
 
         pushRequest(preparedRequest);
     },

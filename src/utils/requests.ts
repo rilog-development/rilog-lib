@@ -1,5 +1,5 @@
 import { saveRequest } from '../api';
-import { REQUESTS_ARRAY_LIMIT, RIL_REQUESTS } from '../constants';
+import { REQUESTS_ARRAY_LIMIT, RIL_REQUESTS, SELF_SENSETIVE_REQUEST } from '../constants';
 import { updatePartState } from '../state';
 import { IRilogRequestItem } from '../types';
 import { encrypt } from './encrypt';
@@ -47,4 +47,8 @@ const saveRequests = async (data: IRilogRequestItem[]) => {
     }
 };
 
-export { pushRequests, saveRequests };
+const requestIsSelfSensetive = (requestUrl: string) => {
+    return SELF_SENSETIVE_REQUEST.some((url) => requestUrl.includes(url));
+};
+
+export { pushRequests, saveRequests, requestIsSelfSensetive };

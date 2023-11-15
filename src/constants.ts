@@ -8,3 +8,4 @@ export const LONG_TIMER_LIMIT = 12000; // use it for check saving request data (
 export const SUCCESS_RESPONSE_STATUS_START_CODE = '2';
 export const TOKEN_GENERATION_SALT = 'rilog by kaowebdev';
 export const TOKEN_GENERATION_TIMESTAMP = '3456745647';
+export const SELF_SENSETIVE_REQUEST = ['connection/init', 'connection/send']; // the array of requests which shouldn't be stored
