@@ -1,4 +1,11 @@
-import { IRilogRequestTimed } from './requests';
+import { IRilogRequestTimed, TRilogPushRequest, TRilogPushResponse } from './requests';
+
+export interface IRilog {
+    state: TRilogState;
+    init({ key, config}: TRilogInit): void;
+    interceptRequestAxios(data: TRilogPushRequest): void;
+    interceptResponseAxios(data: TRilogPushResponse): void;
+}
 
 export type TRilogInit = {
     key: string;
@@ -28,7 +35,7 @@ export type TRilogState = {
     key: null | string;
     config: null | TRilogInitConfig;
     shouldSave: boolean;
-    shortTimer: any;
-    longTimer: any;
     shortTimerDuration: null | number;
 };
+
+export type TUpdateStateFn = (state: Partial<TRilogState>) => void;

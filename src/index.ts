@@ -7,7 +7,7 @@ import { initRequest } from './api';
 // tokens
 import { getUserUniqToken } from './utils';
 import { getExternalInfo } from './utils/browser';
-import { axiosInterceptor } from './feature/interceptors/axios';
+import { axiosInterceptor } from './feature/interceptors/axios/axios';
 import { fetchInterceptor } from './feature/interceptors/fetch';
 
 /**
@@ -20,6 +20,7 @@ type TRilog = {
     interceptRequestAxios: (data: TRilogPushRequest) => void;
     interceptResponseAxios: (data: TRilogPushResponse) => void;
 };
+
 
 const Rilog = {
     // methods
