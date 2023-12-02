@@ -18,7 +18,7 @@ export type TRilogInitConfig = {
     headers?: string[]; // write only this headers,
     localStorage?: string[]; // only this params will be stored
     timeout?: number; // in ms, when user didn't get response from server.
-    disableFetchInterceptor?: boolean // disable fetch interception
+    disableFetchInterceptor?: boolean; // disable fetch interception
 };
 
 export type TInitRequest = {

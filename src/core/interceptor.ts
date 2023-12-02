@@ -15,6 +15,7 @@ class RilogInterceptor implements IRilogInterceptror {
     private token: TRilogState['token'];
 
     constructor(config: TRilogInitConfig | null, salt: TRilogState['salt'], token: TRilogState['token']) {
+        console.log('[RilogInterceptor] config ', config, 'salt ', salt, 'token ', token);
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
         this.salt = salt;
