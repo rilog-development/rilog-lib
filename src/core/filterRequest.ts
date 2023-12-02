@@ -10,8 +10,8 @@ class RilogFilterRequest implements IRilogFilterRequest {
     }
 
     getRequests(data: IRilogRequestTimed): IRilogRequestTimed {
-        console.log("[RilogFilterRequest] (getRequests) data ", data);
-        
+        console.log('[RilogFilterRequest] (getRequests) data ', data);
+
         let filteredRequest: IRilogRequestTimed | null = null;
 
         filteredRequest = this.sensetive(data);
@@ -19,7 +19,7 @@ class RilogFilterRequest implements IRilogFilterRequest {
         filteredRequest = this.headers(filteredRequest);
         filteredRequest = this.storage(filteredRequest);
 
-        console.log("[RilogFilterRequest] (getRequests) filteredRequest ", filteredRequest);
+        console.log('[RilogFilterRequest] (getRequests) filteredRequest ', filteredRequest);
 
         return filteredRequest;
     }
