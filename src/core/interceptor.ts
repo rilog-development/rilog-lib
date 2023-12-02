@@ -22,7 +22,7 @@ class RilogInterceptor implements IRilogInterceptror {
         this.token = token;
     }
 
-    async prepareRequest(request: IRilogRequest) {
+    prepareRequest(request: IRilogRequest) {
         console.log('[RilogInterceptor] (prepareRequest) request ', request);
 
         const timedRequest: IRilogRequestTimed | null = request
@@ -119,7 +119,7 @@ class RilogInterceptor implements IRilogInterceptror {
 
         const result = await saveRequest(encryptedRequests, this.token || '');
 
-        if (result.result.toLowerCase() === 'success') {
+        if (result?.result?.toLowerCase() === 'success') {
             localStorage.removeItem(RIL_REQUESTS);
         }
     }
