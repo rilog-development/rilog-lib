@@ -65,6 +65,7 @@ class Rilog implements IRilog {
      */
 
     interceptRequestAxios(data: TRilogPushRequest) {
+        console.log('[interceptRequestAxios] data ', data);
         if (!this.state.recording) return;
         /**
          * Prepare request from axios
