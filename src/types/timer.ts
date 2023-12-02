@@ -1,5 +1,3 @@
-import { IRilogRequestItem } from "./requests";
-
 export interface IRilogTimer {
     shortTimer: any;
     longTimer: any;

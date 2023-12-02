@@ -1,13 +1,13 @@
-import { SELF_SENSETIVE_REQUEST } from "../constants";
-import { IRilogRequestTimed, TRilogInitConfig } from "../types";
-import { IRilogFilterRequest } from "../types/filterRequest";
+import { SELF_SENSETIVE_REQUEST } from '../constants';
+import { IRilogRequestTimed, TRilogInitConfig } from '../types';
+import { IRilogFilterRequest } from '../types/filterRequest';
 
 class RilogFilterRequest implements IRilogFilterRequest {
     private config: TRilogInitConfig | null;
 
     constructor(config: TRilogInitConfig | null) {
         this.config = config;
-    };
+    }
 
     getRequests(data: IRilogRequestTimed): IRilogRequestTimed {
         let filteredRequest: IRilogRequestTimed | null = null;
@@ -26,11 +26,11 @@ class RilogFilterRequest implements IRilogFilterRequest {
 
     private sensetive(data: IRilogRequestTimed) {
         return this.config?.sensetiveRequsts?.includes(data.url) ? { ...data, headers: 'sensetive', data: 'sensetive' } : data;
-    };
+    }
 
     private sensetiveData(data: IRilogRequestTimed) {
         return this.config?.sensetiveDataRequests?.includes(data.url) ? { ...data, data: 'sensetive' } : data;
-    };
+    }
 
     private headers(data: IRilogRequestTimed) {
         let headers = {};
@@ -44,7 +44,7 @@ class RilogFilterRequest implements IRilogFilterRequest {
         });
 
         return { ...data, headers: this.config?.headers ? headers : data.headers };
-    };
+    }
 
     private storage(data: IRilogRequestTimed) {
         const localStorageConfig: string[] | null = this.config?.localStorage || null;
@@ -72,7 +72,7 @@ class RilogFilterRequest implements IRilogFilterRequest {
         } else {
             return { ...data, localStorage: '' };
         }
-    };
+    }
 }
 
 export default RilogFilterRequest;

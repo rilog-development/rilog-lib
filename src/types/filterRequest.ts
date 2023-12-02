@@ -1,4 +1,4 @@
-import { IRilogRequestTimed } from "./requests";
+import { IRilogRequestTimed } from './requests';
 
 export interface IRilogFilterRequest {
     getRequests(data: IRilogRequestTimed): IRilogRequestTimed;

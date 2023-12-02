@@ -2,7 +2,7 @@ import { IRilogRequestTimed, TRilogPushRequest, TRilogPushResponse } from './req
 
 export interface IRilog {
     state: TRilogState;
-    init({ key, config}: TRilogInit): void;
+    init({ key, config }: TRilogInit): void;
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
 }
@@ -18,6 +18,7 @@ export type TRilogInitConfig = {
     headers?: string[]; // write only this headers,
     localStorage?: string[]; // only this params will be stored
     timeout?: number; // in ms, when user didn't get response from server.
+    disableFetchInterceptor?: boolean // disable fetch interception
 };
 
 export type TInitRequest = {
@@ -27,15 +28,15 @@ export type TInitRequest = {
 };
 
 export type TRilogState = {
-    init: boolean;
-    request: null | IRilogRequestTimed;
-    token: null | string;
-    salt: null | string;
-    recording: boolean;
-    key: null | string;
-    config: null | TRilogInitConfig;
-    shouldSave: boolean;
-    shortTimerDuration: null | number;
+    init: boolean; // app done init
+    request: null | IRilogRequestTimed; // push requests data
+    token: null | string; // token for user auth requests
+    salt: null | string; // salt for encoding push data
+    recording: boolean; // enable/disable recording requests
+    key: null | string; // app key for connection to back (to your current app),
+    config: null | TRilogInitConfig; // config for requests
+    shortTimer: null | any; // Use it for saving request data (if request data equal to REQUESTS_ARRAY_LIMIT)
+    longTimer: null | any; // Use it saving request data (if user did not do requests during a long time),
 };
 
 export type TUpdateStateFn = (state: Partial<TRilogState>) => void;

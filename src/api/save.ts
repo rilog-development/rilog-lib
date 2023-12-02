@@ -1,5 +1,4 @@
 import { BASE_URL } from '../constants';
-import { getState } from '../state';
 
 type TSaveRequestResp = {
     result: 'SUCCESS' | 'ERROR';
@@ -11,14 +10,12 @@ type TSaveRequestResp = {
  * @returns
  */
 
-const saveRequest = (data: string): Promise<TSaveRequestResp> => {
-    const state = getState();
-
+const saveRequest = (data: string, token: string): Promise<TSaveRequestResp> => {
     return fetch(`${BASE_URL}/connection/send`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${state.token}`,
+            Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ requestData: data }),
     })

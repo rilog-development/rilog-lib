@@ -3,7 +3,6 @@ import { IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } 
 import { IAxiosAdapter } from './types';
 
 class AxiosAdapter implements IAxiosAdapter {
-
     getRequest(data: TRilogPushRequest) {
         let requestFull: IRilogRequest = {
             url: '',
@@ -20,24 +19,24 @@ class AxiosAdapter implements IAxiosAdapter {
         data?.headers && (requestFull = { ...requestFull, headers: data.headers });
         data?.data && (requestFull = { ...requestFull, data: data.data });
         data?.params && (requestFull = { ...requestFull, data: { ...requestFull.data, ...data.params } });
-    
+
         return this.checkEmptyRequest(requestFull) ? null : requestFull;
-    };
+    }
 
     getResponse(data: TRilogPushResponse) {
         let responseFull: IRilogResponse = {
             data: {},
             status: null,
         };
-    
+
         if (Object.keys(data).length === 0) {
             return null;
         }
-    
+
         if (data?.status?.toString()[0] !== SUCCESS_RESPONSE_STATUS_START_CODE) {
             return { data: data.response.data, status: data.status?.toString() };
         }
-    
+
         if (data?.data) {
             responseFull = {
                 ...responseFull,
@@ -45,7 +44,7 @@ class AxiosAdapter implements IAxiosAdapter {
                 status: data?.response?.status?.toString() || data?.status?.toString() || null,
             };
         }
-    
+
         return this.checkEmptyResponse(responseFull) ? null : responseFull;
     }
 
@@ -55,7 +54,7 @@ class AxiosAdapter implements IAxiosAdapter {
         !request.url && (empty = true);
         !request.method && (empty = true);
         !request.headers && (empty = true);
-    
+
         return empty;
     }
 
@@ -67,6 +66,5 @@ class AxiosAdapter implements IAxiosAdapter {
         return empty;
     }
 }
-
 
 export default AxiosAdapter;
