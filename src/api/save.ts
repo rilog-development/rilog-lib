@@ -11,8 +11,8 @@ type TSaveRequestResp = {
  */
 
 const saveRequest = (data: string, token: string): Promise<TSaveRequestResp> => {
-    console.log("[saveRequest] token ", token);
-    
+    console.log('[saveRequest] token ', token);
+
     return fetch(`${BASE_URL}/connection/send`, {
         method: 'POST',
         headers: {
