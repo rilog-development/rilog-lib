@@ -3,6 +3,7 @@ import { IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } 
 import { IAxiosAdapter } from './types';
 
 class AxiosAdapter implements IAxiosAdapter {
+
     getRequest(data: TRilogPushRequest) {
         let requestFull: IRilogRequest = {
             url: '',
