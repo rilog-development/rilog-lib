@@ -57,7 +57,7 @@ class Rilog implements IRilog {
         /**
          * Init fetch interception
          */
-        !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest, this.interceptFetchResponse);
+        // !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest, this.interceptFetchResponse);
     }
 
     /**
