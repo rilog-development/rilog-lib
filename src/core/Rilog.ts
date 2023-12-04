@@ -24,6 +24,12 @@ class Rilog implements IRilog {
 
     async init({ key, config }: TRilogInit) {
         /**
+         * Initialize interceptor
+         * Set default config from client to interceptor for relevant request filtering
+         */
+        this.interceptor = new RilogInterceptor(config || null);
+
+        /**
          * Generate unique client token
          */
         const token = getUserUniqToken();
@@ -49,9 +55,10 @@ class Rilog implements IRilog {
         });
 
         /**
-         * Got interceptor config from client
+         * Set salt and acess token to interceptop for pushing it to backend store
          */
-        this.interceptor = new RilogInterceptor(config || null, data.salt, data.access_token);
+        this.interceptor.salt = data.salt;
+        this.interceptor.token = data.access_token;
 
         /**
          * Init fetch interception

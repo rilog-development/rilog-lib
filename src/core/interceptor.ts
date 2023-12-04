@@ -11,15 +11,13 @@ import RilogTimer from './timer';
 class RilogInterceptor implements IRilogInterceptror {
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
-    private salt: TRilogState['salt'];
-    private token: TRilogState['token'];
+    public salt: TRilogState['salt'] = null;
+    public token: TRilogState['token'] = null;
 
-    constructor(config: TRilogInitConfig | null, salt: TRilogState['salt'], token: TRilogState['token']) {
-        console.log('[RilogInterceptor] config ', config, 'salt ', salt, 'token ', token);
+    constructor(config: TRilogInitConfig | null) {
+        console.log('[RilogInterceptor] config ', config);
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
-        this.salt = salt;
-        this.token = token;
     }
 
     prepareRequest(request: IRilogRequest) {
@@ -104,6 +102,12 @@ class RilogInterceptor implements IRilogInterceptror {
             } else {
                 localStorage.removeItem(RIL_REQUESTS);
                 localStorage.setItem(RIL_REQUESTS, JSON.stringify(requestArray));
+
+                /**
+                 * Leave function if lib isn't init
+                 * (Lib got salt and token from backend on init request)
+                 */
+                if (!this.salt && !this.token) return;
 
                 this.timer.startLong(async () => {
                     await this.saveRequests(requestArray);
