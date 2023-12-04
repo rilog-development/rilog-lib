@@ -64,7 +64,7 @@ class Rilog implements IRilog {
         /**
          * Init fetch interception
          */
-        initFetchInterception(this.interceptFetchRequest, this.interceptFetchResponse);
+        initFetchInterception(this.interceptFetchRequest.bind(this), this.interceptFetchResponse.bind(this));
     }
 
     /**
