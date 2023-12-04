@@ -1,6 +1,7 @@
 import { initRequest } from '../api';
 import AxiosAdapter from '../feature/interceptors/axios/adapter';
 import { IAxiosAdapter } from '../feature/interceptors/axios/types';
+import { initFetchInterception } from '../feature/interceptors/fetch';
 import FetchAdapter from '../feature/interceptors/fetch/adapter';
 import { IFetchAdapter } from '../feature/interceptors/fetch/types';
 import { IRilog, IRilogRequest, IRilogResponse, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
@@ -63,7 +64,7 @@ class Rilog implements IRilog {
         /**
          * Init fetch interception
          */
-        // !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest, this.interceptFetchResponse);
+        initFetchInterception(this.interceptFetchRequest, this.interceptFetchResponse);
     }
 
     /**
