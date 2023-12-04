@@ -31,6 +31,11 @@ class Rilog implements IRilog {
         this.interceptor = new RilogInterceptor(config || null);
 
         /**
+         * Init fetch interception
+         */
+        !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest.bind(this), this.interceptFetchResponse.bind(this));
+
+        /**
          * Generate unique client token
          */
         const token = getUserUniqToken();
@@ -60,11 +65,6 @@ class Rilog implements IRilog {
          */
         this.interceptor.salt = data.salt;
         this.interceptor.token = data.access_token;
-
-        /**
-         * Init fetch interception
-         */
-        initFetchInterception(this.interceptFetchRequest.bind(this), this.interceptFetchResponse.bind(this));
     }
 
     /**
