@@ -87,7 +87,7 @@ class Rilog implements IRilog {
     }
 
     async interceptResponseAxios(data: TRilogPushResponse) {
-        if (!this.state.recording) return;
+        if (this.state.init && !this.state.recording) return;
         /**
          * Prepare response from axios
          */
@@ -107,7 +107,7 @@ class Rilog implements IRilog {
     private interceptFetchRequest(data: TRilogPushRequest) {
         console.log('[interceptFetchRequest] data ', data, ' state ', this.state);
 
-        if (!this.state.recording) return;
+        if (this.state.init && !this.state.recording) return;
         /**
          * Prepare request from fetch
          */
@@ -122,7 +122,7 @@ class Rilog implements IRilog {
 
     private async interceptFetchResponse(data: TRilogPushResponse) {
         console.log('[interceptFetchResponse] data ', data);
-        if (!this.state.recording) return;
+        if (this.state.init && !this.state.recording) return;
         /**
          * Prepare response from fetch
          */

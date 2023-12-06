@@ -1,5 +1,5 @@
 import { SELF_SENSETIVE_REQUEST } from '../constants';
 
-const isLibruarySensetiveRequest = (url: string) => SELF_SENSETIVE_REQUEST.some((sensetiveUrl) => sensetiveUrl.includes(url));
+const isLibruarySensetiveRequest = (url: string) => SELF_SENSETIVE_REQUEST.some((sensetiveUrl) => url.includes(sensetiveUrl));
 
 export { isLibruarySensetiveRequest };
