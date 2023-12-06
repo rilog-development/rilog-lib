@@ -4,6 +4,8 @@ import { IFetchAdapter } from './types';
 
 class FetchAdapter implements IFetchAdapter {
     getRequest(data: TRilogPushRequest) {
+        console.log('[FetchAdapter] (getRequest) data ', data);
+
         const queryParams = getQueryParamsFromUrl(data.url);
 
         const requestFull: IRilogRequest = {

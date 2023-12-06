@@ -7,7 +7,7 @@ const initFetchInterception = (onRequest: (data: TRilogPushRequest) => void, onR
     const { fetch: originalFetch } = window;
 
     window.fetch = async (url, options) => {
-        const isSensetive = isLibruarySensetiveRequest(url as string);
+        const isSensetive = isLibruarySensetiveRequest(url.toString() as string);
         console.log('[initFetchInterception] isSensetive ', isSensetive, ' url ', url);
 
         !isSensetive && onRequest({ url, options });
