@@ -105,7 +105,7 @@ class Rilog implements IRilog {
      */
 
     private interceptFetchRequest(data: TRilogPushRequest) {
-        console.log('[interceptFetchRequest] data ', data);
+        console.log('[interceptFetchRequest] data ', data, ' state ', this.state);
 
         if (!this.state.recording) return;
         /**
