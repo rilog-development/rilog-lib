@@ -1,6 +1,7 @@
 import { SELF_SENSETIVE_REQUEST } from '../constants';
 import { IRilogRequestTimed, TRilogInitConfig } from '../types';
 import { IRilogFilterRequest } from '../types/filterRequest';
+import { isLibruarySensetiveRequest } from '../utils/filters';
 
 class RilogFilterRequest implements IRilogFilterRequest {
     private config: TRilogInitConfig | null;
@@ -25,7 +26,7 @@ class RilogFilterRequest implements IRilogFilterRequest {
     }
 
     isLibruaryRequest(data: IRilogRequestTimed) {
-        return SELF_SENSETIVE_REQUEST.some((url) => data.url.includes(url));
+        return isLibruarySensetiveRequest(data.url);
     }
 
     private sensetive(data: IRilogRequestTimed) {
