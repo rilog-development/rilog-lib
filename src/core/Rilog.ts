@@ -8,6 +8,7 @@ import { IRilog, IRilogRequest, IRilogResponse, TRilogInit, TRilogPushRequest, T
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken } from '../utils';
 import { getExternalInfo } from '../utils/browser';
+import { logMethods } from '../utils/logger';
 import RilogInterceptor from './interceptor';
 
 class Rilog implements IRilog {
@@ -23,6 +24,7 @@ class Rilog implements IRilog {
         this.fetchAdapter = new FetchAdapter();
     }
 
+    @logMethods('IRilog')
     async init({ key, config }: TRilogInit) {
         /**
          * Initialize interceptor
@@ -71,15 +73,13 @@ class Rilog implements IRilog {
      * Axios interception methods
      */
 
+    @logMethods('IRilog')
     interceptRequestAxios(data: TRilogPushRequest) {
-        console.log('[interceptRequestAxios] data ', data);
         if (this.state.init && !this.state.recording) return;
         /**
          * Prepare request from axios
          */
         const axiosPreparedRequest = this.axiosAdapter.getRequest(data);
-
-        console.log('[interceptRequestAxios] axiosPreparedRequest ', axiosPreparedRequest);
 
         if (!axiosPreparedRequest) return;
 
@@ -93,8 +93,6 @@ class Rilog implements IRilog {
          */
         const axiosPreparedResponse = this.axiosAdapter.getResponse(data);
 
-        console.log('[interceptResponseAxios] axiosPreparedResponse ', axiosPreparedResponse);
-
         if (!axiosPreparedResponse) return;
 
         await this.onResponse(axiosPreparedResponse);
@@ -103,46 +101,38 @@ class Rilog implements IRilog {
     /**
      * Fetch interception methods
      */
-
+    @logMethods('IRilog')
     private interceptFetchRequest(data: TRilogPushRequest) {
-        console.log('[interceptFetchRequest] data ', data, ' state ', this.state);
-
         if (this.state.init && !this.state.recording) return;
         /**
          * Prepare request from fetch
          */
         const fetchPreparedRequest = this.fetchAdapter.getRequest(data);
 
-        console.log('[interceptFetchRequest] fetchPreparedRequest ', fetchPreparedRequest);
-
         if (!fetchPreparedRequest) return;
 
         this.onRequest(fetchPreparedRequest);
     }
 
+    @logMethods('IRilog')
     private async interceptFetchResponse(data: TRilogPushResponse) {
-        console.log('[interceptFetchResponse] data ', data);
         if (this.state.init && !this.state.recording) return;
         /**
          * Prepare response from fetch
          */
         const fetchPreparedResponse = this.fetchAdapter.getResponse(data);
 
-        console.log('[interceptFetchResponse] fetchPreparedResponse ', fetchPreparedResponse);
-
         if (!fetchPreparedResponse) return;
 
         await this.onResponse(fetchPreparedResponse);
     }
 
+    @logMethods('IRilog')
     private onRequest(request: IRilogRequest) {
-        console.log('[onRequest] request ', request);
         /**
          * Prepare full request with filled additional info
          */
         const preparedRequest = this.interceptor?.prepareRequest(request);
-
-        console.log('[onRequest] preparedRequest ', preparedRequest);
 
         if (!preparedRequest) return;
 
@@ -154,14 +144,12 @@ class Rilog implements IRilog {
         });
     }
 
+    @logMethods('IRilog')
     private async onResponse(response: IRilogResponse) {
-        console.log('[onResponse] response ', response);
         /**
          * Prepare full response with filled additional info
          */
         const preparedResponse = await this.interceptor?.prepareResponse(response || {}, this.state.request);
-
-        console.log('[onResponse] preparedResponse ', preparedResponse);
 
         if (!preparedResponse) return;
 

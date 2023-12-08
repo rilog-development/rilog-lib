@@ -15,14 +15,11 @@ class RilogInterceptor implements IRilogInterceptror {
     public token: TRilogState['token'] = null;
 
     constructor(config: TRilogInitConfig | null) {
-        console.log('[RilogInterceptor] config ', config);
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
     }
 
     prepareRequest(request: IRilogRequest) {
-        console.log('[RilogInterceptor] (prepareRequest) request ', request);
-
         const timedRequest: IRilogRequestTimed | null = request
             ? {
                   ...request,
@@ -33,10 +30,7 @@ class RilogInterceptor implements IRilogInterceptror {
               }
             : null;
 
-        console.log('[RilogInterceptor] (prepareRequest) timedRequest ', timedRequest);
-
         this.timer.startShort(() => {
-            console.log('[RilogInterceptor] (startShort) ', this.prepareResponse);
             this.prepareResponse({}, timedRequest);
         });
 
@@ -48,7 +42,6 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     async prepareResponse(response: IRilogResponse, request: IRilogRequestTimed | null) {
-        console.log('[RilogInterceptor] (prepareResponse) response ', response, 'request ', request);
         /**
          * Init full request variable which includes full request and response data.
          */

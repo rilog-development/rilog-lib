@@ -11,16 +11,12 @@ class RilogFilterRequest implements IRilogFilterRequest {
     }
 
     getRequests(data: IRilogRequestTimed): IRilogRequestTimed {
-        console.log('[RilogFilterRequest] (getRequests) data ', data);
-
         let filteredRequest: IRilogRequestTimed | null = null;
 
         filteredRequest = this.sensetive(data);
         filteredRequest = this.sensetiveData(filteredRequest);
         filteredRequest = this.headers(filteredRequest);
         filteredRequest = this.storage(filteredRequest);
-
-        console.log('[RilogFilterRequest] (getRequests) filteredRequest ', filteredRequest);
 
         return filteredRequest;
     }

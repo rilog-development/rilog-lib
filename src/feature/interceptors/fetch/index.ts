@@ -2,13 +2,10 @@ import { TRilogPushRequest, TRilogPushResponse } from '../../../types';
 import { isLibruarySensetiveRequest } from '../../../utils/filters';
 
 const initFetchInterception = (onRequest: (data: TRilogPushRequest) => void, onResponse: (data: TRilogPushResponse) => void) => {
-    console.log('[initFetchInterception]');
-
     const { fetch: originalFetch } = window;
 
     window.fetch = async (url, options) => {
         const isSensetive = isLibruarySensetiveRequest(url.toString() as string);
-        console.log('[initFetchInterception] isSensetive ', isSensetive, ' url ', url);
 
         !isSensetive && onRequest({ url, options });
 
