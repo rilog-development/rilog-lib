@@ -127,7 +127,7 @@ class Rilog implements IRilog {
         await this.onResponse(fetchPreparedResponse);
     }
 
-    @logMethods('IRilog')
+    @logMethods('IRilog', true)
     private onRequest(request: IRilogRequest) {
         /**
          * Prepare full request with filled additional info
@@ -144,7 +144,7 @@ class Rilog implements IRilog {
         });
     }
 
-    @logMethods('IRilog')
+    @logMethods('IRilog', false)
     private async onResponse(response: IRilogResponse) {
         /**
          * Prepare full response with filled additional info

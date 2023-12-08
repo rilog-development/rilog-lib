@@ -2,7 +2,7 @@
  * Create a decorator function for logging
  */
 const logMethods =
-    (label: string) =>
+    (label: string, showArgs: boolean = false) =>
     (target: any, memberName: string, descriptor: PropertyDescriptor): any => {
         /**
          * Get the original method
@@ -16,7 +16,7 @@ const logMethods =
             /**
              *  Log method name and parameters
              */
-            console.log(`[Rilog-lib debug] (${label}|${memberName}):`, JSON.stringify(args));
+            console.log(`[Rilog-lib debug] (${label}|${memberName}):`, showArgs && JSON.stringify(args));
             /**
              * Call the original method
              */
