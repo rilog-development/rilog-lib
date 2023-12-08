@@ -1,3 +1,8 @@
+export interface IRilogRequests {
+    push(data: IRilogRequestItem): void;
+    save(data: IRilogRequestItem[]): void;
+}
+
 export interface IRilogRequestItem {
     _id: string;
     request: IRilogRequestTimed;
