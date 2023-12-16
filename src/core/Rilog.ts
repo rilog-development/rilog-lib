@@ -81,9 +81,9 @@ class Rilog implements IRilog {
          */
         const axiosPreparedRequest = this.axiosAdapter.getRequest(data);
 
-        if (!axiosPreparedRequest) return;
+        if (!axiosPreparedRequest || !this.interceptor) return;
 
-        this.onRequest(axiosPreparedRequest);
+        this.interceptor.onRequest(axiosPreparedRequest);
     }
 
     async interceptResponseAxios(data: TRilogPushResponse) {
@@ -93,9 +93,9 @@ class Rilog implements IRilog {
          */
         const axiosPreparedResponse = this.axiosAdapter.getResponse(data);
 
-        if (!axiosPreparedResponse) return;
+        if (!axiosPreparedResponse || !this.interceptor) return;
 
-        await this.onResponse(axiosPreparedResponse);
+        await this.interceptor.onResponse(axiosPreparedResponse);
     }
 
     /**
@@ -109,9 +109,9 @@ class Rilog implements IRilog {
          */
         const fetchPreparedRequest = this.fetchAdapter.getRequest(data);
 
-        if (!fetchPreparedRequest) return;
+        if (!fetchPreparedRequest || !this.interceptor) return;
 
-        this.onRequest(fetchPreparedRequest);
+        this.interceptor.onRequest(fetchPreparedRequest);
     }
 
     @logMethods('IRilog')
@@ -122,43 +122,9 @@ class Rilog implements IRilog {
          */
         const fetchPreparedResponse = this.fetchAdapter.getResponse(data);
 
-        if (!fetchPreparedResponse) return;
+        if (!fetchPreparedResponse || !this.interceptor) return;
 
-        await this.onResponse(fetchPreparedResponse);
-    }
-
-    @logMethods('IRilog', true)
-    private onRequest(request: IRilogRequest) {
-        /**
-         * Prepare full request with filled additional info
-         */
-        const preparedRequest = this.interceptor?.prepareRequest(request);
-
-        if (!preparedRequest) return;
-
-        /**
-         * Save prepared request (after filtering) to store
-         */
-        this.updateState({
-            request: preparedRequest || null,
-        });
-    }
-
-    @logMethods('IRilog', false)
-    private async onResponse(response: IRilogResponse) {
-        /**
-         * Prepare full response with filled additional info
-         */
-        const preparedResponse = await this.interceptor?.prepareResponse(response || {}, this.state.request);
-
-        if (!preparedResponse) return;
-
-        /**
-         * Clear request after pushing full request data to store
-         */
-        this.updateState({
-            request: null,
-        });
+        await this.interceptor.onResponse(fetchPreparedResponse);
     }
 
     /**

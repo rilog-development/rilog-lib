@@ -1,16 +1,16 @@
 import { BASE_URL } from '../constants';
 
-type TSaveRequestResp = {
+type TSaveEventsResp = {
     result: 'SUCCESS' | 'ERROR';
 };
 
 /**
- * Do save request to back
- * @param data - encrypted requests data(array)
+ * Do save events to backend
+ * @param data - encrypted events data(array)
  * @returns
  */
 
-const saveRequest = (data: string, token: string): Promise<TSaveRequestResp> => {
+const saveEvents = (data: string, token: string): Promise<TSaveEventsResp> => {
     return fetch(`${BASE_URL}/connection/send`, {
         method: 'POST',
         headers: {
@@ -25,4 +25,4 @@ const saveRequest = (data: string, token: string): Promise<TSaveRequestResp> => 
         });
 };
 
-export { saveRequest };
+export { saveEvents };

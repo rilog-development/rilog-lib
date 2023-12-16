@@ -29,14 +29,11 @@ export type TInitRequest = {
 
 export type TRilogState = {
     init: boolean; // app done init
-    request: null | IRilogRequestTimed; // push requests data
     token: null | string; // token for user auth requests
     salt: null | string; // salt for encoding push data
     recording: boolean; // enable/disable recording requests
     key: null | string; // app key for connection to back (to your current app),
     config: null | TRilogInitConfig; // config for requests
-    shortTimer: null | any; // Use it for saving request data (if request data equal to REQUESTS_ARRAY_LIMIT)
-    longTimer: null | any; // Use it saving request data (if user did not do requests during a long time),
 };
 
 export type TUpdateStateFn = (state: Partial<TRilogState>) => void;
