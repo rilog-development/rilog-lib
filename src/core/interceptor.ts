@@ -96,7 +96,7 @@ class RilogInterceptor implements IRilogInterceptror {
         this.timer.clearLong();
 
         await this.pushEvents({
-            _id: fullRequest['_id'],
+            _id: fullRequest._id,
             type: ERilogEvent.REQUEST,
             date: fullRequest.request.timestamp.toString(),
             data: fullRequest,
