@@ -29,7 +29,9 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     onClick(event: any) {
-        const clickEvent = this.clickInterceptor.getClickEvent(event);
+        console.log('onClick ', event);
+
+        const clickEvent = this.clickInterceptor?.getClickEvent(event);
 
         this.pushEvents(clickEvent);
     }
