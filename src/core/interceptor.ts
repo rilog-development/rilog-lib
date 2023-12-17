@@ -25,7 +25,7 @@ class RilogInterceptor implements IRilogInterceptror {
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
 
-        window.document.addEventListener('click', this.onClick);
+        window.document.addEventListener('click', this.onClick.bind(this));
     }
 
     onClick(event: any) {
