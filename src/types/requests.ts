@@ -1,4 +1,4 @@
-import { IRilogLocation } from "./events";
+import { IRilogLocation } from './events';
 
 export interface IRilogRequests {
     push(data: IRilogRequestItem): void;
