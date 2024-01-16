@@ -3,17 +3,21 @@ import { EVENTS_ARRAY_LIMIT, RIL_EVENTS } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { defaultState } from '../feature/interceptors/constants';
+import MessageInterceptor from '../feature/interceptors/message';
+import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
 import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, IRilogResponseTimed, TRilogInitConfig, TRilogState, TUpdateStateFn } from '../types';
 import { ERilogEvent, IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptorState, IRilogInterceptror } from '../types/interceptor';
 import { IRilogTimer } from '../types/timer';
+import { getLocation } from '../utils';
 import { encrypt } from '../utils/encrypt';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
 
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
+    private messageInterceptor: IRilogMessageInterceptor;
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
     public salt: TRilogState['salt'] = null;
@@ -24,13 +28,18 @@ class RilogInterceptor implements IRilogInterceptror {
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
+        this.messageInterceptor = new MessageInterceptor();
 
         window.document.addEventListener('click', this.onClick.bind(this));
     }
 
-    onClick(event: any) {
-        console.log('onClick ', event);
+    onSaveData<T>(data: T, config: IRilogMessageConfig): void{
+        const messageEvent = this.messageInterceptor?.getMessageEvent(data, config);
 
+        this.pushEvents(messageEvent);
+    }
+
+    onClick(event: any) {
         const clickEvent = this.clickInterceptor?.getClickEvent(event);
 
         this.pushEvents(clickEvent);
@@ -41,8 +50,8 @@ class RilogInterceptor implements IRilogInterceptror {
             ? {
                   ...request,
                   timestamp: Date.now(),
-                  locationOrigin: window.location?.origin || null,
-                  locationHref: window.location?.href || null,
+                  // should be defined in request time
+                  location: getLocation(),
                   localStorage: JSON.stringify(localStorage),
               }
             : null;
@@ -102,6 +111,7 @@ class RilogInterceptor implements IRilogInterceptror {
             type: ERilogEvent.REQUEST,
             date: fullRequest.request.timestamp.toString(),
             data: fullRequest,
+            location: fullRequest.request.location
         });
 
         /**

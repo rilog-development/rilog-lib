@@ -1,10 +1,12 @@
-import { IRilogRequestTimed, TRilogPushRequest, TRilogPushResponse } from './requests';
+import { IRilogMessageConfig } from '../feature/interceptors/message/types';
+import { TRilogPushRequest, TRilogPushResponse } from './requests';
 
 export interface IRilog {
     state: TRilogState;
     init({ key, config }: TRilogInit): void;
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
+    saveData<T>(data: T, config: IRilogMessageConfig): void;
 }
 
 export type TRilogInit = {

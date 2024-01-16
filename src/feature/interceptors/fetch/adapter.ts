@@ -1,4 +1,5 @@
 import { IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } from '../../../types';
+import { getLocation } from '../../../utils';
 import { getQueryParamsFromUrl } from '../../../utils/transforms';
 import { IFetchAdapter } from './types';
 
@@ -11,8 +12,7 @@ class FetchAdapter implements IFetchAdapter {
             method: data.options?.method || 'GET',
             headers: data.options?.headers || {},
             data: data.options?.method ? data.options?.data : queryParams || {},
-            locationOrigin: null,
-            locationHref: null,
+            location: { origin: null, href: null },
             localStorage: null,
         };
 

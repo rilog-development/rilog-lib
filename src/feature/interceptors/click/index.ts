@@ -1,9 +1,11 @@
 import { ERilogEvent, IRilogEventItem } from '../../../types/events';
+import { getLocation } from '../../../utils';
 import { logMethods } from '../../../utils/logger';
 import { BUTTON_NODES } from './constants';
 import { IRilogClick, IRilogClickInterceptor } from './types';
 
 class ClickInterceptor implements IRilogClickInterceptor {
+
     @logMethods('ClickInterceptor', true)
     public getClickEvent(event: any): IRilogEventItem {
         const elementInfo: IRilogClick = {
@@ -18,6 +20,7 @@ class ClickInterceptor implements IRilogClickInterceptor {
             type: ERilogEvent.CLICK,
             date: Date.now().toString(),
             data: elementInfo,
+            location: getLocation()
         };
     }
 

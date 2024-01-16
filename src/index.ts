@@ -1,5 +1,5 @@
 import Rilog from './core/Rilog';
-import { IRilogRequestTimed, TRilogState } from './types';
+import { TRilogState } from './types';
 
 const defaultState = {
     init: false,

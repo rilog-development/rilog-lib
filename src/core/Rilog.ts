@@ -4,6 +4,7 @@ import { IAxiosAdapter } from '../feature/interceptors/axios/types';
 import { initFetchInterception } from '../feature/interceptors/fetch';
 import FetchAdapter from '../feature/interceptors/fetch/adapter';
 import { IFetchAdapter } from '../feature/interceptors/fetch/types';
+import { IRilogMessageConfig } from '../feature/interceptors/message/types';
 import { IRilog, IRilogRequest, IRilogResponse, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken } from '../utils';
@@ -96,6 +97,14 @@ class Rilog implements IRilog {
         if (!axiosPreparedResponse || !this.interceptor) return;
 
         await this.interceptor.onResponse(axiosPreparedResponse);
+    }
+
+    /**
+     * Intercept custom user messages/data
+     */
+    @logMethods('IRilog')
+    saveData<T>(data: T, config: IRilogMessageConfig): void {
+        this.interceptor?.onSaveData(data, config);
     }
 
     /**

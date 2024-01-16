@@ -1,3 +1,5 @@
+import { IRilogLocation } from "./events";
+
 export interface IRilogRequests {
     push(data: IRilogRequestItem): void;
     save(data: IRilogRequestItem[]): void;
@@ -15,8 +17,7 @@ export interface IRilogRequest {
     method: string;
     headers: any;
     data?: any;
-    locationOrigin: string | null;
-    locationHref: string | null;
+    location: IRilogLocation;
     localStorage: string | null;
 }
 
