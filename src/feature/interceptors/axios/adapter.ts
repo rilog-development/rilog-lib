@@ -9,8 +9,7 @@ class AxiosAdapter implements IAxiosAdapter {
             method: '',
             headers: {},
             data: {},
-            locationOrigin: null,
-            locationHref: null,
+            location: { origin: null, href: null },
             localStorage: null,
         };
         // Fill Request data
