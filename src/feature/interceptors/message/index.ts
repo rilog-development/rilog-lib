@@ -4,7 +4,7 @@ import { IRilogMessageConfig, IRilogMessageData, IRilogMessageInterceptor } from
 
 class MessageInterceptor implements IRilogMessageInterceptor {
     public getMessageEvent<T>(data: T, config: IRilogMessageConfig | undefined) {
-        const parsedData: string = typeof data === 'string' ? data : String(data);
+        const parsedData: string = typeof data === 'string' ? data : JSON.stringify(data);
 
         return {
             _id: Date.now().toString(),
