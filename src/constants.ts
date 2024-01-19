@@ -9,3 +9,4 @@ export const SUCCESS_RESPONSE_STATUS_START_CODE = '2';
 export const TOKEN_GENERATION_SALT = 'rilog by kaowebdev';
 export const TOKEN_GENERATION_TIMESTAMP = '3456745647';
 export const SELF_SENSETIVE_REQUEST = ['connection/init', 'connection/send']; // the array of requests which shouldn't be stored
+export const MAX_LOCAL_STORAGE_SIZE = 4.5; // max available size of local storage in Mb. Using for defining when the events send to storage.

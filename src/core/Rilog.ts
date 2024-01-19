@@ -34,7 +34,8 @@ class Rilog implements IRilog {
         this.interceptor = new RilogInterceptor(config || null);
 
         /**
-         * Init fetch interception
+         * Init fetch interception.
+         * (Can be disabled from config).
          */
         !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest.bind(this), this.interceptFetchResponse.bind(this));
 

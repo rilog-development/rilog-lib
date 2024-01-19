@@ -1,12 +1,12 @@
 /**
  * Different types of events.
- * !!!Should be updated with BACKEND type
+ * !!!Should be updated with BACKEND types
  */
 export enum ERilogEvent {
     REQUEST,
     CLICK,
-    INPUT,
-    CONSOLE_ERROR,
+    INPUT, // TODO: Future feature
+    CONSOLE_ERROR, // TODO: Future feature
     DEBUG_MESSAGE,
 }
 

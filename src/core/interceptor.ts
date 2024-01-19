@@ -4,9 +4,6 @@ import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
 import { defaultState } from '../feature/interceptors/constants';
-import InputInterceptor from '../feature/interceptors/input';
-import { IRilogInputInterceptor, RilogInputEvent } from '../feature/interceptors/input/types';
-import { isInputElement } from '../feature/interceptors/input/utils';
 import MessageInterceptor from '../feature/interceptors/message';
 import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
 import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, IRilogResponseTimed, TRilogInitConfig, TRilogState, TUpdateStateFn } from '../types';
@@ -14,7 +11,7 @@ import { ERilogEvent, IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptorState, IRilogInterceptror } from '../types/interceptor';
 import { IRilogTimer } from '../types/timer';
-import { getLocation } from '../utils';
+import { getLocation, isFullLocalStorage } from '../utils';
 import { encrypt } from '../utils/encrypt';
 import { logMethods } from '../utils/logger';
 import RilogFilterRequest from './filterRequest';
@@ -35,7 +32,10 @@ class RilogInterceptor implements IRilogInterceptror {
         this.clickInterceptor = new ClickInterceptor();
         this.messageInterceptor = new MessageInterceptor();
 
-        window.document.addEventListener('click', this.onClick.bind(this));
+        /**
+         * The click interception can be disabled by user from config.
+         */
+        if (!config?.disableClickInterceptor) window.document.addEventListener('click', this.onClick.bind(this));
     }
 
     onSaveData<T>(data: T, config: IRilogMessageConfig): void {
@@ -72,7 +72,7 @@ class RilogInterceptor implements IRilogInterceptror {
 
         if (!timedRequest) return;
 
-        if (this.filter.isLibruaryRequest(timedRequest)) return;
+        if (this.filter.isLibruaryRequest(timedRequest) || this.filter.isIgnoredRequest(timedRequest)) return;
 
         this.state.request = this.filter.getRequests(timedRequest) || null;
     }
@@ -135,7 +135,7 @@ class RilogInterceptor implements IRilogInterceptror {
         if (eventsArray) {
             eventsArray.push(data);
 
-            if (eventsArray.length > EVENTS_ARRAY_LIMIT) {
+            if (eventsArray.length > EVENTS_ARRAY_LIMIT || isFullLocalStorage(events)) {
                 await this.saveEvents(eventsArray);
             } else {
                 localStorage.removeItem(RIL_EVENTS);

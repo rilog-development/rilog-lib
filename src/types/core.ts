@@ -1,4 +1,5 @@
 import { IRilogMessageConfig } from '../feature/interceptors/message/types';
+import { IRilogEventItem } from './events';
 import { TRilogPushRequest, TRilogPushResponse } from './requests';
 
 export interface IRilog {
@@ -14,14 +15,18 @@ export type TRilogInit = {
     config?: TRilogInitConfig;
 };
 
-export type TRilogInitConfig = {
-    sensetiveRequsts?: string[]; // this request will not be written,
-    sensetiveDataRequests?: string[]; // will not be written data to requests (example: card data),
-    headers?: string[]; // write only this headers,
-    localStorage?: string[]; // only this params will be stored
-    timeout?: number; // in ms, when user didn't get response from server.
-    disableFetchInterceptor?: boolean; // disable fetch interception
-};
+export type TRilogInitConfig = Partial<{
+    ignoredRequests: string[]; // TODO: (test) ignore this requests (do not save this)
+    sensetiveRequsts: string[]; // this request will not be written,
+    sensetiveDataRequests: string[]; // will not be written data to requests (example: card data),
+    headers: string[]; // write only this headers,
+    localStorage: string[]; // only this params will be stored
+    timeout: number; // in ms, when user didn't get response from server.
+    disableFetchInterceptor: boolean; // disable fetch interception
+    disableClickInterceptor: boolean; // TODO: (test) disable click on button/links interception
+    onSaveEvents: (events: IRilogEventItem[]) => void; // TODO: add save events callback
+    onPushEvent: (event: IRilogEventItem) => void; // TODO: add push event callback
+}>;
 
 export type TInitRequest = {
     uToken: string;
