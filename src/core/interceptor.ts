@@ -22,7 +22,6 @@ import RilogTimer from './timer';
 
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
-    private inputInterceptor: IRilogInputInterceptor;
     private messageInterceptor: IRilogMessageInterceptor;
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
@@ -35,13 +34,8 @@ class RilogInterceptor implements IRilogInterceptror {
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
         this.messageInterceptor = new MessageInterceptor();
-        this.inputInterceptor = new InputInterceptor();
 
         window.document.addEventListener('click', this.onClick.bind(this));
-
-        window.document.addEventListener('blur', (event) => {
-            console.log('[test] blur ', event.target);
-        });
     }
 
     onSaveData<T>(data: T, config: IRilogMessageConfig): void {
@@ -55,15 +49,6 @@ class RilogInterceptor implements IRilogInterceptror {
             const clickEvent = this.clickInterceptor?.getClickEvent(event);
 
             this.pushEvents(clickEvent);
-        }
-    }
-
-    @logMethods('onInput')
-    onInput(event: any) {
-        if (isInputElement(event)) {
-            const inputEvent = this.inputInterceptor?.getInputEvent(event, RilogInputEvent.BLUR);
-
-            this.pushEvents(inputEvent);
         }
     }
 
