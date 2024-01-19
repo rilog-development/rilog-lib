@@ -39,7 +39,8 @@ class RilogInterceptor implements IRilogInterceptror {
 
         window.document.addEventListener('click', this.onClick.bind(this));
 
-        window.document.addEventListener('blur', this.onInput.bind(this));
+        const inputs = document.querySelector('input');
+        inputs?.addEventListener('blur', this.onInput.bind(this));
     }
 
     onSaveData<T>(data: T, config: IRilogMessageConfig): void {
@@ -57,7 +58,7 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     @logMethods('onInput')
-    onInput(event: any): void {
+    onInput(event: any) {
         if (isInputElement(event)) {
             const inputEvent = this.inputInterceptor?.getInputEvent(event, RilogInputEvent.BLUR);
 

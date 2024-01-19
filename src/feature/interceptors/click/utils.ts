@@ -1,7 +1,6 @@
 import { BUTTON_NODES } from './constants';
 
 const isButtonElement = (event: any) => {
-    console.log('isButtonElement ', event.target.tagName);
     if (BUTTON_NODES.includes(event.target.tagName.toLowerCase())) return true;
 
     /**
