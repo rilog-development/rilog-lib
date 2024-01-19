@@ -2,6 +2,7 @@ import { saveEvents } from '../api';
 import { EVENTS_ARRAY_LIMIT, RIL_EVENTS } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
+import { isButtonElement } from '../feature/interceptors/click/utils';
 import { defaultState } from '../feature/interceptors/constants';
 import InputInterceptor from '../feature/interceptors/input';
 import { IRilogInputInterceptor, RilogInputEvent } from '../feature/interceptors/input/types';
@@ -15,6 +16,7 @@ import { IRilogInterceptorState, IRilogInterceptror } from '../types/interceptor
 import { IRilogTimer } from '../types/timer';
 import { getLocation } from '../utils';
 import { encrypt } from '../utils/encrypt';
+import { logMethods } from '../utils/logger';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
 
@@ -47,11 +49,14 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     onClick(event: any) {
-        const clickEvent = this.clickInterceptor?.getClickEvent(event);
+        if (isButtonElement(event)) {
+            const clickEvent = this.clickInterceptor?.getClickEvent(event);
 
-        this.pushEvents(clickEvent);
+            this.pushEvents(clickEvent);
+        }
     }
 
+    @logMethods('onInput')
     onInput(event: any): void {
         if (isInputElement(event)) {
             const inputEvent = this.inputInterceptor?.getInputEvent(event, RilogInputEvent.BLUR);

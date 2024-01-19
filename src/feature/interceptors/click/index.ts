@@ -29,9 +29,9 @@ class ClickInterceptor implements IRilogClickInterceptor {
      * @returns
      */
     private getParentButton(target: HTMLElement) {
-        if (BUTTON_NODES.includes(target.nodeName.toLowerCase())) return target;
+        if (BUTTON_NODES.includes(target.tagName.toLowerCase())) return target;
 
-        if (!target.parentElement || !BUTTON_NODES.includes(target.parentElement.nodeName.toLowerCase())) return;
+        if (!target.parentElement || !BUTTON_NODES.includes(target.parentElement.tagName.toLowerCase())) return;
 
         return target.parentElement;
     }
