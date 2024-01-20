@@ -19,16 +19,16 @@ const getLocation = (): IRilogLocation => {
  * @returns {number}
  */
 const getLocalStorageSize = () => {
-    var totalSize = 0;
+    let totalSize = 0;
 
     // Iterate through all items in local storage
-    for (var i = 0; i < localStorage.length; i++) {
+    for (let i = 0; i < localStorage.length; i++) {
         const key: string = localStorage.key(i) || '';
         const value: string = localStorage.getItem(key) || '';
 
         // Calculate the size of key and value in bytes
-        var keySize = key.length * 2; // Each character is 2 bytes in JavaScript
-        var valueSize = value.length * 2 || 1; // Minimum size is 1 byte
+        const keySize = key.length * 2; // Each character is 2 bytes in JavaScript
+        const valueSize = value.length * 2 || 1; // Minimum size is 1 byte
 
         // Add the key and value sizes to the total size
         totalSize += keySize + valueSize;
