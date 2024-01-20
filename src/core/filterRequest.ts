@@ -1,4 +1,5 @@
 import { IRilogRequestTimed, TRilogInitConfig } from '../types';
+import { IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { isLibruarySensetiveRequest, isUrlIgnored } from '../utils/filters';
 
@@ -27,6 +28,10 @@ class RilogFilterRequest implements IRilogFilterRequest {
     isIgnoredRequest(data: IRilogRequestTimed) {
         if (!this.config?.ignoredRequests) return false;
         return isUrlIgnored(data.url, this.config.ignoredRequests);
+    }
+
+    sortEventsByDate(events: IRilogEventItem[]) {
+        return events.sort((a, b) => +a.date - +b.date);
     }
 
     private sensetive(data: IRilogRequestTimed) {

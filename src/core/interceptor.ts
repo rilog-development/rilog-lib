@@ -13,7 +13,6 @@ import { IRilogInterceptorState, IRilogInterceptror } from '../types/interceptor
 import { IRilogTimer } from '../types/timer';
 import { getLocation, isFullLocalStorage } from '../utils';
 import { encrypt } from '../utils/encrypt';
-import { logMethods } from '../utils/logger';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
 
@@ -22,11 +21,13 @@ class RilogInterceptor implements IRilogInterceptror {
     private messageInterceptor: IRilogMessageInterceptor;
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
+    private config: TRilogInitConfig | null = null;
     public salt: TRilogState['salt'] = null;
     public token: TRilogState['token'] = null;
     public state: IRilogInterceptorState = defaultState;
 
     constructor(config: TRilogInitConfig | null) {
+        this.config = config;
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
@@ -128,6 +129,11 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     private async pushEvents(data: IRilogEventItem) {
+        /**
+         * User can intercept push events to array using callback from config.
+         */
+        if (this.config?.onPushEvent) this.config?.onPushEvent(data);
+
         const events: string | null = localStorage.getItem(RIL_EVENTS);
 
         const eventsArray: IRilogEventItem[] = events ? JSON.parse(events) : [];
@@ -157,7 +163,18 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     private async saveEvents(data: IRilogEventItem[]) {
-        const encryptedEvents = encrypt(data, this.salt);
+        /**
+         * Users can intercept events using callback from config.
+         */
+        if (this.config?.onSaveEvents) this.config.onSaveEvents(data);
+
+        /**
+         * Sort events by timestamp.
+         * For case when request was initiated earlier then click event happend.
+         */
+        const sortedEvents = this.filter.sortEventsByDate(data);
+
+        const encryptedEvents = encrypt(sortedEvents, this.salt);
 
         const result = await saveEvents(encryptedEvents, this.token || '');
 

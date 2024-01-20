@@ -24,8 +24,8 @@ export type TRilogInitConfig = Partial<{
     timeout: number; // in ms, when user didn't get response from server.
     disableFetchInterceptor: boolean; // disable fetch interception
     disableClickInterceptor: boolean; // TODO: (test) disable click on button/links interception
-    onSaveEvents: (events: IRilogEventItem[]) => void; // TODO: add save events callback
-    onPushEvent: (event: IRilogEventItem) => void; // TODO: add push event callback
+    onSaveEvents: (events: IRilogEventItem[]) => void; // TODO: (test) add save events callback
+    onPushEvent: (event: IRilogEventItem) => void; // TODO: (test) add push event callback
 }>;
 
 export type TInitRequest = {
