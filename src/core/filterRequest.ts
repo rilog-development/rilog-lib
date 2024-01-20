@@ -35,11 +35,11 @@ class RilogFilterRequest implements IRilogFilterRequest {
     }
 
     private sensetive(data: IRilogRequestTimed) {
-        return this.config?.sensetiveRequsts?.includes(data.url) ? { ...data, headers: 'sensetive', data: 'sensetive' } : data;
+        return this.config?.sensetiveRequsts?.some((sensetiveUrl) => data.url.includes(sensetiveUrl)) ? { ...data, headers: 'sensetive', data: 'sensetive' } : data;
     }
 
     private sensetiveData(data: IRilogRequestTimed) {
-        return this.config?.sensetiveDataRequests?.includes(data.url) ? { ...data, data: 'sensetive' } : data;
+        return this.config?.sensetiveDataRequests?.some((sensetiveUrl) => data.url.includes(sensetiveUrl)) ? { ...data, data: 'sensetive' } : data;
     }
 
     private headers(data: IRilogRequestTimed) {

@@ -5,7 +5,8 @@ import { initFetchInterception } from '../feature/interceptors/fetch';
 import FetchAdapter from '../feature/interceptors/fetch/adapter';
 import { IFetchAdapter } from '../feature/interceptors/fetch/types';
 import { IRilogMessageConfig } from '../feature/interceptors/message/types';
-import { IRilog, IRilogRequest, IRilogResponse, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
+import { IRilog, IRilogRequest, IRilogResponse, TOnPushEvent, TOnSaveEvents, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
+import { IRilogEventItem } from '../types/events';
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken } from '../utils';
 import { getExternalInfo } from '../utils/browser';
@@ -18,6 +19,8 @@ class Rilog implements IRilog {
     private fetchAdapter: IFetchAdapter;
 
     public state: TRilogState;
+    public onPushEvent: TOnPushEvent | null = null;
+    public onSaveEvents: TOnSaveEvents | null = null;
 
     constructor(state: TRilogState) {
         this.state = state;
@@ -31,7 +34,7 @@ class Rilog implements IRilog {
          * Initialize interceptor
          * Set default config from client to interceptor for relevant request filtering
          */
-        this.interceptor = new RilogInterceptor(config || null);
+        this.interceptor = new RilogInterceptor(config || null, this.onPushEvent?.bind(this) || null, this.onSaveEvents?.bind(this) || null);
 
         /**
          * Init fetch interception.

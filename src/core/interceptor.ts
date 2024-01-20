@@ -6,7 +6,7 @@ import { isButtonElement } from '../feature/interceptors/click/utils';
 import { defaultState } from '../feature/interceptors/constants';
 import MessageInterceptor from '../feature/interceptors/message';
 import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
-import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, IRilogResponseTimed, TRilogInitConfig, TRilogState, TUpdateStateFn } from '../types';
+import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, IRilogResponseTimed, TOnPushEvent, TOnSaveEvents, TRilogInitConfig, TRilogState, TUpdateStateFn } from '../types';
 import { ERilogEvent, IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptorState, IRilogInterceptror } from '../types/interceptor';
@@ -25,13 +25,17 @@ class RilogInterceptor implements IRilogInterceptror {
     public salt: TRilogState['salt'] = null;
     public token: TRilogState['token'] = null;
     public state: IRilogInterceptorState = defaultState;
+    private onPushEvent: TOnPushEvent | null;
+    private onSaveEvents: TOnSaveEvents | null;
 
-    constructor(config: TRilogInitConfig | null) {
+    constructor(config: TRilogInitConfig | null, onPushEvent: TOnPushEvent | null, onSaveEvents: TOnSaveEvents | null) {
         this.config = config;
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
         this.messageInterceptor = new MessageInterceptor();
+        this.onPushEvent = onPushEvent;
+        this.onSaveEvents = onSaveEvents;
 
         /**
          * The click interception can be disabled by user from config.
@@ -46,6 +50,7 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     onClick(event: any) {
+        if (this.config?.disableClickInterceptor) return;
         if (isButtonElement(event)) {
             const clickEvent = this.clickInterceptor?.getClickEvent(event);
 
@@ -132,7 +137,7 @@ class RilogInterceptor implements IRilogInterceptror {
         /**
          * User can intercept push events to array using callback from config.
          */
-        if (this.config?.onPushEvent) this.config?.onPushEvent(data);
+        if (this.onPushEvent) this.onPushEvent(data);
 
         const events: string | null = localStorage.getItem(RIL_EVENTS);
 
@@ -166,7 +171,7 @@ class RilogInterceptor implements IRilogInterceptror {
         /**
          * Users can intercept events using callback from config.
          */
-        if (this.config?.onSaveEvents) this.config.onSaveEvents(data);
+        if (this.onSaveEvents) this.onSaveEvents(data);
 
         /**
          * Sort events by timestamp.

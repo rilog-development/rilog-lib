@@ -2,12 +2,17 @@ import { IRilogMessageConfig } from '../feature/interceptors/message/types';
 import { IRilogEventItem } from './events';
 import { TRilogPushRequest, TRilogPushResponse } from './requests';
 
+export type TOnPushEvent = (event: IRilogEventItem) => void;
+export type TOnSaveEvents = (event: IRilogEventItem[]) => void;
+
 export interface IRilog {
     state: TRilogState;
     init({ key, config }: TRilogInit): void;
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
     saveData<T>(data: T, config: IRilogMessageConfig): void;
+    onPushEvent?: TOnPushEvent | null; // add push event callback
+    onSaveEvents?: TOnSaveEvents | null; // add save events callback
 }
 
 export type TRilogInit = {
@@ -16,7 +21,7 @@ export type TRilogInit = {
 };
 
 export type TRilogInitConfig = Partial<{
-    ignoredRequests: string[]; // TODO: (test) ignore this requests (do not save this)
+    ignoredRequests: string[]; // ignore this requests (do not save this)
     sensetiveRequsts: string[]; // this request will not be written,
     sensetiveDataRequests: string[]; // will not be written data to requests (example: card data),
     headers: string[]; // write only this headers,
@@ -24,8 +29,6 @@ export type TRilogInitConfig = Partial<{
     timeout: number; // in ms, when user didn't get response from server.
     disableFetchInterceptor: boolean; // disable fetch interception
     disableClickInterceptor: boolean; // TODO: (test) disable click on button/links interception
-    onSaveEvents: (events: IRilogEventItem[]) => void; // TODO: (test) add save events callback
-    onPushEvent: (event: IRilogEventItem) => void; // TODO: (test) add push event callback
 }>;
 
 export type TInitRequest = {
