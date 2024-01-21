@@ -11,8 +11,7 @@ export interface IRilog {
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
     saveData<T>(data: T, config: IRilogMessageConfig): void;
-    onPushEvent?: TOnPushEvent | null; // add push event callback
-    onSaveEvents?: TOnSaveEvents | null; // add save events callback
+    onPushCallback?: TOnPushEvent | null; // add push event callback
 }
 
 export type TRilogInit = {
