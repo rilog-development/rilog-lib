@@ -11,7 +11,6 @@ export interface IRilog {
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
     saveData<T>(data: T, config: IRilogMessageConfig): void;
-    onPushCallback?: TOnPushEvent | null; // add push event callback
 }
 
 export type TRilogInit = {
@@ -28,6 +27,8 @@ export type TRilogInitConfig = Partial<{
     timeout: number; // in ms, when user didn't get response from server.
     disableFetchInterceptor: boolean; // disable fetch interception
     disableClickInterceptor: boolean; // TODO: (test) disable click on button/links interception
+    onPushEvent?: TOnPushEvent | null; // add push event callback
+    onSaveEvents?: TOnSaveEvents | null; // add save events callback
 }>;
 
 export type TInitRequest = {

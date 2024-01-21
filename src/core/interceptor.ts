@@ -25,15 +25,13 @@ class RilogInterceptor implements IRilogInterceptror {
     public salt: TRilogState['salt'] = null;
     public token: TRilogState['token'] = null;
     public state: IRilogInterceptorState = defaultState;
-    private onPushEvent: TOnPushEvent | null;
 
-    constructor(config: TRilogInitConfig | null, onPushEvent: TOnPushEvent | null) {
+    constructor(config: TRilogInitConfig | null) {
         this.config = config;
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
         this.messageInterceptor = new MessageInterceptor();
-        this.onPushEvent = onPushEvent;
 
         /**
          * The click interception can be disabled by user from config.
@@ -135,7 +133,7 @@ class RilogInterceptor implements IRilogInterceptror {
         /**
          * User can intercept push events to array using callback from config.
          */
-        if (this.onPushEvent) this.onPushEvent(data);
+        if (this.config?.onPushEvent) this.config?.onPushEvent(data);
 
         const events: string | null = localStorage.getItem(RIL_EVENTS);
 
@@ -169,7 +167,7 @@ class RilogInterceptor implements IRilogInterceptror {
         /**
          * Users can intercept events using callback from config.
          */
-        // if (this.onSaveEvents) this.onSaveEvents(data);
+        if (this.config?.onSaveEvents) this.config?.onSaveEvents(data);
 
         /**
          * Sort events by timestamp.

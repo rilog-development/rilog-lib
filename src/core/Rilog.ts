@@ -19,7 +19,6 @@ class Rilog implements IRilog {
     private fetchAdapter: IFetchAdapter;
 
     public state: TRilogState;
-    public onPushCallback: TOnPushEvent | null = null;
 
     constructor(state: TRilogState) {
         this.state = state;
@@ -33,7 +32,7 @@ class Rilog implements IRilog {
          * Initialize interceptor
          * Set default config from client to interceptor for relevant request filtering
          */
-        this.interceptor = new RilogInterceptor(config || null, this.onPushCallback || null);
+        this.interceptor = new RilogInterceptor(config || null);
 
         /**
          * Init fetch interception.
@@ -150,10 +149,6 @@ class Rilog implements IRilog {
         };
 
         this.state = updatedState;
-    }
-
-    onPushEvent(pushCallback: TOnPushEvent) {
-        this.onPushCallback = pushCallback;
     }
 }
 
