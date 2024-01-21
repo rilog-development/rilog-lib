@@ -10,19 +10,47 @@ type TSaveEventsResp = {
  * @returns
  */
 
-const saveEvents = (data: string, token: string): Promise<TSaveEventsResp> => {
+const saveEventsToRilog = (data: string, token: string): Promise<TSaveEventsResp> => {
     return fetch(`${BASE_URL}/connection/send`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ requestData: data }),
+        body: JSON.stringify({ eventsData: data }),
     })
         .then((response) => response.json())
         .catch((error) => {
-            console.error('[Rilog-lib] Got error in connection send request ', error);
+            console.error('[Rilog-lib] Got error in save events to rilog (/connection/send) ', error);
         });
 };
 
-export { saveEvents };
+interface ISaveEventsParams {
+    data: string;
+    url: string;
+    headers?: Record<string, string>;
+}
+
+const saveEventsCustom = ({ data, url, headers }: ISaveEventsParams): Promise<TSaveEventsResp> => {
+    const updatedHeaders = new Headers();
+
+    updatedHeaders.append('Content-Type', 'application/json');
+
+    if (headers) {
+        Object.keys(headers).forEach((key) => {
+            updatedHeaders.append(key, headers[key]);
+        });
+    }
+
+    return fetch(url, {
+        method: 'POST',
+        headers: updatedHeaders,
+        body: JSON.stringify({ eventsData: data }),
+    })
+        .then((response) => response.json())
+        .catch((error) => {
+            console.error('[Rilog-lib] Got error in save events ', error);
+        });
+};
+
+export { saveEventsToRilog, saveEventsCustom };

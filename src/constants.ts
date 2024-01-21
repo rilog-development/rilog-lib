@@ -1,4 +1,5 @@
-export const BASE_URL = 'http://localhost:3000';
+export const BASE_URL = 'http://localhost:3000'; // Base Url for Rilog backend app
+export const LOCAL_BASE_URL = 'http://localhost:3025'; // Base Url for Rilog local loger backend app
 export const RIL_TOKEN = 'riltoken'; // label for saving unique user (connection) token in Local Storage
 export const RIL_EVENTS = 'rilevents'; // label for saving reuqests in Local Storage
 export const RIL_STATE = 'rilstate'; // label for saving state to the local storage

@@ -1,7 +1,23 @@
 import { BASE_URL } from '../constants';
-import { TInitRequest, TInitResponse } from '../types';
+import { TInitRequest, TInitResponse, TRilogInitConfig } from '../types';
 
-const initRequest = async (data: TInitRequest): Promise<TInitResponse> => {
+interface InitRequestParams {
+    data: TInitRequest;
+    config: TRilogInitConfig | undefined;
+}
+
+const initRequest = async ({ data, config }: InitRequestParams): Promise<TInitResponse> => {
+    /**
+     * Do not make an init request if enabled local saving events or self saving.
+     */
+
+    if (config?.localSaving || config?.selfSaving)
+        return Promise.resolve({
+            access_token: '',
+            salt: '',
+            recording: true,
+        });
+
     /**
      * Generate Authorization header ('Basic '), includes:
      * { token, key, salt }

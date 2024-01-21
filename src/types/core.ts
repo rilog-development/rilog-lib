@@ -26,10 +26,17 @@ export type TRilogInitConfig = Partial<{
     localStorage: string[]; // only this params will be stored
     timeout: number; // in ms, when user didn't get response from server.
     disableFetchInterceptor: boolean; // disable fetch interception
-    disableClickInterceptor: boolean; // TODO: (test) disable click on button/links interception
-    onPushEvent?: TOnPushEvent | null; // add push event callback
-    onSaveEvents?: TOnSaveEvents | null; // add save events callback
+    disableClickInterceptor: boolean; // disable click on button/links interception
+    localSaving: boolean; // for storing events to rilog local server. Needs to install rilog-local-logger.
+    selfSaving: ISelfSaving; // for storing events to client backend. Pass this url to saveEvents method.
+    onPushEvent: TOnPushEvent | null; // add push event callback
+    onSaveEvents: TOnSaveEvents | null; // add save events callback
 }>;
+
+export interface ISelfSaving {
+    url: string;
+    headers?: Record<string, string>;
+}
 
 export type TInitRequest = {
     uToken: string;

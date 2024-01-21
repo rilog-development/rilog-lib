@@ -1,15 +1,15 @@
-import { saveEvents } from '../api';
-import { EVENTS_ARRAY_LIMIT, RIL_EVENTS } from '../constants';
+import { saveEventsCustom, saveEventsToRilog } from '../api';
+import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, RIL_EVENTS } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
 import { defaultState } from '../feature/interceptors/constants';
 import MessageInterceptor from '../feature/interceptors/message';
 import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
-import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, IRilogResponseTimed, TOnPushEvent, TOnSaveEvents, TRilogInitConfig, TRilogState, TUpdateStateFn } from '../types';
+import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, IRilogResponseTimed, TRilogInitConfig, TRilogState } from '../types';
 import { ERilogEvent, IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
-import { IRilogInterceptorState, IRilogInterceptror } from '../types/interceptor';
+import { IRilogInterceptorState, IRilogInterceptror, TSendEvents } from '../types/interceptor';
 import { IRilogTimer } from '../types/timer';
 import { getLocation, isFullLocalStorage } from '../utils';
 import { encrypt } from '../utils/encrypt';
@@ -22,6 +22,7 @@ class RilogInterceptor implements IRilogInterceptror {
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
     private config: TRilogInitConfig | null = null;
+    public init: TRilogState['init'] = false;
     public salt: TRilogState['salt'] = null;
     public token: TRilogState['token'] = null;
     public state: IRilogInterceptorState = defaultState;
@@ -47,6 +48,7 @@ class RilogInterceptor implements IRilogInterceptror {
 
     onClick(event: any) {
         if (this.config?.disableClickInterceptor) return;
+
         if (isButtonElement(event)) {
             const clickEvent = this.clickInterceptor?.getClickEvent(event);
 
@@ -152,7 +154,7 @@ class RilogInterceptor implements IRilogInterceptror {
                  * Leave function if lib isn't init
                  * (Lib got salt and token from backend on init request)
                  */
-                if (!this.salt && !this.token) return;
+                if (!this.init) return;
 
                 this.timer.startLong(async () => {
                     await this.saveEvents(eventsArray);
@@ -175,15 +177,41 @@ class RilogInterceptor implements IRilogInterceptror {
          */
         const sortedEvents = this.filter.sortEventsByDate(data);
 
+        /**
+         * Encrypt array of events for safety pushing it to server.
+         *
+         * If got salt - would be encrypted with CryptoJS.
+         * Without salt - would be convert to base64.
+         */
         const encryptedEvents = encrypt(sortedEvents, this.salt);
 
-        const result = await saveEvents(encryptedEvents, this.token || '');
+        const result = await this.sendEvents({ data: encryptedEvents, token: this.token || '', localSaving: this.config?.localSaving, selfSaving: this?.config?.selfSaving });
 
         this.timer.clearLong();
 
         if (result?.result?.toLowerCase() === 'success') {
             localStorage.removeItem(RIL_EVENTS);
         }
+    }
+
+    /**
+     * Define the send events methods using some config params.
+     * @param {TSendEvents}
+     * @returns {Promise}
+     */
+    private async sendEvents({ data, token, localSaving, selfSaving }: TSendEvents) {
+        /**
+         * The priority method for saving is local :)
+         */
+        if (localSaving) {
+            return saveEventsCustom({ data, url: LOCAL_BASE_URL, headers: { Authorization: 'Bearer local_saving' } });
+        }
+
+        if (selfSaving) {
+            return saveEventsCustom({ data, url: selfSaving.url, headers: selfSaving.headers });
+        }
+
+        return saveEventsToRilog(data, token);
     }
 }
 
