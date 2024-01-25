@@ -20,4 +20,4 @@ export interface IRilogInterceptorState {
 export type TSendEvents = {
     data: string;
     token: string;
-} & Pick<TRilogInitConfig, 'localSaving' | 'selfSaving'>;
+} & Pick<TRilogInitConfig, 'localServer' | 'selfServer'>;

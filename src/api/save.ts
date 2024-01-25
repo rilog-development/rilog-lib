@@ -26,7 +26,7 @@ const saveEventsToRilog = (data: string, token: string): Promise<TSaveEventsResp
 };
 
 interface ISaveEventsParams {
-    data: string;
+    data: BodyInit;
     url: string;
     headers?: Record<string, string>;
 }
@@ -45,7 +45,7 @@ const saveEventsCustom = ({ data, url, headers }: ISaveEventsParams): Promise<TS
     return fetch(url, {
         method: 'POST',
         headers: updatedHeaders,
-        body: JSON.stringify({ eventsData: data }),
+        body: data,
     })
         .then((response) => response.json())
         .catch((error) => {

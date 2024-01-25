@@ -185,7 +185,7 @@ class RilogInterceptor implements IRilogInterceptror {
          */
         const encryptedEvents = encrypt(sortedEvents, this.salt);
 
-        const result = await this.sendEvents({ data: encryptedEvents, token: this.token || '', localSaving: this.config?.localSaving, selfSaving: this?.config?.selfSaving });
+        const result = await this.sendEvents({ data: encryptedEvents, token: this.token || '', localServer: this.config?.localServer, selfServer: this?.config?.selfServer });
 
         this.timer.clearLong();
 
@@ -199,16 +199,16 @@ class RilogInterceptor implements IRilogInterceptror {
      * @param {TSendEvents}
      * @returns {Promise}
      */
-    private async sendEvents({ data, token, localSaving, selfSaving }: TSendEvents) {
+    private async sendEvents({ data, token, localServer, selfServer }: TSendEvents) {
         /**
          * The priority method for saving is local :)
          */
-        if (localSaving) {
-            return saveEventsCustom({ data, url: LOCAL_BASE_URL, headers: { Authorization: 'Bearer local_saving' } });
+        if (localServer) {
+            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.token, appName: this.config?.appName || 'Unknown app' }), url: `${LOCAL_BASE_URL}/api/events/save` });
         }
 
-        if (selfSaving) {
-            return saveEventsCustom({ data, url: selfSaving.url, headers: selfSaving.headers });
+        if (selfServer) {
+            return saveEventsCustom({ data: JSON.stringify({ eventsData: data }), url: selfServer.url, headers: selfServer.headers });
         }
 
         return saveEventsToRilog(data, token);

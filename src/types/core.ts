@@ -24,16 +24,16 @@ export type TRilogInitConfig = Partial<{
     sensetiveDataRequests: string[]; // will not be written data to requests (example: card data),
     headers: string[]; // write only this headers,
     localStorage: string[]; // only this params will be stored
-    timeout: number; // in ms, when user didn't get response from server.
     disableFetchInterceptor: boolean; // disable fetch interception
     disableClickInterceptor: boolean; // disable click on button/links interception
-    localSaving: boolean; // for storing events to rilog local server. Needs to install rilog-local-logger.
-    selfSaving: ISelfSaving; // for storing events to client backend. Pass this url to saveEvents method.
+    localServer: boolean; // for storing events to rilog local server. Needs to install rilog-local-logger.
+    appName: string; // app name would be used in local saving for creating app logs folder.
+    selfServer: ISelfServer; // for storing events to client backend. Pass this url to saveEvents method.
     onPushEvent: TOnPushEvent | null; // add push event callback
     onSaveEvents: TOnSaveEvents | null; // add save events callback
 }>;
 
-export interface ISelfSaving {
+export interface ISelfServer {
     url: string;
     headers?: Record<string, string>;
 }
