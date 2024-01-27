@@ -6,6 +6,7 @@ class RilogTimer implements IRilogTimer {
     longTimer: any;
 
     startShort(afterTimeoutFn: () => void) {
+        this.clearShort();
         this.shortTimer = setTimeout(() => {
             afterTimeoutFn();
         }, SHORT_TIMER_LIMIT);
@@ -17,6 +18,7 @@ class RilogTimer implements IRilogTimer {
     }
 
     startLong(afterTimeoutFn: () => void) {
+        this.clearLong();
         this.longTimer = setTimeout(() => {
             afterTimeoutFn();
         }, LONG_TIMER_LIMIT);

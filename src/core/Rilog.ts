@@ -4,7 +4,9 @@ import { IAxiosAdapter } from '../feature/interceptors/axios/types';
 import { initFetchInterception } from '../feature/interceptors/fetch';
 import FetchAdapter from '../feature/interceptors/fetch/adapter';
 import { IFetchAdapter } from '../feature/interceptors/fetch/types';
-import { IRilog, IRilogRequest, IRilogResponse, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
+import { IRilogMessageConfig } from '../feature/interceptors/message/types';
+import { IRilog, IRilogRequest, IRilogResponse, TOnPushEvent, TOnSaveEvents, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
+import { IRilogEventItem } from '../types/events';
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken } from '../utils';
 import { getExternalInfo } from '../utils/browser';
@@ -33,14 +35,15 @@ class Rilog implements IRilog {
         this.interceptor = new RilogInterceptor(config || null);
 
         /**
-         * Init fetch interception
+         * Init fetch interception.
+         * (Can be disabled from config).
          */
         !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest.bind(this), this.interceptFetchResponse.bind(this));
 
         /**
          * Generate unique client token
          */
-        const token = getUserUniqToken();
+        const uToken = getUserUniqToken();
 
         /**
          * Save appId (app key) to the state
@@ -52,7 +55,7 @@ class Rilog implements IRilog {
          */
         const externalInfo = getExternalInfo();
 
-        const data = await initRequest({ uToken: token, appId: key, externalInfo });
+        const data = await initRequest({ data: { uToken, appId: key, externalInfo }, config });
 
         this.updateState({
             token: data.access_token,
@@ -67,6 +70,8 @@ class Rilog implements IRilog {
          */
         this.interceptor.salt = data.salt;
         this.interceptor.token = data.access_token;
+        this.interceptor.init = true;
+        this.interceptor.uToken = uToken;
     }
 
     /**
@@ -81,9 +86,9 @@ class Rilog implements IRilog {
          */
         const axiosPreparedRequest = this.axiosAdapter.getRequest(data);
 
-        if (!axiosPreparedRequest) return;
+        if (!axiosPreparedRequest || !this.interceptor) return;
 
-        this.onRequest(axiosPreparedRequest);
+        this.interceptor.onRequest(axiosPreparedRequest);
     }
 
     async interceptResponseAxios(data: TRilogPushResponse) {
@@ -93,9 +98,17 @@ class Rilog implements IRilog {
          */
         const axiosPreparedResponse = this.axiosAdapter.getResponse(data);
 
-        if (!axiosPreparedResponse) return;
+        if (!axiosPreparedResponse || !this.interceptor) return;
 
-        await this.onResponse(axiosPreparedResponse);
+        await this.interceptor.onResponse(axiosPreparedResponse);
+    }
+
+    /**
+     * Intercept custom user messages/data
+     */
+    @logMethods('IRilog')
+    saveData<T>(data: T, config: IRilogMessageConfig): void {
+        this.interceptor?.onSaveData(data, config);
     }
 
     /**
@@ -109,9 +122,9 @@ class Rilog implements IRilog {
          */
         const fetchPreparedRequest = this.fetchAdapter.getRequest(data);
 
-        if (!fetchPreparedRequest) return;
+        if (!fetchPreparedRequest || !this.interceptor) return;
 
-        this.onRequest(fetchPreparedRequest);
+        this.interceptor.onRequest(fetchPreparedRequest);
     }
 
     @logMethods('IRilog')
@@ -122,43 +135,9 @@ class Rilog implements IRilog {
          */
         const fetchPreparedResponse = this.fetchAdapter.getResponse(data);
 
-        if (!fetchPreparedResponse) return;
+        if (!fetchPreparedResponse || !this.interceptor) return;
 
-        await this.onResponse(fetchPreparedResponse);
-    }
-
-    @logMethods('IRilog', true)
-    private onRequest(request: IRilogRequest) {
-        /**
-         * Prepare full request with filled additional info
-         */
-        const preparedRequest = this.interceptor?.prepareRequest(request);
-
-        if (!preparedRequest) return;
-
-        /**
-         * Save prepared request (after filtering) to store
-         */
-        this.updateState({
-            request: preparedRequest || null,
-        });
-    }
-
-    @logMethods('IRilog', false)
-    private async onResponse(response: IRilogResponse) {
-        /**
-         * Prepare full response with filled additional info
-         */
-        const preparedResponse = await this.interceptor?.prepareResponse(response || {}, this.state.request);
-
-        if (!preparedResponse) return;
-
-        /**
-         * Clear request after pushing full request data to store
-         */
-        this.updateState({
-            request: null,
-        });
+        await this.interceptor.onResponse(fetchPreparedResponse);
     }
 
     /**

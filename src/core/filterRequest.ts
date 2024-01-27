@@ -1,7 +1,7 @@
-import { SELF_SENSETIVE_REQUEST } from '../constants';
 import { IRilogRequestTimed, TRilogInitConfig } from '../types';
+import { IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
-import { isLibruarySensetiveRequest } from '../utils/filters';
+import { isLibruarySensetiveRequest, isUrlIgnored } from '../utils/filters';
 
 class RilogFilterRequest implements IRilogFilterRequest {
     private config: TRilogInitConfig | null;
@@ -25,12 +25,21 @@ class RilogFilterRequest implements IRilogFilterRequest {
         return isLibruarySensetiveRequest(data.url);
     }
 
+    isIgnoredRequest(data: IRilogRequestTimed) {
+        if (!this.config?.ignoredRequests) return false;
+        return isUrlIgnored(data.url, this.config.ignoredRequests);
+    }
+
+    sortEventsByDate(events: IRilogEventItem[]) {
+        return events.sort((a, b) => +a.date - +b.date);
+    }
+
     private sensetive(data: IRilogRequestTimed) {
-        return this.config?.sensetiveRequsts?.includes(data.url) ? { ...data, headers: 'sensetive', data: 'sensetive' } : data;
+        return this.config?.sensetiveRequsts?.some((sensetiveUrl) => data.url.toLowerCase().includes(sensetiveUrl.toLowerCase())) ? { ...data, headers: 'sensetive', data: 'sensetive' } : data;
     }
 
     private sensetiveData(data: IRilogRequestTimed) {
-        return this.config?.sensetiveDataRequests?.includes(data.url) ? { ...data, data: 'sensetive' } : data;
+        return this.config?.sensetiveDataRequests?.some((sensetiveUrl) => data.url.toLowerCase().includes(sensetiveUrl.toLowerCase())) ? { ...data, data: 'sensetive' } : data;
     }
 
     private headers(data: IRilogRequestTimed) {
