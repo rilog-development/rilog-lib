@@ -133,8 +133,6 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     private async pushEvents(data: IRilogEventItem) {
-        console.log('[test] pushEvents');
-
         /**
          * User can intercept push events to array using callback from config.
          */
@@ -160,7 +158,6 @@ class RilogInterceptor implements IRilogInterceptror {
                 if (!this.init) return;
 
                 this.timer.startLong(async () => {
-                    console.log('[test] long timer');
                     await this.saveEvents(eventsArray);
                 });
             }
@@ -193,11 +190,7 @@ class RilogInterceptor implements IRilogInterceptror {
 
         this.timer.clearLong();
 
-        console.log('[test] result ', result);
-
         if (result?.result?.toLowerCase() === 'success') {
-            console.log('[test] remove ril events');
-
             localStorage.removeItem(RIL_EVENTS);
         }
     }
