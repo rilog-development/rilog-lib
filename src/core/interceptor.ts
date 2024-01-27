@@ -25,6 +25,7 @@ class RilogInterceptor implements IRilogInterceptror {
     public init: TRilogState['init'] = false;
     public salt: TRilogState['salt'] = null;
     public token: TRilogState['token'] = null;
+    public uToken: string | null = null;
     public state: IRilogInterceptorState = defaultState;
 
     constructor(config: TRilogInitConfig | null) {
@@ -204,7 +205,7 @@ class RilogInterceptor implements IRilogInterceptror {
          * The priority method for saving is local :)
          */
         if (localServer) {
-            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.token, appName: this.config?.appName || 'Unknown app' }), url: `${LOCAL_BASE_URL}/api/events/save` });
+            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.uToken, appName: this.config?.appName || 'Unknown app' }), url: `${LOCAL_BASE_URL}/api/events/save` });
         }
 
         if (selfServer) {

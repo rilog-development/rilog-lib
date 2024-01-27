@@ -43,7 +43,7 @@ class Rilog implements IRilog {
         /**
          * Generate unique client token
          */
-        const token = getUserUniqToken();
+        const uToken = getUserUniqToken();
 
         /**
          * Save appId (app key) to the state
@@ -55,7 +55,7 @@ class Rilog implements IRilog {
          */
         const externalInfo = getExternalInfo();
 
-        const data = await initRequest({ data: { uToken: token, appId: key, externalInfo }, config });
+        const data = await initRequest({ data: { uToken, appId: key, externalInfo }, config });
 
         this.updateState({
             token: data.access_token,
@@ -71,6 +71,7 @@ class Rilog implements IRilog {
         this.interceptor.salt = data.salt;
         this.interceptor.token = data.access_token;
         this.interceptor.init = true;
+        this.interceptor.uToken = uToken;
     }
 
     /**
