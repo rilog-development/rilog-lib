@@ -158,6 +158,7 @@ class RilogInterceptor implements IRilogInterceptror {
                 if (!this.init) return;
 
                 this.timer.startLong(async () => {
+                    console.log('[test] long timer');
                     await this.saveEvents(eventsArray);
                 });
             }
@@ -189,6 +190,8 @@ class RilogInterceptor implements IRilogInterceptror {
         const result = await this.sendEvents({ data: encryptedEvents, token: this.token || '', localServer: this.config?.localServer, selfServer: this?.config?.selfServer });
 
         this.timer.clearLong();
+
+        console.log('[test] result ', result);
 
         if (result?.result?.toLowerCase() === 'success') {
             localStorage.removeItem(RIL_EVENTS);
