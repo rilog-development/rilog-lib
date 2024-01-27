@@ -133,8 +133,8 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     private async pushEvents(data: IRilogEventItem) {
-        console.log("[test] pushEvents");
-        
+        console.log('[test] pushEvents');
+
         /**
          * User can intercept push events to array using callback from config.
          */
@@ -196,8 +196,8 @@ class RilogInterceptor implements IRilogInterceptror {
         console.log('[test] result ', result);
 
         if (result?.result?.toLowerCase() === 'success') {
-            console.log("[test] remove ril events");
-            
+            console.log('[test] remove ril events');
+
             localStorage.removeItem(RIL_EVENTS);
         }
     }
