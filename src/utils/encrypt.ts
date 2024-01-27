@@ -8,7 +8,7 @@ import { IRilogEventItem } from '../types/events';
  * @param data
  */
 const encrypt = (data: IRilogEventItem[], salt: TRilogState['salt']): string => {
-    return salt ? CryptoJS.AES.encrypt(JSON.stringify(data), salt).toString() : btoa(JSON.stringify(data));
+    return salt?.length ? CryptoJS.AES.encrypt(JSON.stringify(data), salt).toString() : btoa(JSON.stringify(data));
 };
 
 export { encrypt };
