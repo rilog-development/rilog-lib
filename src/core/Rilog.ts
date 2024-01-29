@@ -5,8 +5,7 @@ import { initFetchInterception } from '../feature/interceptors/fetch';
 import FetchAdapter from '../feature/interceptors/fetch/adapter';
 import { IFetchAdapter } from '../feature/interceptors/fetch/types';
 import { IRilogMessageConfig } from '../feature/interceptors/message/types';
-import { IRilog, IRilogRequest, IRilogResponse, TOnPushEvent, TOnSaveEvents, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
-import { IRilogEventItem } from '../types/events';
+import { IRilog, TRilogExtensions, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken } from '../utils';
 import { getExternalInfo } from '../utils/browser';
@@ -18,12 +17,19 @@ class Rilog implements IRilog {
     private axiosAdapter: IAxiosAdapter;
     private fetchAdapter: IFetchAdapter;
 
-    public state: TRilogState;
+    private state: TRilogState;
 
-    constructor(state: TRilogState) {
+    constructor(state: TRilogState, extensions?: TRilogExtensions) {
         this.state = state;
         this.axiosAdapter = new AxiosAdapter();
         this.fetchAdapter = new FetchAdapter();
+       
+        /**
+         * Check if extension is exist and starts it.
+         */
+        if (extensions?.interactivePanel) {
+            extensions.interactivePanel.build();
+        }
     }
 
     @logMethods('IRilog')
