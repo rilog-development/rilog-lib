@@ -53,8 +53,8 @@ export type TRilogState = {
 };
 
 export type TRilogExtensions = {
-    interactivePanel: null | IRilogExtension
-}
+    interactivePanel: null | IRilogExtension;
+};
 
 export interface IRilogExtension {
     build(): void; // required method for call extension

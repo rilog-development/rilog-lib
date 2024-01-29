@@ -23,7 +23,7 @@ class Rilog implements IRilog {
         this.state = state;
         this.axiosAdapter = new AxiosAdapter();
         this.fetchAdapter = new FetchAdapter();
-       
+
         /**
          * Check if extension is exist and starts it.
          */

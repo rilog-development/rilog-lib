@@ -10,7 +10,6 @@ const defaultState = {
     config: null,
 } as TRilogState;
 
-
 const rilog = new Rilog(defaultState);
 
 export default rilog;
