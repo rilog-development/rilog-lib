@@ -6,7 +6,6 @@ export type TOnPushEvent = (event: IRilogEventItem) => void;
 export type TOnSaveEvents = (event: IRilogEventItem[]) => void;
 
 export interface IRilog {
-    state: TRilogState;
     init({ key, config }: TRilogInit): void;
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
@@ -52,5 +51,13 @@ export type TRilogState = {
     key: null | string; // app key for connection to back (to your current app),
     config: null | TRilogInitConfig; // config for requests
 };
+
+export type TRilogExtensions = {
+    interactivePanel: null | IRilogExtension;
+};
+
+export interface IRilogExtension {
+    build(): void; // required method for call extension
+}
 
 export type TUpdateStateFn = (state: Partial<TRilogState>) => void;
