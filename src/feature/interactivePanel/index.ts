@@ -113,26 +113,26 @@ class InteractivePanel implements IRilogExtension {
         copyScript.innerHTML = `
             function rilogLibCopyToken(){
                 const input = document.getElementById("${this.inputId}");
-    
+
                 input.select();
                 input.setSelectionRange(0, 99999); // For mobile devices
-    
+
                 navigator.clipboard.writeText(input.value);
             }
             function rilogLibOnOpen() {
                const panel = document.getElementById("${this.panelId}");
                const openButton = document.getElementById("${this.openButtonId}");
-    
+
                panel.style.display = 'block';
                openButton.style.display = 'none';
             }
             function rilogLibOnClose() {
                 const panel = document.getElementById("${this.panelId}");
                 const openButton = document.getElementById("${this.openButtonId}");
-     
+
                 panel.style.display = 'none';
                 openButton.style.display = 'block';
-             }`;
+            }`;
 
         return copyScript;
     }
