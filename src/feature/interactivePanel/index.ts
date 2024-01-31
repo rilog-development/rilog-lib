@@ -1,4 +1,4 @@
-import { RIL_TOKEN } from '../../constants';
+import { RIL_TOKEN, RIL_VERSION } from '../../constants';
 import { IInteractivePanel } from './types';
 
 class InteractivePanel implements IInteractivePanel {
@@ -33,7 +33,7 @@ class InteractivePanel implements IInteractivePanel {
 
         container.setAttribute('style', 'position:fixed;bottom:0;left:0;width:100%;z-index:998;display:none;');
         
-        const header = this.createHeader();
+        const header = this.createHeader("Rilog lib", RIL_VERSION);
         const body = this.createBody(uToken);
     
         container.appendChild(header);
