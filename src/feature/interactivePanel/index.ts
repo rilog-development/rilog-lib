@@ -11,8 +11,6 @@ class InteractivePanel implements IInteractivePanel {
     private closeButtonId = 'rilog-lib-close-btn';
     private copyButtonId = 'rilog-lib-copy-btn';
 
-    constructor() {}
-
     build(): void {
         const panel = this.createHTMLPanel();
         const openButton = this.createOpenButton();
