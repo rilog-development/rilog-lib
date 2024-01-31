@@ -1,7 +1,7 @@
 import { RIL_TOKEN, RIL_VERSION } from '../../constants';
-import { IInteractivePanel } from './types';
+import { IRilogExtension } from '../../types';
 
-class InteractivePanel implements IInteractivePanel {
+class InteractivePanel implements IRilogExtension {
     private headerColor = '#12191B';
     private bodyColor = '#002329';
     private inputColor = '#12191B';
