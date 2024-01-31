@@ -1,6 +1,6 @@
 {
   "name": "@rilog-development/rilog-lib",
-  "version": "0.3.8-fixed.0",
+  "version": "0.3.9",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "Andrii Karnaukh <kaowebdev@gmail.com>",
