@@ -2,11 +2,11 @@ import { RIL_TOKEN, RIL_VERSION } from '../../constants';
 import { IInteractivePanel } from './types';
 
 class InteractivePanel implements IInteractivePanel {
-    private headerColor = "#12191B";
-    private bodyColor = "#002329";
-    private inputColor = "#12191B";
+    private headerColor = '#12191B';
+    private bodyColor = '#002329';
+    private inputColor = '#12191B';
     private inputId = 'rilog-lib-u-token';
-    private panelId = 'rilog-lib-panel'
+    private panelId = 'rilog-lib-panel';
     private openButtonId = 'rilog-lib-open-btn';
     private closeButtonId = 'rilog-lib-close-btn';
     private copyButtonId = 'rilog-lib-copy-btn';
@@ -14,6 +14,7 @@ class InteractivePanel implements IInteractivePanel {
     constructor() {}
 
     build(): void {
+        console.log('[test] interactive panel works');
         const panel = this.createHTMLPanel();
         const openButton = this.createOpenButton();
         const script = this.createScript();
@@ -24,7 +25,7 @@ class InteractivePanel implements IInteractivePanel {
     }
 
     private getToken() {
-        return localStorage.getItem(RIL_TOKEN) || "";
+        return localStorage.getItem(RIL_TOKEN) || '';
     }
 
     private createHTMLPanel() {
@@ -35,7 +36,7 @@ class InteractivePanel implements IInteractivePanel {
 
         container.setAttribute('style', 'position:fixed;bottom:0;left:0;width:100%;z-index:998;display:none;');
 
-        const header = this.createHeader("Rilog lib", RIL_VERSION);
+        const header = this.createHeader('Rilog lib', RIL_VERSION);
         const body = this.createBody(uToken);
 
         container.appendChild(header);
@@ -55,20 +56,19 @@ class InteractivePanel implements IInteractivePanel {
         container.innerHTML = `<button onclick='rilogLibOnOpen()' id='${this.openButtonId}-elem' style='${buttonStyles}'><img src='https://i.ibb.co/nwm3Dxx/rilog-logo.png' href='Rilog'/></button>`;
 
         return container;
-
     }
 
-    private createHeader(headerTitle = 'Rilog lib', version = "0.3.1") {
+    private createHeader(headerTitle = 'Rilog lib', version = '0.3.1') {
         const container = document.createElement('div');
 
-            const containerStyles = `padding: 16px 20px; background: ${this.headerColor};color:#fff;display:flex;justify-content:space-between;align-items:center`;
-            const titleContainerStyles = "display:flex;align-items:center;";
-            const titleStyles = "margin: 0px;font-size:14px;font-family:Arial;font-weight:300";
-            const versionStyles = "margin-left:8px;color:#fff;opacity:0.3;font-size:12px;";
+        const containerStyles = `padding: 16px 20px; background: ${this.headerColor};color:#fff;display:flex;justify-content:space-between;align-items:center`;
+        const titleContainerStyles = 'display:flex;align-items:center;';
+        const titleStyles = 'margin: 0px;font-size:14px;font-family:Arial;font-weight:300';
+        const versionStyles = 'margin-left:8px;color:#fff;opacity:0.3;font-size:12px;';
 
-            container.setAttribute('style', containerStyles);
+        container.setAttribute('style', containerStyles);
 
-            container.innerHTML = `<div style='${titleContainerStyles}'>
+        container.innerHTML = `<div style='${titleContainerStyles}'>
                 <h2 style='${titleStyles}'>${headerTitle}</h2>
                 <span style='${versionStyles}'>v${version}</span>
             </div>
@@ -77,10 +77,10 @@ class InteractivePanel implements IInteractivePanel {
         return container;
     }
 
-    private createBody(uToken = "") {
+    private createBody(uToken = '') {
         const container = document.createElement('div');
 
-        const containerStyles = `background:${this.bodyColor};color:#fff;padding:16px 20px;`
+        const containerStyles = `background:${this.bodyColor};color:#fff;padding:16px 20px;`;
         const tokenContainerStyles = 'display:flex;flex-direction:column;max-width:270px;';
         const inputStyles = `border:1px solid #809194;width:100%;color:${this.inputColor};padding:5px 12px;border-radius:4px;outline:none;box-shadow:none;font-size:14px`;
         const inputContainerStyles = 'position:relative;display:flex;margin-bottom:16px';
@@ -139,8 +139,6 @@ class InteractivePanel implements IInteractivePanel {
 
         return copyScript;
     }
-
-
 }
 
 export default InteractivePanel;

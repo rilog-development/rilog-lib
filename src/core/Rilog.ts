@@ -28,6 +28,7 @@ class Rilog implements IRilog {
          * Check if extension is exist and starts it.
          */
         if (extensions?.interactivePanel) {
+            console.log('[test] extensions has interactivePanel');
             extensions.interactivePanel.build();
         }
     }
