@@ -53,7 +53,7 @@ class RilogInterceptor implements IRilogInterceptror {
         if (isButtonElement(event)) {
             const clickEvent = this.clickInterceptor?.getClickEvent(event);
 
-            this.pushEvents(clickEvent);
+            clickEvent && this.pushEvents(clickEvent);
         }
     }
 
