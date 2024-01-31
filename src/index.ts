@@ -12,7 +12,7 @@ const defaultState = {
 } as TRilogState;
 
 const rilog = new Rilog(defaultState, {
-    interactivePanel: new InteractivePanel()
+    interactivePanel: new InteractivePanel(),
 });
 
 export default rilog;
