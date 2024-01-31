@@ -13,4 +13,4 @@ export const SELF_SENSETIVE_REQUEST = ['connection/init', 'connection/send', 'ev
 
 export const SELF_SENSETIVE_CLICK_IDS = ['rilog-lib'];
 export const MAX_LOCAL_STORAGE_SIZE = 4.5; // max available size of local storage in Mb. Using for defining when the events send to storage.
-export const RIL_VERSION = '0.3.*'; // current rilog lib version
+export const RIL_VERSION = '0.3.8'; // current rilog lib version
