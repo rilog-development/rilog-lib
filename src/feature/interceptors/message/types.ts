@@ -8,6 +8,9 @@ export interface IRilogMessageConfig {
     label: string;
 }
 
+/**
+ * !!!Should be updated with BACKEND types
+ */
 export interface IRilogMessageData {
     data: string;
     /**

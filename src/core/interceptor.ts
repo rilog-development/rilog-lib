@@ -11,10 +11,11 @@ import { ERilogEvent, IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptorState, IRilogInterceptror, TSendEvents } from '../types/interceptor';
 import { IRilogTimer } from '../types/timer';
-import { getLocation, isFullLocalStorage } from '../utils';
+import { generateUniqueId, getLocation, isFullLocalStorage } from '../utils';
 import { encrypt } from '../utils/encrypt';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
+import { isUrlIgnored } from '../utils/filters';
 
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
@@ -77,6 +78,13 @@ class RilogInterceptor implements IRilogInterceptror {
 
         if (!timedRequest) return;
 
+        /**
+         * Check if request was to self server and skip onRequest if true (this req shouldn't be logged).
+         */
+        const isSelfServerRequest = this.config?.selfServer ? isUrlIgnored(timedRequest.url, [this.config?.selfServer.url]) : false;
+
+        if (isSelfServerRequest) return;
+
         if (this.filter.isLibruaryRequest(timedRequest) || this.filter.isIgnoredRequest(timedRequest)) return;
 
         this.state.request = this.filter.getRequests(timedRequest) || null;
@@ -99,12 +107,12 @@ class RilogInterceptor implements IRilogInterceptror {
 
         fullRequest = timedResponse
             ? {
-                  _id: Date.now().toString(),
+                  _id: generateUniqueId(),
                   request: this.state.request,
                   response: timedResponse,
               }
             : {
-                  _id: Date.now().toString(),
+                  _id: generateUniqueId(),
                   request: this.state.request,
                   response: {
                       data: 'No response from server. Timeout.',
@@ -119,7 +127,7 @@ class RilogInterceptor implements IRilogInterceptror {
         this.timer.clearLong();
 
         await this.pushEvents({
-            _id: fullRequest._id,
+            _id: generateUniqueId(),
             type: ERilogEvent.REQUEST,
             date: fullRequest.request.timestamp.toString(),
             data: fullRequest,
@@ -205,7 +213,7 @@ class RilogInterceptor implements IRilogInterceptror {
          * The priority method for saving is local :)
          */
         if (localServer) {
-            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.uToken, appName: this.config?.appName || 'Unknown app' }), url: `${LOCAL_BASE_URL}/api/events/save` });
+            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.uToken, ...this.config?.localServer }), url: `${LOCAL_BASE_URL}/api/events/save` });
         }
 
         if (selfServer) {

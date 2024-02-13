@@ -1,5 +1,5 @@
 import { ERilogEvent, IRilogEventItem } from '../../../types/events';
-import { getLocation } from '../../../utils';
+import { generateUniqueId, getLocation } from '../../../utils';
 import { logMethods } from '../../../utils/logger';
 import { BUTTON_NODES } from './constants';
 import { IRilogClick, IRilogClickInterceptor } from './types';
@@ -20,7 +20,7 @@ class ClickInterceptor implements IRilogClickInterceptor {
         };
 
         return {
-            _id: Date.now().toString(),
+            _id: generateUniqueId(),
             type: ERilogEvent.CLICK,
             date: Date.now().toString(),
             data: elementInfo,
