@@ -26,7 +26,7 @@ const saveEventsToRilog = (data: string, token: string): Promise<TSaveEventsResp
 };
 
 interface ISaveEventsParams {
-    data: BodyInit;
+    data: string;
     url: string;
     headers?: Record<string, string>;
 }
