@@ -217,7 +217,7 @@ class RilogInterceptor implements IRilogInterceptror {
         }
 
         if (selfServer) {
-            return saveEventsCustom({ data: JSON.stringify({ eventsData: data }), url: selfServer.url, headers: selfServer.headers });
+            return saveEventsCustom({ data: JSON.stringify({ events: data }), url: selfServer.url, headers: selfServer.headers });
         }
 
         return saveEventsToRilog(data, token);

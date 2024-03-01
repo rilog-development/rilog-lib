@@ -7,6 +7,7 @@ type TSaveEventsResp = {
 /**
  * Do save events to backend
  * @param data - encrypted events data(array)
+ * @param token - authorization token for sending requests
  * @returns
  */
 
@@ -26,7 +27,7 @@ const saveEventsToRilog = (data: string, token: string): Promise<TSaveEventsResp
 };
 
 interface ISaveEventsParams {
-    data: BodyInit;
+    data: string;
     url: string;
     headers?: Record<string, string>;
 }
