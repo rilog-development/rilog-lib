@@ -44,7 +44,7 @@ class Rilog implements IRilog {
          * Init fetch interception.
          * (Can be disabled from config).
          */
-        !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest.bind(this), this.interceptFetchResponse.bind(this));
+        !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest.bind(this), this.interceptFetchResponse.bind(this), config?.selfServer);
 
         /**
          * Generate unique client token

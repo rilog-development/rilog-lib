@@ -1,5 +1,5 @@
 import { ERilogEvent } from '../../../types/events';
-import { getLocation } from '../../../utils';
+import { generateUniqueId, getLocation } from '../../../utils';
 import { IRilogMessageConfig, IRilogMessageData, IRilogMessageInterceptor } from './types';
 
 class MessageInterceptor implements IRilogMessageInterceptor {
@@ -7,7 +7,7 @@ class MessageInterceptor implements IRilogMessageInterceptor {
         const parsedData: string = typeof data === 'string' ? data : JSON.stringify(data);
 
         return {
-            _id: Date.now().toString(),
+            _id: generateUniqueId(),
             type: ERilogEvent.DEBUG_MESSAGE,
             date: Date.now().toString(),
             data: {

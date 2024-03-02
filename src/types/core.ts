@@ -25,15 +25,19 @@ export type TRilogInitConfig = Partial<{
     localStorage: string[]; // only this params will be stored
     disableFetchInterceptor: boolean; // disable fetch interception
     disableClickInterceptor: boolean; // disable click on button/links interception
-    localServer: boolean; // for storing events to rilog local server. Needs to install rilog-local-logger.
-    appName: string; // app name would be used in local saving for creating app logs folder.
+    localServer: ILocalServerConfig; // for storing events to rilog local server. Needs to install rilog-local-logger.
     selfServer: ISelfServer; // for storing events to client backend. Pass this url to saveEvents method.
     onPushEvent: TOnPushEvent | null; // add push event callback
     onSaveEvents: TOnSaveEvents | null; // add save events callback
 }>;
 
+export interface ILocalServerConfig {
+    appName: string; // app name would be used in local saving for creating app logs folder.
+    params?: Record<string, string>; // additional params for storing in the header of logs files.
+}
+
 export interface ISelfServer {
-    url: string;
+    url: string; // url should include "events/save" in the url
     headers?: Record<string, string>;
 }
 
