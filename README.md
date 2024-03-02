@@ -1,7 +1,5 @@
-<div>
-<h1 align='center'>Rilog lib</h1>
-<p align='center'>Simple way to log and debug your web apps.</p>
-</div>
+# Rilog lib
+**Simple way to log and debug your web apps.**
 
 
 Rilog lib intercepts and stores different events such as requests, button clicks, client custom messages (instead of using console.log), etc.
