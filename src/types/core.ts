@@ -13,7 +13,7 @@ export interface IRilog {
 }
 
 export type TRilogInit = {
-    key: string;
+    key?: string; // app key, need if client use rilog backend app
     config?: TRilogInitConfig;
 };
 

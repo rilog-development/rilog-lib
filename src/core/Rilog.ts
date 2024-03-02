@@ -54,14 +54,14 @@ class Rilog implements IRilog {
         /**
          * Save appId (app key) to the state
          */
-        this.updateState({ key });
+        key && this.updateState({ key });
 
         /**
          * Get some browser information
          */
         const externalInfo = getExternalInfo();
 
-        const data = await initRequest({ data: { uToken, appId: key, externalInfo }, config });
+        const data = await initRequest({ data: { uToken, appId: key ?? "", externalInfo }, config });
 
         this.updateState({
             token: data.access_token,
