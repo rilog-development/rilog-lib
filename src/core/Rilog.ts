@@ -61,7 +61,7 @@ class Rilog implements IRilog {
          */
         const externalInfo = getExternalInfo();
 
-        const data = await initRequest({ data: { uToken, appId: key ?? "", externalInfo }, config });
+        const data = await initRequest({ data: { uToken, appId: key ?? '', externalInfo }, config });
 
         this.updateState({
             token: data.access_token,
