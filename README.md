@@ -111,7 +111,7 @@ Every time when events were collected the Rilog lib would call your `POST` metho
 ```typescript
     { events: string }
 ```
-The array of events would be converted to base64 and passed as string to the method. So, you should parse it. 
+The array of events would be passed as JSON string to the method. So, you should parse it. 
 
 
 ### Self server config

@@ -3,12 +3,12 @@ import { TRilogState } from '../types';
 import { IRilogEventItem } from '../types/events';
 
 /**
- * Encryt request data for save request array.
- * Encrypt to base64 if the salt doesn't exist.
+ * Encrypt request data for save request array.
+ * Encrypt to string (using JSON.stringify) if the salt doesn't exist.
  * @param data
  */
 const encrypt = (data: IRilogEventItem[], salt: TRilogState['salt']): string => {
-    return salt?.length ? CryptoJS.AES.encrypt(JSON.stringify(data), salt).toString() : btoa(JSON.stringify(data));
+    return salt?.length ? CryptoJS.AES.encrypt(JSON.stringify(data), salt).toString() : JSON.stringify(data);
 };
 
 export { encrypt };
