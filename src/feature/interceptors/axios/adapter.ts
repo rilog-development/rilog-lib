@@ -23,11 +23,6 @@ class AxiosAdapter implements IAxiosAdapter {
     }
 
     getResponse(data: TRilogPushResponse) {
-        let responseFull: IRilogResponse = {
-            data: {},
-            status: null,
-        };
-
         if (Object.keys(data).length === 0) {
             return null;
         }
@@ -36,15 +31,14 @@ class AxiosAdapter implements IAxiosAdapter {
             return { data: data.response.data, status: data.status?.toString() };
         }
 
-        if (data?.data) {
-            responseFull = {
-                ...responseFull,
+        if (JSON.stringify(data?.data)?.length) {
+            return {
                 data: data.data,
                 status: data?.response?.status?.toString() || data?.status?.toString() || null,
             };
         }
 
-        return this.checkEmptyResponse(responseFull) ? null : responseFull;
+        return null;
     }
 
     private checkEmptyRequest(request: IRilogRequest): boolean {
@@ -53,14 +47,6 @@ class AxiosAdapter implements IAxiosAdapter {
         !request.url && (empty = true);
         !request.method && (empty = true);
         !request.headers && (empty = true);
-
-        return empty;
-    }
-
-    private checkEmptyResponse(response: IRilogResponse): boolean {
-        let empty = false;
-
-        Object.keys(response.data).length === 0 && (empty = true);
 
         return empty;
     }
