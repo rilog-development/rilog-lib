@@ -12,5 +12,7 @@ export const TOKEN_GENERATION_TIMESTAMP = '3456745647';
 export const SELF_SENSETIVE_REQUEST = ['connection/init', 'connection/send', 'events/save']; // the array of requests which shouldn't be stored
 
 export const SELF_SENSETIVE_CLICK_IDS = ['rilog-lib'];
-export const MAX_LOCAL_STORAGE_SIZE = 4.5; // max available size of local storage in Mb. Using for defining when the events send to storage.
+export const MAX_LOCAL_STORAGE_SIZE = 4.5; // max available size of local storage in Mb. Using for defining when the events send to the backend storage.
+
+export const MAX_EVENTS_SIZE_MB = 2; // max available size of events in Mb. Using for defining when the events send to the backend storage.
 export const RIL_VERSION = '0.3.*'; // current rilog lib version
