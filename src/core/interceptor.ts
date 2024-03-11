@@ -104,6 +104,7 @@ class RilogInterceptor implements IRilogInterceptror {
         /**
          * Can't prepare any response without request.
          */
+        console.log('[Rilog-lib] (onResponse) request ', this.state.request, 'response ', response);
         if (!this.state.request) return;
 
         fullRequest = timedResponse

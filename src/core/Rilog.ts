@@ -104,8 +104,6 @@ class Rilog implements IRilog {
          */
         const axiosPreparedResponse = this.axiosAdapter.getResponse(data);
 
-        console.log('[Rilog-lib] (interceptResponseAxios) axiosPreparedResponse ', axiosPreparedResponse);
-
         if (!axiosPreparedResponse || !this.interceptor) return;
 
         await this.interceptor.onResponse(axiosPreparedResponse);
