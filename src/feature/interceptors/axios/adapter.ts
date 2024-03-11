@@ -27,6 +27,8 @@ class AxiosAdapter implements IAxiosAdapter {
             return null;
         }
 
+        console.log('[Rilog-lib] (getResponse) data ', data);
+
         if (data?.status?.toString()[0] !== SUCCESS_RESPONSE_STATUS_START_CODE) {
             return { data: data.response.data, status: data.status?.toString() };
         }
