@@ -1,5 +1,5 @@
 import { saveEventsCustom, saveEventsToRilog } from '../api';
-import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, RIL_EVENTS } from '../constants';
+import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, MAX_EVENTS_SIZE_MB, MAX_LOCAL_STORAGE_SIZE, RIL_EVENTS } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
@@ -11,11 +11,12 @@ import { ERilogEvent, IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptorState, IRilogInterceptror, TSendEvents } from '../types/interceptor';
 import { IRilogTimer } from '../types/timer';
-import { generateUniqueId, getLocation, isFullLocalStorage } from '../utils';
+import { generateUniqueId, getLocation } from '../utils';
 import { encrypt } from '../utils/encrypt';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
 import { isUrlIgnored } from '../utils/filters';
+import { calculateLocalStorageSizeInMB, calculateLocalStorageValueSizeInMB, calculateStringSizeInMB } from '../utils/storage';
 
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
@@ -151,13 +152,15 @@ class RilogInterceptor implements IRilogInterceptror {
         const eventsArray: IRilogEventItem[] = events ? JSON.parse(events) : [];
 
         if (eventsArray) {
-            eventsArray.push(data);
+            const updatedEventsArray = [...eventsArray, data];
 
-            if (eventsArray.length > EVENTS_ARRAY_LIMIT || isFullLocalStorage(events)) {
-                await this.saveEvents(eventsArray);
+            const shouldSendEvents = await this.shouldSendEvents(JSON.stringify(data), JSON.stringify(eventsArray));
+
+            if (shouldSendEvents || updatedEventsArray.length > EVENTS_ARRAY_LIMIT) {
+                await this.saveEvents(updatedEventsArray);
             } else {
                 localStorage.removeItem(RIL_EVENTS);
-                localStorage.setItem(RIL_EVENTS, JSON.stringify(eventsArray));
+                localStorage.setItem(RIL_EVENTS, JSON.stringify(updatedEventsArray));
 
                 /**
                  * Leave function if lib isn't init
@@ -166,7 +169,7 @@ class RilogInterceptor implements IRilogInterceptror {
                 if (!this.init) return;
 
                 this.timer.startLong(async () => {
-                    await this.saveEvents(eventsArray);
+                    await this.saveEvents(updatedEventsArray);
                 });
             }
         } else {
@@ -221,6 +224,31 @@ class RilogInterceptor implements IRilogInterceptror {
         }
 
         return saveEventsToRilog(data, token);
+    }
+
+    /**
+     * Check the need to send events to backend storage.
+     * @param event {string} - parsed to string created rilog event
+     * @param events {string} - parsed to string array of rilog events
+     * @private
+     * @return {boolean}
+     */
+    private async shouldSendEvents(event: string, events: string) {
+        const eventSize = calculateStringSizeInMB(event);
+
+        const localStorageSize = await calculateLocalStorageSizeInMB();
+        console.log('[Rilog-lib] localStorageSize ', localStorageSize);
+        const freeLocalStorageSpace = MAX_LOCAL_STORAGE_SIZE - localStorageSize;
+        console.log('[Rilog-lib] freeLocalStorageSpace ', freeLocalStorageSpace);
+
+        if (eventSize >= freeLocalStorageSpace) return true;
+
+        const localStorageEventsSize = calculateStringSizeInMB(events);
+
+        console.log('[Rilog-lib] events size ', localStorageEventsSize + eventSize);
+        if (localStorageEventsSize + eventSize > MAX_EVENTS_SIZE_MB) return true;
+
+        return false;
     }
 }
 
