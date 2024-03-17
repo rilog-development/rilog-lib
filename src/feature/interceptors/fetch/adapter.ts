@@ -1,5 +1,4 @@
 import { IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } from '../../../types';
-import { getLocation } from '../../../utils';
 import { getQueryParamsFromUrl } from '../../../utils/transforms';
 import { IFetchAdapter } from './types';
 
