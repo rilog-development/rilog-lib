@@ -27,6 +27,7 @@ class FetchAdapter implements IFetchAdapter {
         const responseFull: IRilogResponse = {
             data: data.data || 'No data.',
             status: data.status || null,
+            url: data.url || '',
         };
 
         return responseFull;

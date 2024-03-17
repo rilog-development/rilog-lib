@@ -23,6 +23,7 @@ export interface IRilogRequest {
 
 export interface IRilogResponse {
     data?: any;
+    url: string;
     status?: string | null;
 }
 

@@ -19,6 +19,7 @@ const initFetchInterception = (onRequest: (data: TRilogPushRequest) => void, onR
                 onResponse({
                     status: response.status,
                     data,
+                    url,
                 });
         });
 

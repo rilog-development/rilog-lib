@@ -3,20 +3,21 @@ import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, MAX_EVENTS_SIZE_MB, MAX_LOCAL_STORA
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
-import { defaultState } from '../feature/interceptors/constants';
 import MessageInterceptor from '../feature/interceptors/message';
 import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
-import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, IRilogResponseTimed, TRilogInitConfig, TRilogState } from '../types';
+import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, TRilogInitConfig, TRilogState } from '../types';
 import { ERilogEvent, IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
-import { IRilogInterceptorState, IRilogInterceptror, TSendEvents } from '../types/interceptor';
+import { IRilogInterceptror, TSendEvents } from '../types/interceptor';
 import { IRilogTimer } from '../types/timer';
 import { generateUniqueId, getLocation } from '../utils';
 import { encrypt } from '../utils/encrypt';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
 import { isUrlIgnored } from '../utils/filters';
-import { calculateLocalStorageSizeInMB, calculateLocalStorageValueSizeInMB, calculateStringSizeInMB } from '../utils/storage';
+import { calculateLocalStorageSizeInMB, calculateStringSizeInMB } from '../utils/storage';
+import QueueArray from '../utils/queque';
+import { Queue } from '../types/queque';
 
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
@@ -24,11 +25,12 @@ class RilogInterceptor implements IRilogInterceptror {
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
     private config: TRilogInitConfig | null = null;
+    private requestsQueue: Queue<IRilogRequestTimed>; // record includes url as key and prepares request as value
+
     public init: TRilogState['init'] = false;
     public salt: TRilogState['salt'] = null;
     public token: TRilogState['token'] = null;
     public uToken: string | null = null;
-    public state: IRilogInterceptorState = defaultState;
 
     constructor(config: TRilogInitConfig | null) {
         this.config = config;
@@ -36,6 +38,7 @@ class RilogInterceptor implements IRilogInterceptror {
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
         this.messageInterceptor = new MessageInterceptor();
+        this.requestsQueue = new QueueArray();
 
         /**
          * The click interception can be disabled by user from config.
@@ -70,13 +73,6 @@ class RilogInterceptor implements IRilogInterceptror {
               }
             : null;
 
-        /**
-         * Shor timer is used only for interception request-response. It's time without any response from server.
-         */
-        this.timer.startShort(() => {
-            this.onResponse({});
-        });
-
         if (!timedRequest) return;
 
         /**
@@ -88,40 +84,29 @@ class RilogInterceptor implements IRilogInterceptror {
 
         if (this.filter.isLibruaryRequest(timedRequest) || this.filter.isIgnoredRequest(timedRequest)) return;
 
-        this.state.request = this.filter.getRequests(timedRequest) || null;
+        const preparedRequest = this.filter.getRequests(timedRequest) || null;
+
+        if (!preparedRequest) return;
+
+        // add prepared request to requests queue
+        this.requestsQueue.enqueue(preparedRequest);
     }
 
-    async onResponse(response: IRilogResponse) {
-        /**
-         * Init full request variable which includes full request and response data.
-         */
-        let fullRequest: IRilogRequestItem | null = null;
-
-        const timedResponse: IRilogResponseTimed | null = response ? { ...response, timestamp: Date.now() } : null;
-
-        this.timer.clearShort();
-
+    async onResponse(response: IRilogResponse | null) {
         /**
          * Can't prepare any response without request.
+         * Compare request and response using url.
          */
-        console.log('[Rilog-lib] (onResponse) request ', this.state.request, 'response ', response);
-        if (!this.state.request) return;
 
-        fullRequest = timedResponse
-            ? {
-                  _id: generateUniqueId(),
-                  request: this.state.request,
-                  response: timedResponse,
-              }
-            : {
-                  _id: generateUniqueId(),
-                  request: this.state.request,
-                  response: {
-                      data: 'No response from server. Timeout.',
-                      status: '',
-                      timestamp: Date.now(),
-                  },
-              };
+        const request = response && this.requestsQueue.dequeue('url', response.url);
+
+        if (!request) return;
+
+        const fullRequest: IRilogRequestItem = {
+            _id: generateUniqueId(),
+            request,
+            response: { ...response, timestamp: Date.now() },
+        };
 
         /**
          * Clear long timer which was started after pushing request data to server.
@@ -135,11 +120,38 @@ class RilogInterceptor implements IRilogInterceptror {
             data: fullRequest,
             location: fullRequest.request.location,
         });
+    }
 
-        /**
-         * Clear request data
-         */
-        this.state.request = null;
+    /**
+     * Got not resolved (without response) requests from queue, transform it to events and combine with another array of events.
+     * Also clear the request queue.
+     * @param events {IRilogEventItem[]}
+     * @private
+     * @return {IRilogEventItem[]}
+     */
+    private combineNotResolverRequests(events: IRilogEventItem[]): IRilogEventItem[] {
+        const notResolvedRequests = this.requestsQueue.dequeueNotResolved();
+
+        const fullNotResolvedRequests: IRilogEventItem[] | undefined = notResolvedRequests?.map((request) => ({
+            _id: generateUniqueId(),
+            type: ERilogEvent.REQUEST,
+            date: request.timestamp.toString(),
+            data: {
+                _id: generateUniqueId(),
+                request,
+                response: {
+                    data: "Interceptor haven't got any response. Timeout.",
+                    status: '',
+                    url: '',
+                    timestamp: Date.now(),
+                },
+            },
+            location: request.location,
+        }));
+
+        if (fullNotResolvedRequests) return [...events, ...fullNotResolvedRequests];
+
+        return [...events];
     }
 
     private async pushEvents(data: IRilogEventItem) {
@@ -155,10 +167,20 @@ class RilogInterceptor implements IRilogInterceptror {
         if (eventsArray) {
             const updatedEventsArray = [...eventsArray, data];
 
+            /**
+             * Should send events in case when local storage is full.
+             */
             const shouldSendEvents = await this.shouldSendEvents(JSON.stringify(data), JSON.stringify(eventsArray));
 
-            if (shouldSendEvents || updatedEventsArray.length > EVENTS_ARRAY_LIMIT) {
+            if (updatedEventsArray.length > EVENTS_ARRAY_LIMIT && this.requestsQueue.isEmpty()) {
                 await this.saveEvents(updatedEventsArray);
+            } else if (shouldSendEvents) {
+                /**
+                 * Combine existed events with not resolved requests.
+                 */
+                const fullEventsArray = this.combineNotResolverRequests(updatedEventsArray);
+
+                await this.saveEvents(fullEventsArray);
             } else {
                 localStorage.removeItem(RIL_EVENTS);
                 localStorage.setItem(RIL_EVENTS, JSON.stringify(updatedEventsArray));
@@ -170,7 +192,9 @@ class RilogInterceptor implements IRilogInterceptror {
                 if (!this.init) return;
 
                 this.timer.startLong(async () => {
-                    await this.saveEvents(updatedEventsArray);
+                    const fullEventsArray = this.combineNotResolverRequests(updatedEventsArray);
+
+                    await this.saveEvents(fullEventsArray);
                 });
             }
         } else {
@@ -186,7 +210,7 @@ class RilogInterceptor implements IRilogInterceptror {
 
         /**
          * Sort events by timestamp.
-         * For case when request was initiated earlier then click event happend.
+         * For case when request was initiated earlier than click event happened.
          */
         const sortedEvents = this.filter.sortEventsByDate(data);
 
@@ -194,7 +218,7 @@ class RilogInterceptor implements IRilogInterceptror {
          * Encrypt array of events for safety pushing it to server.
          *
          * If got salt - would be encrypted with CryptoJS.
-         * Without salt - would be convert to base64.
+         * Without salt - would be converted to string (with JSON.stringify).
          */
         const encryptedEvents = encrypt(sortedEvents, this.salt);
 
@@ -238,15 +262,13 @@ class RilogInterceptor implements IRilogInterceptror {
         const eventSize = calculateStringSizeInMB(event);
 
         const localStorageSize = await calculateLocalStorageSizeInMB();
-        console.log('[Rilog-lib] localStorageSize ', localStorageSize);
+
         const freeLocalStorageSpace = MAX_LOCAL_STORAGE_SIZE - localStorageSize;
-        console.log('[Rilog-lib] freeLocalStorageSpace ', freeLocalStorageSpace);
 
         if (eventSize >= freeLocalStorageSpace) return true;
 
         const localStorageEventsSize = calculateStringSizeInMB(events);
 
-        console.log('[Rilog-lib] events size ', localStorageEventsSize + eventSize);
         if (localStorageEventsSize + eventSize > MAX_EVENTS_SIZE_MB) return true;
 
         return false;
