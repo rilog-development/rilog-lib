@@ -1,5 +1,4 @@
 import { IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } from '../../../types';
-import { getLocation } from '../../../utils';
 import { getQueryParamsFromUrl } from '../../../utils/transforms';
 import { IFetchAdapter } from './types';
 
@@ -27,6 +26,7 @@ class FetchAdapter implements IFetchAdapter {
         const responseFull: IRilogResponse = {
             data: data.data || 'No data.',
             status: data.status || null,
+            url: data.url || '',
         };
 
         return responseFull;

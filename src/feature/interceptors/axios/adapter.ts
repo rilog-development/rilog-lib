@@ -22,18 +22,19 @@ class AxiosAdapter implements IAxiosAdapter {
         return this.checkEmptyRequest(requestFull) ? null : requestFull;
     }
 
-    getResponse(data: TRilogPushResponse) {
+    getResponse(data: TRilogPushResponse): IRilogResponse | null {
         if (Object.keys(data).length === 0) {
             return null;
         }
 
         if (data?.status?.toString()[0] !== SUCCESS_RESPONSE_STATUS_START_CODE) {
-            return { data: data.response.data, status: data.status?.toString() };
+            return { data: data.response.data, status: data.status?.toString(), url: data.config.url };
         }
 
         if (JSON.stringify(data?.data)?.length) {
             return {
                 data: data.data,
+                url: data.config.url,
                 status: data?.response?.status?.toString() || data?.status?.toString() || null,
             };
         }
