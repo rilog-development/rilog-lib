@@ -9,6 +9,7 @@ import { IRilog, TRilogExtensions, TRilogInit, TRilogPushRequest, TRilogPushResp
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken } from '../utils';
 import { getExternalInfo } from '../utils/browser';
+import { parseStackTrace } from '../utils/transforms';
 import { logMethods } from '../utils/logger';
 import RilogInterceptor from './interceptor';
 
@@ -113,8 +114,9 @@ class Rilog implements IRilog {
      * Intercept custom user messages/data
      */
     @logMethods('IRilog')
-    saveData<T>(data: T, config: IRilogMessageConfig): void {
-        this.interceptor?.onSaveData(data, config);
+    logData<T>(data: T, config: IRilogMessageConfig): void {
+        const stackTrace = parseStackTrace(new Error().stack || '');
+        this.interceptor?.onLogData(data, config, stackTrace);
     }
 
     /**

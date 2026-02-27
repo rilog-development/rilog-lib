@@ -8,7 +8,7 @@ export interface IRilogInterceptror {
     token: TRilogState['token'];
     uToken: string | null;
     onClick(event: any): void;
-    onSaveData<T>(data: T, config: IRilogMessageConfig): void;
+    onLogData<T>(data: T, config: IRilogMessageConfig, stackTrace?: string): void;
     onRequest(request: IRilogRequest): void;
     onResponse(response: IRilogResponse): void;
 }

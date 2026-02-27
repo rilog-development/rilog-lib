@@ -3,6 +3,8 @@ import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, MAX_EVENTS_SIZE_MB, MAX_LOCAL_STORA
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
+import ConsoleInterceptor from '../feature/interceptors/console';
+import { IRilogConsoleInterceptor } from '../feature/interceptors/console/types';
 import MessageInterceptor from '../feature/interceptors/message';
 import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
 import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, TRilogInitConfig, TRilogState } from '../types';
@@ -22,6 +24,7 @@ import { Queue } from '../types/queque';
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
     private messageInterceptor: IRilogMessageInterceptor;
+    private consoleInterceptor: IRilogConsoleInterceptor;
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
     private config: TRilogInitConfig | null = null;
@@ -38,16 +41,22 @@ class RilogInterceptor implements IRilogInterceptror {
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
         this.messageInterceptor = new MessageInterceptor();
+        this.consoleInterceptor = new ConsoleInterceptor();
         this.requestsQueue = new QueueArray();
 
         /**
          * The click interception can be disabled by user from config.
          */
         if (!config?.disableClickInterceptor) window.document.addEventListener('click', this.onClick.bind(this));
+
+        /**
+         * The console interception can be disabled by user from config.
+         */
+        if (!config?.disableConsoleInterceptor) this.consoleInterceptor.start(this.pushEvents.bind(this));
     }
 
-    onSaveData<T>(data: T, config: IRilogMessageConfig): void {
-        const messageEvent = this.messageInterceptor?.getMessageEvent(data, config);
+    onLogData<T>(data: T, config: IRilogMessageConfig, stackTrace?: string): void {
+        const messageEvent = this.messageInterceptor?.getMessageEvent(data, config, stackTrace);
 
         this.pushEvents(messageEvent);
     }
