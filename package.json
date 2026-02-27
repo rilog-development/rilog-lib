@@ -14,7 +14,7 @@
     "prepublishOnly": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags",
-    "release": "npm publish"
+    "release": "npm publish --access public"
   },
   "files": [
     "dist/**/*"
