@@ -1,9 +1,9 @@
 import { initRequest } from '../api';
 import AxiosAdapter from '../feature/interceptors/axios/adapter';
 import { IAxiosAdapter } from '../feature/interceptors/axios/types';
-import { initFetchInterception } from '../feature/interceptors/fetch';
-import FetchAdapter from '../feature/interceptors/fetch/adapter';
-import { IFetchAdapter } from '../feature/interceptors/fetch/types';
+import { initFetchInterception } from '../feature/interceptors/fetchInterceptor';
+import FetchAdapter from '../feature/interceptors/fetchInterceptor/adapter';
+import { IFetchAdapter } from '../feature/interceptors/fetchInterceptor/types';
 import { IRilogMessageConfig } from '../feature/interceptors/message/types';
 import { IRilog, TRilogExtensions, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
 import { IRilogInterceptror } from '../types/interceptor';
