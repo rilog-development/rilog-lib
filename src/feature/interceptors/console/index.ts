@@ -59,12 +59,8 @@ class ConsoleInterceptor implements IRilogConsoleInterceptor {
          */
         this.onUnhandledRejection = (event: PromiseRejectionEvent) => {
             const reason = event.reason;
-            const message = reason instanceof Error
-                ? reason.message
-                : `Unhandled rejection: ${String(reason)}`;
-            const stackTrace = reason instanceof Error && reason.stack
-                ? parseStackTrace(reason.stack)
-                : undefined;
+            const message = reason instanceof Error ? reason.message : `Unhandled rejection: ${String(reason)}`;
+            const stackTrace = reason instanceof Error && reason.stack ? parseStackTrace(reason.stack) : undefined;
 
             onEvent(this.buildEventFromData({ level: 'error', message, stackTrace, source: 'unhandledRejection' }, ERilogEvent.CONSOLE_ERROR));
         };
@@ -86,9 +82,7 @@ class ConsoleInterceptor implements IRilogConsoleInterceptor {
     }
 
     private buildEvent(args: any[], level: TConsoleLevel, source: IRilogConsoleData['source'], type: ERilogEvent): IRilogEventItem {
-        const message = args
-            .map((arg) => (typeof arg === 'string' ? arg : JSON.stringify(arg)))
-            .join(' ');
+        const message = args.map((arg) => (typeof arg === 'string' ? arg : JSON.stringify(arg))).join(' ');
 
         const stackTrace = parseStackTrace(new Error().stack || '');
 
