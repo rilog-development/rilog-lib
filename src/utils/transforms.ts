@@ -6,7 +6,7 @@ const parseStackTrace = (stack: string): string => {
     return stack
         .split('\n')
         .slice(1) // remove "Error" header line
-        .filter((line) => !line.includes('Rilog.') && !line.includes('RilogInterceptor.') && !line.includes('MessageInterceptor.') && !line.includes('ConsoleInterceptor.'))
+        .filter((line) => !line.includes('rilog-lib'))
         .join('\n')
         .trim();
 };
