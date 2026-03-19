@@ -24,6 +24,7 @@ Rilog lib intercepts and stores different events such as requests, button clicks
 -   [Storing to your server](#your-server)
 -   [Config](#config)
 -   [Examples](#examples)
+-   [Contacts](#contacts)
 
 ## Installation and usage
 
@@ -213,6 +214,16 @@ Below is a list of all config params (`TRilogInitConfig`):
 | selfServer                | [`ISelfServer`](#self-server-config) | Config for storing events to your own backend.                                             |
 | onPushEvent               | `function(event) {}`                 | Callback fired each time an event is intercepted.                                          |
 | onSaveEvents              | `function(events) {}`                | Callback fired before events are sent to storage.                                          |
+
+## Contacts
+
+---
+
+If you have any questions, feel free to reach out:
+
+-   **Rilog app contact form:** [rilog.online/auth/contact](https://www.rilog.online/auth/contact)
+-   **Email:** [kaowebdev@gmail.com](mailto:kaowebdev@gmail.com)
+-   **LinkedIn:** [andrii-karnaukh-webdev](https://www.linkedin.com/in/andrii-karnaukh-webdev/)
 
 ## Examples
 
