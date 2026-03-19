@@ -39,7 +39,7 @@ or
 
 ### Get your app key
 
-Before initializing the library, create a project in the Rilog app and copy its **app key**. Pass this key to `rilog.init()` — it links events from your application to your project in the storage.
+Before initializing the library, create a project in the [Rilog app](http://www.rilog.online) and copy its **app key**. Pass this key to `rilog.init()` — it links events from your application to your project in the storage.
 
 ```javascript
 rilog.init({ key: 'your-app-key' });
