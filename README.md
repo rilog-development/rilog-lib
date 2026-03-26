@@ -1,18 +1,70 @@
+<div align="center">
+
 # Rilog lib
 
 **Simple way to log and debug your web apps.**
 
-Rilog lib intercepts and stores different events such as requests, button clicks, console errors/warnings, and custom debug messages. Today, rilog-lib is adapted for [axios](https://www.npmjs.com/package/axios 'axios') and fetch.
+[![npm version](https://img.shields.io/npm/v/@rilog-development/rilog-lib?color=0d2b2b&labelColor=3ecfbf&style=flat-square)](https://www.npmjs.com/package/@rilog-development/rilog-lib)
+[![npm downloads](https://img.shields.io/npm/dm/@rilog-development/rilog-lib?color=0d2b2b&labelColor=3ecfbf&style=flat-square)](https://www.npmjs.com/package/@rilog-development/rilog-lib)
+[![TypeScript](https://img.shields.io/badge/TypeScript-ready-0d2b2b?labelColor=3ecfbf&style=flat-square)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-0d2b2b?labelColor=3ecfbf&style=flat-square)](LICENSE)
 
-## Intercepted events
+<br/>
 
-| Event           | Trigger                           | Automatic |
-| --------------- | --------------------------------- | --------- |
-| `REQUEST`       | HTTP requests via axios or fetch  | ✓         |
-| `CLICK`         | Clicks on `button`, `a` elements  | ✓         |
-| `CONSOLE_ERROR` | `console.error()` calls           | ✓         |
-| `CONSOLE_WARN`  | `console.warn()` calls            | ✓         |
-| `DEBUG_MESSAGE` | Manual call via `rilog.logData()` | manual    |
+> 📖 **[Full Documentation → docs.rilog.online](https://docs.rilog.online/docs/rilog-lib/overview)**
+
+</div>
+
+---
+
+Rilog lib intercepts and stores different events such as requests, button clicks, console errors/warnings, and custom debug messages. Adapted for [axios](https://www.npmjs.com/package/axios 'axios') and fetch.
+
+---
+
+## Get started in 3 steps
+
+**1. Install**
+
+```bash
+npm i @rilog-development/rilog-lib
+```
+
+**2. Init with your app key**
+
+```javascript
+import rilog from '@rilog-development/rilog-lib';
+
+rilog.init({ key: 'YOUR_APP_KEY' });
+```
+
+> Get your key by creating a project in the [Rilog app](http://www.rilog.online).
+
+**3. Watch events flow in real-time**
+
+Open the [Rilog dashboard](http://www.rilog.online) — HTTP requests, errors, clicks and custom events appear automatically.
+
+---
+
+## What gets captured
+
+| | Event | Description | Automatic |
+| --- | --- | --- | --- |
+| 🌐 | `REQUEST` | HTTP requests via axios or fetch | ✓ |
+| 🖱️ | `CLICK` | Clicks on `button`, `a` elements | ✓ |
+| 🚨 | `CONSOLE_ERROR` | `console.error()` calls | ✓ |
+| ⚠️ | `CONSOLE_WARN` | `console.warn()` calls | ✓ |
+| 📡 | `DEBUG_MESSAGE` | Manual call via `rilog.logData()` | manual |
+
+## Framework compatibility
+
+| Framework | Support |
+| --- | --- |
+| React 16+ | ✅ Full |
+| Vue 2/3 | ✅ Full |
+| Next.js | ✅ Full |
+| Angular 12+ | ⚡ Partial |
+| Svelte | ⚡ Partial |
+| Plain HTML + JS | ✅ Full |
 
 ## Table of Contents
 
@@ -214,6 +266,8 @@ Below is a list of all config params (`TRilogInitConfig`):
 | selfServer                | [`ISelfServer`](#self-server-config) | Config for storing events to your own backend.                                             |
 | onPushEvent               | `function(event) {}`                 | Callback fired each time an event is intercepted.                                          |
 | onSaveEvents              | `function(events) {}`                | Callback fired before events are sent to storage.                                          |
+
+> For detailed configuration examples and advanced usage, see the **[full documentation](https://docs.rilog.online/docs/rilog-lib/overview)**.
 
 ## Contacts
 
