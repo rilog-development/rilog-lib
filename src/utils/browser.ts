@@ -1,8 +1,10 @@
+import { TExternalInfoMeta } from '../types/core';
 import { IRilogLocation } from '../types/events';
 
-const getExternalInfo = () => {
+const getExternalInfo = (meta?: TExternalInfoMeta) => {
     return {
         userAgent: navigator.userAgent,
+        ...(meta ? { meta } : {}),
     };
 };
 

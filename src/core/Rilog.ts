@@ -60,7 +60,7 @@ class Rilog implements IRilog {
         /**
          * Get some browser information
          */
-        const externalInfo = getExternalInfo();
+        const externalInfo = getExternalInfo(config?.meta);
 
         const data = await initRequest({ data: { uToken, appId: key ?? '', externalInfo }, config });
 

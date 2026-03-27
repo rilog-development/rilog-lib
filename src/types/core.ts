@@ -30,6 +30,7 @@ export type TRilogInitConfig = Partial<{
     selfServer: ISelfServer; // for storing events to client backend. Pass this url to saveEvents method.
     onPushEvent: TOnPushEvent | null; // add push event callback
     onSaveEvents: TOnSaveEvents | null; // add save events callback
+    meta: TExternalInfoMeta; // environment metadata attached to every session
 }>;
 
 export interface ILocalServerConfig {
@@ -42,10 +43,20 @@ export interface ISelfServer {
     headers?: Record<string, string>;
 }
 
+export type TExternalInfoMeta = {
+    environment?: string;
+    branch?: string;
+    framework?: string;
+    platform?: string;
+};
+
 export type TInitRequest = {
     uToken: string;
     appId: string;
-    externalInfo?: object;
+    externalInfo?: {
+        userAgent: string;
+        meta?: TExternalInfoMeta;
+    };
 };
 
 export type TRilogState = {

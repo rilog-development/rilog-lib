@@ -37,6 +37,22 @@ import rilog from '@rilog-development/rilog-lib';
 rilog.init({ key: 'YOUR_APP_KEY' });
 ```
 
+Optionally pass `meta` in `config` to enrich events with environment context:
+
+```javascript
+rilog.init({
+    key: 'YOUR_APP_KEY',
+    config: {
+        meta: {
+            environment: 'production',
+            branch: 'main',
+            framework: 'React 18.0.0',
+            platform: 'Browser',
+        },
+    },
+});
+```
+
 > Get your key by creating a project in the [Rilog app](http://www.rilog.online).
 
 **3. Watch events flow in real-time**
@@ -75,6 +91,7 @@ Open the [Rilog dashboard](http://www.rilog.online) — HTTP requests, errors, c
 -   [Console interception](#console-interception)
 -   [Storing to your server](#your-server)
 -   [Config](#config)
+-   [Meta](#meta)
 -   [Examples](#examples)
 -   [Contacts](#contacts)
 
@@ -96,6 +113,38 @@ Before initializing the library, create a project in the [Rilog app](http://www.
 
 ```javascript
 rilog.init({ key: 'your-app-key' });
+```
+
+### Init params
+
+| Param  | Type               | Required | Description                                       |
+| ------ | ------------------ | -------- | ------------------------------------------------- |
+| key    | `string`           | No       | App key from your Rilog project.                  |
+| config | `TRilogInitConfig` | No       | Behavioral configuration (see [Config](#config)). |
+
+### Meta
+
+The `meta` object lets you attach environment context to each session. All fields are optional.
+
+| Field       | Type     | Example                      |
+| ----------- | -------- | ---------------------------- |
+| environment | `string` | `"production"`, `"staging"`  |
+| branch      | `string` | `"main"`, `"feat/my-branch"` |
+| framework   | `string` | `"React 18.0.0"`             |
+| platform    | `string` | `"Browser"`, `"Node.js 20"` |
+
+```javascript
+rilog.init({
+    key: 'your-app-key',
+    config: {
+        meta: {
+            environment: process.env.NODE_ENV,
+            branch: 'main',
+            framework: 'React 18.0.0',
+            platform: 'Browser',
+        },
+    },
+});
 ```
 
 ### Usage (axios)
@@ -266,6 +315,7 @@ Below is a list of all config params (`TRilogInitConfig`):
 | selfServer                | [`ISelfServer`](#self-server-config) | Config for storing events to your own backend.                                             |
 | onPushEvent               | `function(event) {}`                 | Callback fired each time an event is intercepted.                                          |
 | onSaveEvents              | `function(events) {}`                | Callback fired before events are sent to storage.                                          |
+| meta                      | [`TExternalInfoMeta`](#meta)         | Environment metadata attached to every session (environment, branch, framework, platform). |
 
 > For detailed configuration examples and advanced usage, see the **[full documentation](https://docs.rilog.online/docs/rilog-lib/overview)**.
 
