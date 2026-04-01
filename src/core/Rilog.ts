@@ -65,7 +65,7 @@ class Rilog implements IRilog {
         const data = await initRequest({ data: { uToken, appId: key ?? '', externalInfo }, config });
 
         /**
-         * You can have few apps placed in a single domen. For example: localhost:3000. 
+         * You can have few apps placed in a single domen. For example: localhost:3000.
          * In this case you open first app and lib generates new uniqe token, then you open another one but you already have the same uToken. It leads to bug.
          */
         data?.newToken && updateUserUniqToken(data.newToken);

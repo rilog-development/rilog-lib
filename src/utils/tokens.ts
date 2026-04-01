@@ -45,6 +45,6 @@ const getUserUniqToken = (): string => {
 
 const updateUserUniqToken = (token: string): void => {
     localStorage?.setItem(RIL_TOKEN, token);
-}
+};
 
 export { getUserUniqToken, generateUniqueId, updateUserUniqToken };
