@@ -42,6 +42,8 @@ export type TInitResponse = {
     salt: string;
     // recording requests
     recording: boolean;
+    // generated new unique token;
+    newToken?: string;
 };
 
 export type TRilogPushRequest = any;

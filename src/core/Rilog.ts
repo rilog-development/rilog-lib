@@ -7,7 +7,7 @@ import { IFetchAdapter } from '../feature/interceptors/fetchInterceptor/types';
 import { IRilogMessageConfig } from '../feature/interceptors/message/types';
 import { IRilog, TRilogExtensions, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
 import { IRilogInterceptror } from '../types/interceptor';
-import { getUserUniqToken } from '../utils';
+import { getUserUniqToken, updateUserUniqToken } from '../utils';
 import { getExternalInfo } from '../utils/browser';
 import { parseStackTrace } from '../utils/transforms';
 import { logMethods } from '../utils/logger';
@@ -64,6 +64,12 @@ class Rilog implements IRilog {
 
         const data = await initRequest({ data: { uToken, appId: key ?? '', externalInfo }, config });
 
+        /**
+         * You can have few apps placed in a single domen. For example: localhost:3000. 
+         * In this case you open first app and lib generates new uniqe token, then you open another one but you already have the same uToken. It leads to bug.
+         */
+        data?.newToken && updateUserUniqToken(data.newToken);
+
         this.updateState({
             token: data.access_token,
             salt: data.salt,
@@ -78,7 +84,7 @@ class Rilog implements IRilog {
         this.interceptor.salt = data.salt;
         this.interceptor.token = data.access_token;
         this.interceptor.init = true;
-        this.interceptor.uToken = uToken;
+        this.interceptor.uToken = data?.newToken ?? uToken;
     }
 
     /**
