@@ -1,5 +1,11 @@
 <div align="center">
 
+> ## 🚀 Registration is now open!
+> **[rilog.online](https://www.rilog.online)** is available for everyone. Create your account and start debugging today!
+> ### **[👉 Sign up at rilog.online](https://www.rilog.online)**
+
+---
+
 # Rilog lib
 
 **Simple way to log and debug your web apps.**
