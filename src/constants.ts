@@ -4,6 +4,7 @@ export const RIL_TOKEN = 'riltoken'; // label for saving unique user (connection
 export const RIL_EVENTS = 'rilevents'; // label for saving reuqests in Local Storage
 export const EVENTS_ARRAY_LIMIT = 10; // max availble events data for saving in localStorage
 export const LONG_TIMER_LIMIT = 12000; // use it for check saving request data (without request during long time)
+export const REQUEST_TIMEOUT_LIMIT = 300000; // max time (5 min) a request can stay unresolved in the queue
 export const SUCCESS_RESPONSE_STATUS_START_CODE = '2';
 export const SELF_SENSETIVE_REQUEST = ['connection/init', 'connection/send', 'events/save']; // the array of requests which shouldn't be stored
 

@@ -27,10 +27,32 @@ class QueueArray<T> implements Queue<T> {
     }
 
     /**
-     * Return not resolved elements from queue and clear the queue.
+     * Remove a specific item from the queue by reference and return it.
      */
-    dequeueNotResolved(): T[] | undefined {
+    dequeueItem(item: T): T | undefined {
+        const idx = this.items.indexOf(item);
+        if (idx === -1) return undefined;
+        return this.items.splice(idx, 1)[0];
+    }
+
+    /**
+     * Return not resolved elements from queue and clear the queue.
+     * If olderThanMs is provided, only returns and removes items older than that threshold.
+     */
+    dequeueNotResolved(olderThanMs?: number): T[] | undefined {
         if (!this.items.length) return;
+
+        if (olderThanMs !== undefined) {
+            const now = Date.now();
+            const timedOut = this.items.filter(
+                (item: any) => typeof item.timestamp === 'number' && now - item.timestamp > olderThanMs
+            );
+            timedOut.forEach((item) => {
+                const idx = this.items.indexOf(item);
+                if (idx !== -1) this.items.splice(idx, 1);
+            });
+            return timedOut.length ? timedOut : undefined;
+        }
 
         return this.items.splice(0);
     }
