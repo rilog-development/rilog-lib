@@ -44,9 +44,7 @@ class QueueArray<T> implements Queue<T> {
 
         if (olderThanMs !== undefined) {
             const now = Date.now();
-            const timedOut = this.items.filter(
-                (item: any) => typeof item.timestamp === 'number' && now - item.timestamp > olderThanMs
-            );
+            const timedOut = this.items.filter((item: any) => typeof item.timestamp === 'number' && now - item.timestamp > olderThanMs);
             timedOut.forEach((item) => {
                 const idx = this.items.indexOf(item);
                 if (idx !== -1) this.items.splice(idx, 1);
