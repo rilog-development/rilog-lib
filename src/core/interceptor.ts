@@ -13,7 +13,6 @@ import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptror, TSendEvents } from '../types/interceptor';
 import { IRilogTimer } from '../types/timer';
 import { generateUniqueId, getLocation } from '../utils';
-import { encrypt } from '../utils/encrypt';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
 import { isUrlIgnored } from '../utils/filters';
@@ -32,7 +31,6 @@ class RilogInterceptor implements IRilogInterceptror {
     private requestTimeouts: Map<IRilogRequestTimed, ReturnType<typeof setTimeout>> = new Map();
 
     public init: TRilogState['init'] = false;
-    public salt: TRilogState['salt'] = null;
     public token: TRilogState['token'] = null;
     public uToken: string | null = null;
 
@@ -259,15 +257,7 @@ class RilogInterceptor implements IRilogInterceptror {
          */
         const sortedEvents = this.filter.sortEventsByDate(data);
 
-        /**
-         * Encrypt array of events for safety pushing it to server.
-         *
-         * If got salt - would be encrypted with CryptoJS.
-         * Without salt - would be converted to string (with JSON.stringify).
-         */
-        const encryptedEvents = encrypt(sortedEvents, this.salt);
-
-        const result = await this.sendEvents({ data: encryptedEvents, token: this.token || '', localServer: this.config?.localServer, selfServer: this?.config?.selfServer });
+        const result = await this.sendEvents({ data: JSON.stringify(sortedEvents), token: this.token || '', localServer: this.config?.localServer, selfServer: this?.config?.selfServer });
 
         this.timer.clearLong();
 

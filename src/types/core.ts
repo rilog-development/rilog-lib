@@ -62,7 +62,6 @@ export type TInitRequest = {
 export type TRilogState = {
     init: boolean; // app done init
     token: null | string; // token for user auth requests
-    salt: null | string; // salt for encoding push data
     recording: boolean; // enable/disable recording requests
     key: null | string; // app key for connection to back (to your current app),
     config: null | TRilogInitConfig; // config for requests

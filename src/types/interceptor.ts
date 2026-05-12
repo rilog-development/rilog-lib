@@ -4,7 +4,6 @@ import { IRilogRequest, IRilogResponse } from './requests';
 
 export interface IRilogInterceptror {
     init: TRilogState['init'];
-    salt: TRilogState['salt'];
     token: TRilogState['token'];
     uToken: string | null;
     onClick(event: any): void;

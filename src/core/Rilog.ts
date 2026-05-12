@@ -72,16 +72,11 @@ class Rilog implements IRilog {
 
         this.updateState({
             token: data.access_token,
-            salt: data.salt,
             recording: data.recording,
             init: true,
             config: config || null,
         });
 
-        /**
-         * Set salt and acess token to interceptop for pushing it to backend store
-         */
-        this.interceptor.salt = data.salt;
         this.interceptor.token = data.access_token;
         this.interceptor.init = true;
         this.interceptor.uToken = data?.newToken ?? uToken;
