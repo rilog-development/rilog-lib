@@ -19,10 +19,7 @@ class RilogErrorBoundary extends React.Component<RilogErrorBoundaryProps, RilogE
     }
 
     componentDidCatch(error: Error, info: React.ErrorInfo): void {
-        this.props.rilog.logData(
-            { message: error.message, stack: error.stack, componentStack: info.componentStack },
-            { label: 'FATAL_REACT_ERROR' },
-        );
+        this.props.rilog.logData({ message: error.message, stack: error.stack, componentStack: info.componentStack }, { label: 'FATAL_REACT_ERROR' });
     }
 
     render(): React.ReactNode {

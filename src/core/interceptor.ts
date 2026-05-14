@@ -187,7 +187,10 @@ class RilogInterceptor implements IRilogInterceptror {
         if (count > EVENTS_ARRAY_LIMIT && this.requestsQueue.isEmpty()) {
             const stored = await this.storage.getAll();
             const fullEvents = this.combineNotResolverRequests(stored, LONG_TIMER_LIMIT);
-            await this.saveEvents(fullEvents, stored.map((e) => e._id));
+            await this.saveEvents(
+                fullEvents,
+                stored.map((e) => e._id),
+            );
             return;
         }
 
@@ -196,7 +199,10 @@ class RilogInterceptor implements IRilogInterceptror {
         this.timer.startLong(async () => {
             const stored = await this.storage.getAll();
             const fullEvents = this.combineNotResolverRequests(stored, LONG_TIMER_LIMIT);
-            await this.saveEvents(fullEvents, stored.map((e) => e._id));
+            await this.saveEvents(
+                fullEvents,
+                stored.map((e) => e._id),
+            );
         });
     }
 
