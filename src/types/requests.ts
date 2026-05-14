@@ -38,10 +38,10 @@ export interface IRilogResponseTimed extends IRilogResponse {
 export type TInitResponse = {
     // for additional requests (example: save())
     access_token: string;
-    // for encoding push data
-    salt: string;
     // recording requests
     recording: boolean;
+    // generated new unique token;
+    newToken?: string;
 };
 
 export type TRilogPushRequest = any;

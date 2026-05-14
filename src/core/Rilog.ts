@@ -1,14 +1,15 @@
 import { initRequest } from '../api';
 import AxiosAdapter from '../feature/interceptors/axios/adapter';
 import { IAxiosAdapter } from '../feature/interceptors/axios/types';
-import { initFetchInterception } from '../feature/interceptors/fetch';
-import FetchAdapter from '../feature/interceptors/fetch/adapter';
-import { IFetchAdapter } from '../feature/interceptors/fetch/types';
+import { initFetchInterception } from '../feature/interceptors/fetchInterceptor';
+import FetchAdapter from '../feature/interceptors/fetchInterceptor/adapter';
+import { IFetchAdapter } from '../feature/interceptors/fetchInterceptor/types';
 import { IRilogMessageConfig } from '../feature/interceptors/message/types';
 import { IRilog, TRilogExtensions, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
 import { IRilogInterceptror } from '../types/interceptor';
-import { getUserUniqToken } from '../utils';
+import { getUserUniqToken, updateUserUniqToken } from '../utils';
 import { getExternalInfo } from '../utils/browser';
+import { parseStackTrace } from '../utils/transforms';
 import { logMethods } from '../utils/logger';
 import RilogInterceptor from './interceptor';
 
@@ -59,25 +60,26 @@ class Rilog implements IRilog {
         /**
          * Get some browser information
          */
-        const externalInfo = getExternalInfo();
+        const externalInfo = getExternalInfo(config?.meta);
 
         const data = await initRequest({ data: { uToken, appId: key ?? '', externalInfo }, config });
 
+        /**
+         * You can have few apps placed in a single domen. For example: localhost:3000.
+         * In this case you open first app and lib generates new uniqe token, then you open another one but you already have the same uToken. It leads to bug.
+         */
+        data?.newToken && updateUserUniqToken(data.newToken);
+
         this.updateState({
             token: data.access_token,
-            salt: data.salt,
             recording: data.recording,
             init: true,
             config: config || null,
         });
 
-        /**
-         * Set salt and acess token to interceptop for pushing it to backend store
-         */
-        this.interceptor.salt = data.salt;
         this.interceptor.token = data.access_token;
         this.interceptor.init = true;
-        this.interceptor.uToken = uToken;
+        this.interceptor.uToken = data?.newToken ?? uToken;
     }
 
     /**
@@ -113,8 +115,9 @@ class Rilog implements IRilog {
      * Intercept custom user messages/data
      */
     @logMethods('IRilog')
-    saveData<T>(data: T, config: IRilogMessageConfig): void {
-        this.interceptor?.onSaveData(data, config);
+    logData<T>(data: T, config: IRilogMessageConfig): void {
+        const stackTrace = parseStackTrace(new Error().stack || '');
+        this.interceptor?.onLogData(data, config, stackTrace);
     }
 
     /**

@@ -9,7 +9,7 @@ export interface IRilog {
     init({ key, config }: TRilogInit): void;
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
-    saveData<T>(data: T, config: IRilogMessageConfig): void;
+    logData<T>(data: T, config: IRilogMessageConfig): void;
 }
 
 export type TRilogInit = {
@@ -25,10 +25,12 @@ export type TRilogInitConfig = Partial<{
     localStorage: string[]; // only this params will be stored
     disableFetchInterceptor: boolean; // disable fetch interception
     disableClickInterceptor: boolean; // disable click on button/links interception
+    disableConsoleInterceptor: boolean; // disable console.warn/console.error interception
     localServer: ILocalServerConfig; // for storing events to rilog local server. Needs to install rilog-local-logger.
     selfServer: ISelfServer; // for storing events to client backend. Pass this url to saveEvents method.
     onPushEvent: TOnPushEvent | null; // add push event callback
     onSaveEvents: TOnSaveEvents | null; // add save events callback
+    meta: TExternalInfoMeta; // environment metadata attached to every session
 }>;
 
 export interface ILocalServerConfig {
@@ -41,16 +43,25 @@ export interface ISelfServer {
     headers?: Record<string, string>;
 }
 
+export type TExternalInfoMeta = {
+    environment?: string;
+    branch?: string;
+    framework?: string;
+    platform?: string;
+};
+
 export type TInitRequest = {
     uToken: string;
     appId: string;
-    externalInfo?: object;
+    externalInfo?: {
+        userAgent: string;
+        meta?: TExternalInfoMeta;
+    };
 };
 
 export type TRilogState = {
     init: boolean; // app done init
     token: null | string; // token for user auth requests
-    salt: null | string; // salt for encoding push data
     recording: boolean; // enable/disable recording requests
     key: null | string; // app key for connection to back (to your current app),
     config: null | TRilogInitConfig; // config for requests

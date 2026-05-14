@@ -1,8 +1,10 @@
 import { saveEventsCustom, saveEventsToRilog } from '../api';
-import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, MAX_EVENTS_SIZE_MB, MAX_LOCAL_STORAGE_SIZE, RIL_EVENTS } from '../constants';
+import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, LONG_TIMER_LIMIT, MAX_EVENTS_SIZE_MB, MAX_LOCAL_STORAGE_SIZE, REQUEST_TIMEOUT_LIMIT, RIL_EVENTS } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
+import ConsoleInterceptor from '../feature/interceptors/console';
+import { IRilogConsoleInterceptor } from '../feature/interceptors/console/types';
 import MessageInterceptor from '../feature/interceptors/message';
 import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
 import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, TRilogInitConfig, TRilogState } from '../types';
@@ -11,7 +13,6 @@ import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptror, TSendEvents } from '../types/interceptor';
 import { IRilogTimer } from '../types/timer';
 import { generateUniqueId, getLocation } from '../utils';
-import { encrypt } from '../utils/encrypt';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
 import { isUrlIgnored } from '../utils/filters';
@@ -22,13 +23,14 @@ import { Queue } from '../types/queque';
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
     private messageInterceptor: IRilogMessageInterceptor;
+    private consoleInterceptor: IRilogConsoleInterceptor;
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
     private config: TRilogInitConfig | null = null;
     private requestsQueue: Queue<IRilogRequestTimed>; // record includes url as key and prepares request as value
+    private requestTimeouts: Map<IRilogRequestTimed, ReturnType<typeof setTimeout>> = new Map();
 
     public init: TRilogState['init'] = false;
-    public salt: TRilogState['salt'] = null;
     public token: TRilogState['token'] = null;
     public uToken: string | null = null;
 
@@ -38,16 +40,22 @@ class RilogInterceptor implements IRilogInterceptror {
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
         this.messageInterceptor = new MessageInterceptor();
+        this.consoleInterceptor = new ConsoleInterceptor();
         this.requestsQueue = new QueueArray();
 
         /**
          * The click interception can be disabled by user from config.
          */
         if (!config?.disableClickInterceptor) window.document.addEventListener('click', this.onClick.bind(this));
+
+        /**
+         * The console interception can be disabled by user from config.
+         */
+        if (!config?.disableConsoleInterceptor) this.consoleInterceptor.start(this.pushEvents.bind(this));
     }
 
-    onSaveData<T>(data: T, config: IRilogMessageConfig): void {
-        const messageEvent = this.messageInterceptor?.getMessageEvent(data, config);
+    onLogData<T>(data: T, config: IRilogMessageConfig, stackTrace?: string): void {
+        const messageEvent = this.messageInterceptor?.getMessageEvent(data, config, stackTrace);
 
         this.pushEvents(messageEvent);
     }
@@ -90,6 +98,15 @@ class RilogInterceptor implements IRilogInterceptror {
 
         // add prepared request to requests queue
         this.requestsQueue.enqueue(preparedRequest);
+
+        // start per-request timeout — max 5 min ceiling
+        const timeoutId = setTimeout(() => {
+            const removed = this.requestsQueue.dequeueItem(preparedRequest);
+            if (removed) this.recordTimedOutRequest(removed);
+            this.requestTimeouts.delete(preparedRequest);
+        }, REQUEST_TIMEOUT_LIMIT);
+
+        this.requestTimeouts.set(preparedRequest, timeoutId);
     }
 
     async onResponse(response: IRilogResponse | null) {
@@ -101,6 +118,13 @@ class RilogInterceptor implements IRilogInterceptror {
         const request = response && this.requestsQueue.dequeue('url', response.url);
 
         if (!request) return;
+
+        // cancel per-request timeout since response arrived
+        const timeoutId = this.requestTimeouts.get(request);
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            this.requestTimeouts.delete(request);
+        }
 
         const fullRequest: IRilogRequestItem = {
             _id: generateUniqueId(),
@@ -129,8 +153,8 @@ class RilogInterceptor implements IRilogInterceptror {
      * @private
      * @return {IRilogEventItem[]}
      */
-    private combineNotResolverRequests(events: IRilogEventItem[]): IRilogEventItem[] {
-        const notResolvedRequests = this.requestsQueue.dequeueNotResolved();
+    private combineNotResolverRequests(events: IRilogEventItem[], olderThanMs?: number): IRilogEventItem[] {
+        const notResolvedRequests = this.requestsQueue.dequeueNotResolved(olderThanMs);
 
         const fullNotResolvedRequests: IRilogEventItem[] | undefined = notResolvedRequests?.map((request) => ({
             _id: generateUniqueId(),
@@ -152,6 +176,25 @@ class RilogInterceptor implements IRilogInterceptror {
         if (fullNotResolvedRequests) return [...events, ...fullNotResolvedRequests];
 
         return [...events];
+    }
+
+    private async recordTimedOutRequest(request: IRilogRequestTimed) {
+        await this.pushEvents({
+            _id: generateUniqueId(),
+            type: ERilogEvent.REQUEST,
+            date: request.timestamp.toString(),
+            data: {
+                _id: generateUniqueId(),
+                request,
+                response: {
+                    data: "Interceptor haven't got any response. Timeout.",
+                    status: '',
+                    url: '',
+                    timestamp: Date.now(),
+                },
+            },
+            location: request.location,
+        });
     }
 
     private async pushEvents(data: IRilogEventItem) {
@@ -178,7 +221,7 @@ class RilogInterceptor implements IRilogInterceptror {
                 /**
                  * Combine existed events with not resolved requests.
                  */
-                const fullEventsArray = this.combineNotResolverRequests(updatedEventsArray);
+                const fullEventsArray = this.combineNotResolverRequests(updatedEventsArray, LONG_TIMER_LIMIT);
 
                 await this.saveEvents(fullEventsArray);
             } else {
@@ -192,7 +235,7 @@ class RilogInterceptor implements IRilogInterceptror {
                 if (!this.init) return;
 
                 this.timer.startLong(async () => {
-                    const fullEventsArray = this.combineNotResolverRequests(updatedEventsArray);
+                    const fullEventsArray = this.combineNotResolverRequests(updatedEventsArray, LONG_TIMER_LIMIT);
 
                     await this.saveEvents(fullEventsArray);
                 });
@@ -214,15 +257,7 @@ class RilogInterceptor implements IRilogInterceptror {
          */
         const sortedEvents = this.filter.sortEventsByDate(data);
 
-        /**
-         * Encrypt array of events for safety pushing it to server.
-         *
-         * If got salt - would be encrypted with CryptoJS.
-         * Without salt - would be converted to string (with JSON.stringify).
-         */
-        const encryptedEvents = encrypt(sortedEvents, this.salt);
-
-        const result = await this.sendEvents({ data: encryptedEvents, token: this.token || '', localServer: this.config?.localServer, selfServer: this?.config?.selfServer });
+        const result = await this.sendEvents({ data: JSON.stringify(sortedEvents), token: this.token || '', localServer: this.config?.localServer, selfServer: this?.config?.selfServer });
 
         this.timer.clearLong();
 

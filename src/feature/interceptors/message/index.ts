@@ -3,7 +3,7 @@ import { generateUniqueId, getLocation } from '../../../utils';
 import { IRilogMessageConfig, IRilogMessageData, IRilogMessageInterceptor } from './types';
 
 class MessageInterceptor implements IRilogMessageInterceptor {
-    public getMessageEvent<T>(data: T, config: IRilogMessageConfig | undefined) {
+    public getMessageEvent<T>(data: T, config: IRilogMessageConfig | undefined, stackTrace?: string) {
         const parsedData: string = typeof data === 'string' ? data : JSON.stringify(data);
 
         return {
@@ -14,6 +14,7 @@ class MessageInterceptor implements IRilogMessageInterceptor {
                 data: parsedData,
                 label: config?.label ?? '',
                 shouldBeParsed: typeof data !== 'string',
+                stackTrace,
             },
             location: getLocation(),
         };

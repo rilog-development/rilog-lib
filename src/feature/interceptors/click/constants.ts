@@ -1,1 +1,1 @@
-export const BUTTON_NODES = ['button', 'a', 'span', 'div', 'p'];
+export const BUTTON_NODES = ['button', 'a'];

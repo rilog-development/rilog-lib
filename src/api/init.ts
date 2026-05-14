@@ -14,7 +14,6 @@ const initRequest = async ({ data, config }: InitRequestParams): Promise<TInitRe
     if (config?.localServer || config?.selfServer)
         return Promise.resolve({
             access_token: '',
-            salt: '',
             recording: true,
         });
 

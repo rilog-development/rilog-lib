@@ -12,10 +12,12 @@ class ClickInterceptor implements IRilogClickInterceptor {
 
         if (id && SELF_SENSETIVE_CLICK_IDS.some((selfId) => id.includes(selfId))) return;
 
+        const targetElement = this.getParentButton(event.target as HTMLElement) || (event.target as HTMLElement);
+
         const elementInfo: IRilogClick = {
-            inner: this.getParentButton(event.target as HTMLElement)?.innerHTML || event.target.innerHTML,
-            nodeName: this.getParentButton(event.target as HTMLElement)?.nodeName || event.target.nodeName,
-            classNames: this.getParentButton(event.target as HTMLElement)?.className || event.target.className,
+            inner: targetElement.innerText?.trim() || '',
+            nodeName: targetElement.nodeName,
+            classNames: targetElement.className,
             id,
         };
 
@@ -29,16 +31,20 @@ class ClickInterceptor implements IRilogClickInterceptor {
     }
 
     /**
-     * Return HTMLElement if parent is button element. In case when click was on inner element (not button).
+     * Traverse up the DOM tree to find the nearest button/link ancestor.
+     * Handles cases where the click target is a deeply nested element (e.g. svg > path inside a button).
      * @param target
      * @returns
      */
-    private getParentButton(target: HTMLElement) {
-        if (BUTTON_NODES.includes(target.tagName.toLowerCase())) return target;
+    private getParentButton(target: HTMLElement): HTMLElement | undefined {
+        let current: HTMLElement | null = target;
 
-        if (!target.parentElement || !BUTTON_NODES.includes(target.parentElement.tagName.toLowerCase())) return;
+        while (current) {
+            if (BUTTON_NODES.includes(current.tagName.toLowerCase())) return current;
+            current = current.parentElement;
+        }
 
-        return target.parentElement;
+        return undefined;
     }
 }
 
