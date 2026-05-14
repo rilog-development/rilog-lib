@@ -51,7 +51,9 @@ const initFetchInterception = (onRequest: (data: TRilogPushRequest) => void, onR
                     onResponse({ status: response.status, data, url });
                 }
             })
-            .catch((err: unknown) => { console.warn('[Rilog-lib]', err); });
+            .catch((err: unknown) => {
+                console.warn('[Rilog-lib]', err);
+            });
 
         return response;
     };
