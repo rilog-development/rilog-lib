@@ -61,14 +61,14 @@ class RilogInterceptor implements IRilogInterceptror {
 
     onLogData<T>(data: T, config: IRilogMessageConfig, stackTrace?: string): void {
         const messageEvent = this.messageInterceptor?.getMessageEvent(data, config, stackTrace);
-        this.pushEvents(messageEvent).catch(() => {});
+        this.pushEvents(messageEvent).catch((err: unknown) => { console.warn('[Rilog-lib]', err); });
     }
 
     onClick(event: any) {
         if (this.config?.disableClickInterceptor) return;
         if (isButtonElement(event)) {
             const clickEvent = this.clickInterceptor?.getClickEvent(event);
-            clickEvent && this.pushEvents(clickEvent).catch(() => {});
+            clickEvent && this.pushEvents(clickEvent).catch((err: unknown) => { console.warn('[Rilog-lib]', err); });
         }
     }
 
@@ -95,7 +95,7 @@ class RilogInterceptor implements IRilogInterceptror {
 
         const timeoutId = setTimeout(() => {
             const removed = this.requestsQueue.dequeueItem(preparedRequest);
-            if (removed) this.recordTimedOutRequest(removed).catch(() => {});
+            if (removed) this.recordTimedOutRequest(removed).catch((err: unknown) => { console.warn('[Rilog-lib]', err); });
             this.requestTimeouts.delete(preparedRequest);
         }, REQUEST_TIMEOUT_LIMIT);
 
@@ -265,7 +265,7 @@ class RilogInterceptor implements IRilogInterceptror {
                 keepalive: true,
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.token}` },
                 body: JSON.stringify({ eventsData }),
-            }).catch(() => {});
+            }).catch((err: unknown) => { console.warn('[Rilog-lib]', err); });
         }
     }
 }

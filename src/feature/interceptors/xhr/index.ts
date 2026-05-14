@@ -15,18 +15,18 @@ const initXHRInterception = (onRequest: (data: TRilogXHRRequest) => void, onResp
         const originalSend = xhr.send.bind(xhr);
         const originalSetRequestHeader = xhr.setRequestHeader.bind(xhr);
 
-        (xhr as any).open = function (method: string, url: string | URL, async?: boolean, user?: string | null, password?: string | null) {
+        (xhr as any).open = (method: string, url: string | URL, async?: boolean, user?: string | null, password?: string | null) => {
             capturedMethod = method;
             capturedUrl = url instanceof URL ? url.href : String(url);
             return originalOpen(method, url as string, async ?? true, user, password);
         };
 
-        (xhr as any).setRequestHeader = function (name: string, value: string) {
+        (xhr as any).setRequestHeader = (name: string, value: string) => {
             capturedHeaders[name] = value;
             return originalSetRequestHeader(name, value);
         };
 
-        (xhr as any).send = function (body?: Document | XMLHttpRequestBodyInit | null) {
+        (xhr as any).send = (body?: Document | XMLHttpRequestBodyInit | null) => {
             const isSelfServerRequest = selfServer ? isUrlIgnored(capturedUrl, [selfServer.url]) : false;
             const isSensitive = isLibruarySensetiveRequest(capturedUrl) || isSelfServerRequest;
 
