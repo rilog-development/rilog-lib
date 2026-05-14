@@ -22,41 +22,34 @@ class ConsoleInterceptor implements IRilogConsoleInterceptor {
         if (this.isStarted) return;
         this.isStarted = true;
 
-        /**
-         * Intercept explicit console.warn() calls.
-         */
         console.warn = (...args: any[]) => {
             this.originalWarn(...args);
             onEvent(this.buildEvent(args, 'warn', 'console', ERilogEvent.CONSOLE_WARN));
         };
 
-        /**
-         * Intercept explicit console.error() calls.
-         */
         console.error = (...args: any[]) => {
             this.originalError(...args);
             onEvent(this.buildEvent(args, 'error', 'console', ERilogEvent.CONSOLE_ERROR));
         };
 
-        /**
-         * Intercept uncaught runtime JS exceptions:
-         * Uncaught TypeError, ReferenceError, etc.
-         */
-        window.onerror = (message, _source, _lineno, _colno, error) => {
+        window.onerror = (message, source, lineno, colno, error) => {
             const msg = typeof message === 'string' ? message : String(message);
             const stackTrace = error?.stack ? parseStackTrace(error.stack) : undefined;
 
-            onEvent(this.buildEventFromData({ level: 'error', message: msg, stackTrace, source: 'runtime' }, ERilogEvent.CONSOLE_ERROR));
+            onEvent(
+                this.buildEventFromData(
+                    { level: 'error', message: msg, stackTrace, source: 'runtime', errorFile: source ?? undefined, errorLine: lineno ?? undefined, errorColumn: colno ?? undefined },
+                    ERilogEvent.CONSOLE_ERROR,
+                ),
+            );
 
             if (typeof this.originalOnError === 'function') {
-                this.originalOnError(message, _source, _lineno, _colno, error);
+                this.originalOnError(message, source, lineno, colno, error);
             }
+
             return false;
         };
 
-        /**
-         * Intercept unhandled Promise rejections.
-         */
         this.onUnhandledRejection = (event: PromiseRejectionEvent) => {
             const reason = event.reason;
             const message = reason instanceof Error ? reason.message : `Unhandled rejection: ${String(reason)}`;
@@ -81,11 +74,19 @@ class ConsoleInterceptor implements IRilogConsoleInterceptor {
         this.isStarted = false;
     }
 
+    private serializeArg(arg: any): string {
+        if (typeof arg === 'string') return arg;
+        if (arg instanceof Error) return `${arg.message}\n${arg.stack ?? ''}`.trim();
+        try {
+            return JSON.stringify(arg);
+        } catch {
+            return String(arg);
+        }
+    }
+
     private buildEvent(args: any[], level: TConsoleLevel, source: IRilogConsoleData['source'], type: ERilogEvent): IRilogEventItem {
-        const message = args.map((arg) => (typeof arg === 'string' ? arg : JSON.stringify(arg))).join(' ');
-
+        const message = args.map((arg) => this.serializeArg(arg)).join(' ');
         const stackTrace = parseStackTrace(new Error().stack || '');
-
         return this.buildEventFromData({ level, message, stackTrace, source }, type);
     }
 

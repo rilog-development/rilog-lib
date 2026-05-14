@@ -1,7 +1,8 @@
 import { IRilogEventItem } from '../../../types/events';
 
 export interface IRilogInputInterceptor {
-    getInputEvent: (event: any, type: RilogInputEvent) => IRilogEventItem;
+    start(onEvent: (event: IRilogEventItem) => void): void;
+    stop(): void;
 }
 
 export enum RilogInputEvent {
@@ -14,4 +15,6 @@ export interface IRilogInput {
     nodeName: string;
     className: string;
     id: string;
+    name: string;
+    inputType: string;
 }

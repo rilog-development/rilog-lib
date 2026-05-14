@@ -5,11 +5,19 @@ import { TRilogPushRequest, TRilogPushResponse } from './requests';
 export type TOnPushEvent = (event: IRilogEventItem) => void;
 export type TOnSaveEvents = (event: IRilogEventItem[]) => void;
 
+export interface IAxiosLike {
+    interceptors: {
+        request: { use(onFulfilled: (config: any) => any): any };
+        response: { use(onFulfilled: (response: any) => any, onRejected: (error: any) => any): any };
+    };
+}
+
 export interface IRilog {
     init({ key, config }: TRilogInit): void;
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
     logData<T>(data: T, config: IRilogMessageConfig): void;
+    wrapAxios<T extends IAxiosLike>(instance: T): T;
 }
 
 export type TRilogInit = {
@@ -24,8 +32,10 @@ export type TRilogInitConfig = Partial<{
     headers: string[]; // write only this headers,
     localStorage: string[]; // only this params will be stored
     disableFetchInterceptor: boolean; // disable fetch interception
+    disableXHRInterceptor: boolean; // disable XMLHttpRequest interception
     disableClickInterceptor: boolean; // disable click on button/links interception
     disableConsoleInterceptor: boolean; // disable console.warn/console.error interception
+    disableInputInterceptor: boolean; // disable input focusout interception
     localServer: ILocalServerConfig; // for storing events to rilog local server. Needs to install rilog-local-logger.
     selfServer: ISelfServer; // for storing events to client backend. Pass this url to saveEvents method.
     onPushEvent: TOnPushEvent | null; // add push event callback

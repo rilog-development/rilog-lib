@@ -1,10 +1,12 @@
 import { saveEventsCustom, saveEventsToRilog } from '../api';
-import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, LONG_TIMER_LIMIT, REQUEST_TIMEOUT_LIMIT } from '../constants';
+import { BASE_URL, EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, LONG_TIMER_LIMIT, REQUEST_TIMEOUT_LIMIT } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
 import ConsoleInterceptor from '../feature/interceptors/console';
 import { IRilogConsoleInterceptor } from '../feature/interceptors/console/types';
+import InputInterceptor from '../feature/interceptors/input';
+import { IRilogInputInterceptor } from '../feature/interceptors/input/types';
 import MessageInterceptor from '../feature/interceptors/message';
 import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
 import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, TRilogInitConfig, TRilogState } from '../types';
@@ -23,6 +25,7 @@ import { Queue } from '../types/queque';
 
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
+    private inputInterceptor: IRilogInputInterceptor;
     private messageInterceptor: IRilogMessageInterceptor;
     private consoleInterceptor: IRilogConsoleInterceptor;
     private timer: IRilogTimer;
@@ -31,6 +34,7 @@ class RilogInterceptor implements IRilogInterceptror {
     private requestsQueue: Queue<IRilogRequestTimed>;
     private requestTimeouts: Map<IRilogRequestTimed, ReturnType<typeof setTimeout>> = new Map();
     private storage: IEventStorage;
+    private eventsCache: IRilogEventItem[] = [];
     private isSending = false;
 
     public init: TRilogState['init'] = false;
@@ -42,6 +46,7 @@ class RilogInterceptor implements IRilogInterceptror {
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
+        this.inputInterceptor = new InputInterceptor();
         this.messageInterceptor = new MessageInterceptor();
         this.consoleInterceptor = new ConsoleInterceptor();
         this.requestsQueue = new QueueArray();
@@ -49,6 +54,9 @@ class RilogInterceptor implements IRilogInterceptror {
 
         if (!config?.disableClickInterceptor) window.document.addEventListener('click', this.onClick.bind(this));
         if (!config?.disableConsoleInterceptor) this.consoleInterceptor.start(this.pushEvents.bind(this));
+        if (!config?.disableInputInterceptor) this.inputInterceptor.start(this.pushEvents.bind(this));
+
+        window.addEventListener('beforeunload', this.onBeforeUnload.bind(this));
     }
 
     onLogData<T>(data: T, config: IRilogMessageConfig, stackTrace?: string): void {
@@ -166,7 +174,13 @@ class RilogInterceptor implements IRilogInterceptror {
     private async pushEvents(data: IRilogEventItem) {
         if (this.config?.onPushEvent) this.config.onPushEvent(data);
 
-        await this.storage.push(data);
+        try {
+            await this.storage.push(data);
+        } catch {
+            return;
+        }
+
+        this.eventsCache.push(data);
 
         const count = await this.storage.count();
 
@@ -200,6 +214,8 @@ class RilogInterceptor implements IRilogInterceptror {
 
             if (result?.result?.toLowerCase() === 'success') {
                 await this.storage.clearByIds(idsToDelete);
+                const deletedIds = new Set(idsToDelete);
+                this.eventsCache = this.eventsCache.filter((e) => !deletedIds.has(e._id));
             }
         } finally {
             this.isSending = false;
@@ -216,6 +232,35 @@ class RilogInterceptor implements IRilogInterceptror {
         }
 
         return saveEventsToRilog(data, token);
+    }
+
+    private onBeforeUnload() {
+        if (!this.eventsCache.length || !this.init) return;
+
+        const sorted = this.filter.sortEventsByDate([...this.eventsCache]);
+        const eventsData = JSON.stringify(sorted);
+
+        if (this.config?.localServer) {
+            const payload = new Blob([JSON.stringify({ events: eventsData, uToken: this.uToken, ...this.config.localServer })], { type: 'application/json' });
+            navigator.sendBeacon && navigator.sendBeacon(`${LOCAL_BASE_URL}/api/events/save`, payload);
+            return;
+        }
+
+        if (this.config?.selfServer) {
+            const payload = new Blob([JSON.stringify({ events: eventsData })], { type: 'application/json' });
+            navigator.sendBeacon && navigator.sendBeacon(this.config.selfServer.url, payload);
+            return;
+        }
+
+        // Rilog cloud — fetch with keepalive supports Authorization header
+        if (this.token) {
+            fetch(`${BASE_URL}/connection/send`, {
+                method: 'POST',
+                keepalive: true,
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.token}` },
+                body: JSON.stringify({ eventsData }),
+            }).catch(() => {});
+        }
     }
 }
 
