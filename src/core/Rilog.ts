@@ -11,7 +11,7 @@ import { IRilogMessageConfig } from '../feature/interceptors/message/types';
 import { IAxiosLike, IRilog, TRilogExtensions, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken, updateUserUniqToken } from '../utils';
-import { getExternalInfo } from '../utils/browser';
+import { getDeviceInfo, getExternalInfo } from '../utils/browser';
 import { parseStackTrace } from '../utils/transforms';
 import { logMethods } from '../utils/logger';
 import RilogInterceptor from './interceptor';
@@ -47,8 +47,9 @@ class Rilog implements IRilog {
         key && this.updateState({ key });
 
         const externalInfo = getExternalInfo(config?.meta);
+        const deviceInfo = getDeviceInfo();
 
-        const data = await initRequest({ data: { uToken, appId: key ?? '', externalInfo }, config });
+        const data = await initRequest({ data: { uToken, appId: key ?? '', externalInfo, deviceInfo }, config });
 
         data?.newToken && updateUserUniqToken(data.newToken);
 

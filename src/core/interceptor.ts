@@ -15,7 +15,8 @@ import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptror, TSendEvents } from '../types/interceptor';
 import { IEventStorage } from '../types/storage';
 import { IRilogTimer } from '../types/timer';
-import { generateUniqueId, getLocation } from '../utils';
+import { generateUniqueId, getDeviceInfo, getLocation } from '../utils';
+import { TDeviceInfo } from '../types/core';
 import IDBStorage from '../utils/IDBStorage';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
@@ -36,6 +37,7 @@ class RilogInterceptor implements IRilogInterceptror {
     private storage: IEventStorage;
     private eventsCache: IRilogEventItem[] = [];
     private isSending = false;
+    private deviceInfo: TDeviceInfo;
 
     public init: TRilogState['init'] = false;
     public token: TRilogState['token'] = null;
@@ -51,6 +53,7 @@ class RilogInterceptor implements IRilogInterceptror {
         this.consoleInterceptor = new ConsoleInterceptor();
         this.requestsQueue = new QueueArray();
         this.storage = new IDBStorage();
+        this.deviceInfo = getDeviceInfo();
 
         if (!config?.disableClickInterceptor) window.document.addEventListener('click', this.onClick.bind(this));
         if (!config?.disableConsoleInterceptor) this.consoleInterceptor.start(this.pushEvents.bind(this));
@@ -238,11 +241,11 @@ class RilogInterceptor implements IRilogInterceptror {
 
     private async sendEvents({ data, token, localServer, selfServer }: TSendEvents) {
         if (localServer) {
-            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.uToken, ...this.config?.localServer }), url: `${LOCAL_BASE_URL}/api/events/save` });
+            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.uToken, deviceInfo: this.deviceInfo, ...this.config?.localServer }), url: `${LOCAL_BASE_URL}/api/events/save` });
         }
 
         if (selfServer) {
-            return saveEventsCustom({ data: JSON.stringify({ events: data }), url: selfServer.url, headers: selfServer.headers });
+            return saveEventsCustom({ data: JSON.stringify({ events: data, deviceInfo: this.deviceInfo }), url: selfServer.url, headers: selfServer.headers });
         }
 
         return saveEventsToRilog(data, token);
@@ -255,13 +258,13 @@ class RilogInterceptor implements IRilogInterceptror {
         const eventsData = JSON.stringify(sorted);
 
         if (this.config?.localServer) {
-            const payload = new Blob([JSON.stringify({ events: eventsData, uToken: this.uToken, ...this.config.localServer })], { type: 'application/json' });
+            const payload = new Blob([JSON.stringify({ events: eventsData, uToken: this.uToken, deviceInfo: this.deviceInfo, ...this.config.localServer })], { type: 'application/json' });
             navigator.sendBeacon && navigator.sendBeacon(`${LOCAL_BASE_URL}/api/events/save`, payload);
             return;
         }
 
         if (this.config?.selfServer) {
-            const payload = new Blob([JSON.stringify({ events: eventsData })], { type: 'application/json' });
+            const payload = new Blob([JSON.stringify({ events: eventsData, deviceInfo: this.deviceInfo })], { type: 'application/json' });
             navigator.sendBeacon && navigator.sendBeacon(this.config.selfServer.url, payload);
             return;
         }

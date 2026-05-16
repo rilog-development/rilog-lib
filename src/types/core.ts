@@ -60,6 +60,20 @@ export type TExternalInfoMeta = {
     platform?: string;
 };
 
+export type TDeviceInfo = {
+    userAgent: string;
+    screenWidth: number;
+    screenHeight: number;
+    viewportWidth: number;
+    viewportHeight: number;
+    devicePixelRatio: number;
+    colorDepth: number;
+    language: string;
+    hardwareConcurrency: number | null;
+    deviceType: 'mobile' | 'tablet' | 'desktop';
+    connectionType: string | null;
+};
+
 export type TInitRequest = {
     uToken: string;
     appId: string;
@@ -67,6 +81,7 @@ export type TInitRequest = {
         userAgent: string;
         meta?: TExternalInfoMeta;
     };
+    deviceInfo?: TDeviceInfo;
 };
 
 export type TRilogState = {

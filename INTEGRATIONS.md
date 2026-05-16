@@ -16,6 +16,7 @@ This document describes changes made to `rilog-lib` that require corresponding u
 | Last Gasp | `sendBeacon` / `fetch keepalive` on page close | Backend (Content-Type) |
 | React ErrorBoundary | DEBUG_MESSAGE with label `FATAL_REACT_ERROR` | Frontend (display) |
 | `salt` field | Removed from init response, no longer sent by lib | Backend (cleanup) |
+| **Device info** | `deviceInfo` added to `/connection/init` body and to local/selfServer events payload | **Backend + rilog-local-server** |
 
 ---
 
@@ -241,6 +242,67 @@ Make sure the event type filter/legend includes all current types:
 | 3 | CONSOLE_ERROR | — |
 | 4 | DEBUG_MESSAGE | — |
 | 5 | CONSOLE_WARN | — |
+
+---
+
+---
+
+### 6. Device info — new field on `/connection/init` and events payload
+
+The lib now collects device information once on `init()` and attaches it to every outbound payload.
+
+**For Rilog cloud — `/connection/init` body now includes `deviceInfo`:**
+
+```ts
+// POST /connection/init
+{
+    uToken: string;
+    appId: string;
+    externalInfo?: { userAgent: string; meta?: TExternalInfoMeta };
+    deviceInfo?: TDeviceInfo;   // NEW
+}
+```
+
+**For localServer / selfServer — `deviceInfo` is included in the events save payload:**
+
+```ts
+// POST /api/events/save  (local/self server)
+{
+    events: string;           // JSON.stringify(IRilogEventItem[])
+    uToken: string;
+    appName?: string;         // localServer only
+    params?: Record<string, string>;  // localServer only
+    deviceInfo?: TDeviceInfo; // NEW
+}
+```
+
+**`TDeviceInfo` shape:**
+
+```ts
+type TDeviceInfo = {
+    userAgent: string;
+    screenWidth: number;        // screen.width
+    screenHeight: number;       // screen.height
+    viewportWidth: number;      // window.innerWidth
+    viewportHeight: number;     // window.innerHeight
+    devicePixelRatio: number;   // window.devicePixelRatio
+    colorDepth: number;         // screen.colorDepth
+    language: string;           // navigator.language
+    hardwareConcurrency: number | null;  // CPU cores, null if unavailable
+    deviceType: 'mobile' | 'tablet' | 'desktop';  // derived from UA + screenWidth
+    connectionType: string | null;  // Network Info API effectiveType, null if unavailable
+};
+```
+
+**What to change on backend:**
+- Add `deviceInfo` column/field to the session or init record (optional — old clients won't send it)
+- Index `deviceType` for filtering sessions by device category
+- `connectionType` values: `"slow-2g"`, `"2g"`, `"3g"`, `"4g"`, or `null`
+
+**What to change on rilog-local-server:**
+- Accept and store `deviceInfo` from the request body alongside `events`, `uToken`, `appName`
+- Include it in the `LogEntry` written to file
+- See the dedicated prompt section below
 
 ---
 
