@@ -241,7 +241,10 @@ class RilogInterceptor implements IRilogInterceptror {
 
     private async sendEvents({ data, token, localServer, selfServer }: TSendEvents) {
         if (localServer) {
-            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.uToken, deviceInfo: this.deviceInfo, ...this.config?.localServer }), url: `${LOCAL_BASE_URL}/api/events/save` });
+            return saveEventsCustom({
+                data: JSON.stringify({ events: data, uToken: this.uToken, deviceInfo: this.deviceInfo, ...this.config?.localServer }),
+                url: `${LOCAL_BASE_URL}/api/events/save`,
+            });
         }
 
         if (selfServer) {
