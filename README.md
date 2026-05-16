@@ -104,6 +104,7 @@ Open the [Rilog dashboard](http://www.rilog.online) — HTTP requests, errors, c
 -   [React ErrorBoundary](#react-errorboundary)
 -   [Debug messages](#debug-messages)
 -   [Storing to your server](#your-server)
+-   [Local server (rilog-local-server)](#local-server)
 -   [Config](#config)
 -   [Meta](#meta)
 -   [Examples](#examples)
@@ -471,6 +472,162 @@ Events are cleared from storage only after receiving a successful response.
 
 ---
 
+## Local server
+
+---
+
+`rilog-local-server` is a lightweight companion server that saves captured events to structured log files on your disk — no cloud, no database, no auth required. Ideal for local debugging and development.
+
+### 1. Start rilog-local-server
+
+```bash
+git clone https://github.com/rilog-development/rilog-local-server.git
+cd rilog-local-server
+npm install
+npm run start
+```
+
+Server starts on **http://localhost:3030**. Start it before your frontend dev server.
+
+> See the [rilog-local-server repository](https://github.com/rilog-development/rilog-local-server) for full server configuration (port, log format, CORS, file rotation, etc.).
+
+### 2. Configure rilog-lib
+
+Pass the `localServer` config to `rilog.init()`. No `key` is required — events are stored locally and never sent to the Rilog cloud.
+
+**Minimal setup:**
+
+```javascript
+import rilog from '@rilog-development/rilog-lib';
+
+rilog.init({
+    config: {
+        localServer: {
+            appName: 'my-app',
+        },
+    },
+});
+```
+
+**With metadata attached to every batch:**
+
+```javascript
+rilog.init({
+    config: {
+        localServer: {
+            appName: 'my-app',
+            params: {
+                environment: 'development',
+                branch: 'feature/login',
+                version: '1.2.0',
+            },
+        },
+    },
+});
+```
+
+### localServer config
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `appName` | `string` | Yes | Identifies the app. Events are saved to `logs/<appName>/`. |
+| `params` | `Record<string, string>` | No | Arbitrary metadata attached to every log batch. Useful for environment, branch, build version, etc. |
+
+### Framework examples
+
+**React (Vite / CRA)**
+
+```typescript
+// src/rilog.ts — initialize before anything else
+import rilog from '@rilog-development/rilog-lib';
+
+rilog.init({
+    config: {
+        localServer: {
+            appName: 'my-react-app',
+            params: { env: process.env.NODE_ENV ?? 'development' },
+        },
+    },
+});
+
+export default rilog;
+```
+
+```typescript
+// src/main.tsx
+import './rilog';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+
+createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+        <App />
+    </StrictMode>,
+);
+```
+
+**Next.js (App Router)**
+
+```typescript
+// app/providers.tsx
+'use client';
+import { useEffect } from 'react';
+import rilog from '@rilog-development/rilog-lib';
+
+export function RilogProvider({ children }: { children: React.ReactNode }) {
+    useEffect(() => {
+        rilog.init({
+            config: {
+                localServer: {
+                    appName: 'my-next-app',
+                    params: { env: process.env.NODE_ENV },
+                },
+            },
+        });
+    }, []);
+    return <>{children}</>;
+}
+```
+
+**Vue 3**
+
+```typescript
+// src/plugins/rilog.ts
+import type { App } from 'vue';
+import rilog from '@rilog-development/rilog-lib';
+
+export function installRilog(app: App) {
+    rilog.init({
+        config: {
+            localServer: {
+                appName: 'my-vue-app',
+                params: { env: import.meta.env.MODE },
+            },
+        },
+    });
+}
+```
+
+### Log files
+
+Events are written to date-stamped files under the `logs/` directory of the running server:
+
+```
+logs/
+  my-app/
+    2025-05-15.log.ndjson    ← one batch per line (default format)
+    2025-05-16.log.ndjson
+```
+
+Watch events arrive in real time:
+
+```bash
+tail -f logs/my-app/2025-05-16.log.ndjson
+```
+
+---
+
 ## Config
 
 ---
@@ -628,6 +785,25 @@ rilog.init({
         localStorage: ['token', 'userId'],
     },
 });
+```
+
+### Local server (development mode)
+
+```javascript
+rilog.init({
+    config: {
+        localServer: {
+            appName: 'my-app',
+            params: {
+                environment: process.env.NODE_ENV,
+                branch: 'main',
+            },
+        },
+        disableXHRInterceptor: true,
+    },
+});
+
+rilog.wrapAxios(axios);
 ```
 
 ### Event callbacks
