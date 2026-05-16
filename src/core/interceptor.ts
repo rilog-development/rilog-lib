@@ -1,37 +1,46 @@
 import { saveEventsCustom, saveEventsToRilog } from '../api';
-import { EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, LONG_TIMER_LIMIT, MAX_EVENTS_SIZE_MB, MAX_LOCAL_STORAGE_SIZE, REQUEST_TIMEOUT_LIMIT, RIL_EVENTS } from '../constants';
+import { BASE_URL, DEFAULT_LOCAL_URL, EVENTS_ARRAY_LIMIT, LONG_TIMER_LIMIT, REQUEST_TIMEOUT_LIMIT } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
 import ConsoleInterceptor from '../feature/interceptors/console';
 import { IRilogConsoleInterceptor } from '../feature/interceptors/console/types';
+import InputInterceptor from '../feature/interceptors/input';
+import { IRilogInputInterceptor } from '../feature/interceptors/input/types';
 import MessageInterceptor from '../feature/interceptors/message';
 import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
 import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, TRilogInitConfig, TRilogState } from '../types';
 import { ERilogEvent, IRilogEventItem } from '../types/events';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptror, TSendEvents } from '../types/interceptor';
+import { IEventStorage } from '../types/storage';
 import { IRilogTimer } from '../types/timer';
-import { generateUniqueId, getLocation } from '../utils';
+import { generateUniqueId, getDeviceInfo, getLocation } from '../utils';
+import { TDeviceInfo } from '../types/core';
+import IDBStorage from '../utils/IDBStorage';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';
 import { isUrlIgnored } from '../utils/filters';
-import { calculateLocalStorageSizeInMB, calculateStringSizeInMB } from '../utils/storage';
 import QueueArray from '../utils/queque';
 import { Queue } from '../types/queque';
 
 class RilogInterceptor implements IRilogInterceptror {
     private clickInterceptor: IRilogClickInterceptor;
+    private inputInterceptor: IRilogInputInterceptor;
     private messageInterceptor: IRilogMessageInterceptor;
     private consoleInterceptor: IRilogConsoleInterceptor;
     private timer: IRilogTimer;
     private filter: IRilogFilterRequest;
     private config: TRilogInitConfig | null = null;
-    private requestsQueue: Queue<IRilogRequestTimed>; // record includes url as key and prepares request as value
+    private requestsQueue: Queue<IRilogRequestTimed>;
     private requestTimeouts: Map<IRilogRequestTimed, ReturnType<typeof setTimeout>> = new Map();
+    private storage: IEventStorage;
+    private eventsCache: IRilogEventItem[] = [];
+    private isSending = false;
+    private deviceInfo: TDeviceInfo;
 
     public init: TRilogState['init'] = false;
-    public token: TRilogState['token'] = null;
+    public token: string | null = null;
     public uToken: string | null = null;
 
     constructor(config: TRilogInitConfig | null) {
@@ -39,34 +48,35 @@ class RilogInterceptor implements IRilogInterceptror {
         this.timer = new RilogTimer();
         this.filter = new RilogFilterRequest(config);
         this.clickInterceptor = new ClickInterceptor();
+        this.inputInterceptor = new InputInterceptor();
         this.messageInterceptor = new MessageInterceptor();
         this.consoleInterceptor = new ConsoleInterceptor();
         this.requestsQueue = new QueueArray();
+        this.storage = new IDBStorage();
+        this.deviceInfo = getDeviceInfo();
 
-        /**
-         * The click interception can be disabled by user from config.
-         */
         if (!config?.disableClickInterceptor) window.document.addEventListener('click', this.onClick.bind(this));
-
-        /**
-         * The console interception can be disabled by user from config.
-         */
         if (!config?.disableConsoleInterceptor) this.consoleInterceptor.start(this.pushEvents.bind(this));
+        if (!config?.disableInputInterceptor) this.inputInterceptor.start(this.pushEvents.bind(this));
+
+        window.addEventListener('beforeunload', this.onBeforeUnload.bind(this));
     }
 
     onLogData<T>(data: T, config: IRilogMessageConfig, stackTrace?: string): void {
         const messageEvent = this.messageInterceptor?.getMessageEvent(data, config, stackTrace);
-
-        this.pushEvents(messageEvent);
+        this.pushEvents(messageEvent).catch((err: unknown) => {
+            console.warn('[Rilog-lib]', err);
+        });
     }
 
     onClick(event: any) {
         if (this.config?.disableClickInterceptor) return;
-
         if (isButtonElement(event)) {
             const clickEvent = this.clickInterceptor?.getClickEvent(event);
-
-            clickEvent && this.pushEvents(clickEvent);
+            clickEvent &&
+                this.pushEvents(clickEvent).catch((err: unknown) => {
+                    console.warn('[Rilog-lib]', err);
+                });
         }
     }
 
@@ -75,7 +85,6 @@ class RilogInterceptor implements IRilogInterceptror {
             ? {
                   ...request,
                   timestamp: Date.now(),
-                  // should be defined in request time
                   location: getLocation(),
                   localStorage: JSON.stringify(localStorage),
               }
@@ -83,26 +92,21 @@ class RilogInterceptor implements IRilogInterceptror {
 
         if (!timedRequest) return;
 
-        /**
-         * Check if request was to self server and skip onRequest if true (this req shouldn't be logged).
-         */
         const isSelfServerRequest = this.config?.selfServer ? isUrlIgnored(timedRequest.url, [this.config?.selfServer.url]) : false;
-
         if (isSelfServerRequest) return;
-
         if (this.filter.isLibruaryRequest(timedRequest) || this.filter.isIgnoredRequest(timedRequest)) return;
 
         const preparedRequest = this.filter.getRequests(timedRequest) || null;
-
         if (!preparedRequest) return;
 
-        // add prepared request to requests queue
         this.requestsQueue.enqueue(preparedRequest);
 
-        // start per-request timeout — max 5 min ceiling
         const timeoutId = setTimeout(() => {
             const removed = this.requestsQueue.dequeueItem(preparedRequest);
-            if (removed) this.recordTimedOutRequest(removed);
+            if (removed)
+                this.recordTimedOutRequest(removed).catch((err: unknown) => {
+                    console.warn('[Rilog-lib]', err);
+                });
             this.requestTimeouts.delete(preparedRequest);
         }, REQUEST_TIMEOUT_LIMIT);
 
@@ -110,16 +114,9 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     async onResponse(response: IRilogResponse | null) {
-        /**
-         * Can't prepare any response without request.
-         * Compare request and response using url.
-         */
-
         const request = response && this.requestsQueue.dequeue('url', response.url);
-
         if (!request) return;
 
-        // cancel per-request timeout since response arrived
         const timeoutId = this.requestTimeouts.get(request);
         if (timeoutId) {
             clearTimeout(timeoutId);
@@ -132,9 +129,6 @@ class RilogInterceptor implements IRilogInterceptror {
             response: { ...response, timestamp: Date.now() },
         };
 
-        /**
-         * Clear long timer which was started after pushing request data to server.
-         */
         this.timer.clearLong();
 
         await this.pushEvents({
@@ -146,13 +140,6 @@ class RilogInterceptor implements IRilogInterceptror {
         });
     }
 
-    /**
-     * Got not resolved (without response) requests from queue, transform it to events and combine with another array of events.
-     * Also clear the request queue.
-     * @param events {IRilogEventItem[]}
-     * @private
-     * @return {IRilogEventItem[]}
-     */
     private combineNotResolverRequests(events: IRilogEventItem[], olderThanMs?: number): IRilogEventItem[] {
         const notResolvedRequests = this.requestsQueue.dequeueNotResolved(olderThanMs);
 
@@ -173,9 +160,7 @@ class RilogInterceptor implements IRilogInterceptror {
             location: request.location,
         }));
 
-        if (fullNotResolvedRequests) return [...events, ...fullNotResolvedRequests];
-
-        return [...events];
+        return fullNotResolvedRequests ? [...events, ...fullNotResolvedRequests] : [...events];
     }
 
     private async recordTimedOutRequest(request: IRilogRequestTimed) {
@@ -198,115 +183,108 @@ class RilogInterceptor implements IRilogInterceptror {
     }
 
     private async pushEvents(data: IRilogEventItem) {
-        /**
-         * User can intercept push events to array using callback from config.
-         */
-        if (this.config?.onPushEvent) this.config?.onPushEvent(data);
+        if (this.config?.onPushEvent) this.config.onPushEvent(data);
 
-        const events: string | null = localStorage.getItem(RIL_EVENTS);
+        try {
+            await this.storage.push(data);
+        } catch {
+            return;
+        }
 
-        const eventsArray: IRilogEventItem[] = events ? JSON.parse(events) : [];
+        this.eventsCache.push(data);
 
-        if (eventsArray) {
-            const updatedEventsArray = [...eventsArray, data];
+        const count = await this.storage.count();
 
-            /**
-             * Should send events in case when local storage is full.
-             */
-            const shouldSendEvents = await this.shouldSendEvents(JSON.stringify(data), JSON.stringify(eventsArray));
+        if (count > EVENTS_ARRAY_LIMIT && this.requestsQueue.isEmpty()) {
+            const stored = await this.storage.getAll();
+            const fullEvents = this.combineNotResolverRequests(stored, LONG_TIMER_LIMIT);
+            await this.saveEvents(
+                fullEvents,
+                stored.map((e) => e._id),
+            );
+            return;
+        }
 
-            if (updatedEventsArray.length > EVENTS_ARRAY_LIMIT && this.requestsQueue.isEmpty()) {
-                await this.saveEvents(updatedEventsArray);
-            } else if (shouldSendEvents) {
-                /**
-                 * Combine existed events with not resolved requests.
-                 */
-                const fullEventsArray = this.combineNotResolverRequests(updatedEventsArray, LONG_TIMER_LIMIT);
+        if (!this.init) return;
 
-                await this.saveEvents(fullEventsArray);
-            } else {
-                localStorage.removeItem(RIL_EVENTS);
-                localStorage.setItem(RIL_EVENTS, JSON.stringify(updatedEventsArray));
+        this.timer.startLong(async () => {
+            const stored = await this.storage.getAll();
+            const fullEvents = this.combineNotResolverRequests(stored, LONG_TIMER_LIMIT);
+            await this.saveEvents(
+                fullEvents,
+                stored.map((e) => e._id),
+            );
+        });
+    }
 
-                /**
-                 * Leave function if lib isn't init
-                 * (Lib got salt and token from backend on init request)
-                 */
-                if (!this.init) return;
+    private async saveEvents(data: IRilogEventItem[], idsToDelete: string[]) {
+        if (this.isSending) return;
+        this.isSending = true;
 
-                this.timer.startLong(async () => {
-                    const fullEventsArray = this.combineNotResolverRequests(updatedEventsArray, LONG_TIMER_LIMIT);
+        try {
+            if (this.config?.onSaveEvents) this.config.onSaveEvents(data);
 
-                    await this.saveEvents(fullEventsArray);
-                });
+            const sortedEvents = this.filter.sortEventsByDate(data);
+            const result = await this.sendEvents({ data: JSON.stringify(sortedEvents), token: this.token || '', localServer: this.config?.localServer, selfServer: this?.config?.selfServer });
+
+            this.timer.clearLong();
+
+            if (result?.result?.toLowerCase() === 'success') {
+                await this.storage.clearByIds(idsToDelete);
+                const deletedIds = new Set(idsToDelete);
+                this.eventsCache = this.eventsCache.filter((e) => !deletedIds.has(e._id));
             }
-        } else {
-            localStorage.setItem(RIL_EVENTS, JSON.stringify([data]));
+        } finally {
+            this.isSending = false;
         }
     }
 
-    private async saveEvents(data: IRilogEventItem[]) {
-        /**
-         * Users can intercept events using callback from config.
-         */
-        if (this.config?.onSaveEvents) this.config?.onSaveEvents(data);
-
-        /**
-         * Sort events by timestamp.
-         * For case when request was initiated earlier than click event happened.
-         */
-        const sortedEvents = this.filter.sortEventsByDate(data);
-
-        const result = await this.sendEvents({ data: JSON.stringify(sortedEvents), token: this.token || '', localServer: this.config?.localServer, selfServer: this?.config?.selfServer });
-
-        this.timer.clearLong();
-
-        if (result?.result?.toLowerCase() === 'success') {
-            localStorage.removeItem(RIL_EVENTS);
-        }
-    }
-
-    /**
-     * Define the send events methods using some config params.
-     * @param {TSendEvents}
-     * @returns {Promise}
-     */
     private async sendEvents({ data, token, localServer, selfServer }: TSendEvents) {
-        /**
-         * The priority method for saving is local :)
-         */
         if (localServer) {
-            return saveEventsCustom({ data: JSON.stringify({ events: data, uToken: this.uToken, ...this.config?.localServer }), url: `${LOCAL_BASE_URL}/api/events/save` });
+            const { url: localUrl, ...localServerData } = localServer;
+            return saveEventsCustom({
+                data: JSON.stringify({ events: data, uToken: this.uToken, deviceInfo: this.deviceInfo, ...localServerData }),
+                url: `${localUrl || DEFAULT_LOCAL_URL}/api/events/save`,
+            });
         }
 
         if (selfServer) {
-            return saveEventsCustom({ data: JSON.stringify({ events: data }), url: selfServer.url, headers: selfServer.headers });
+            return saveEventsCustom({ data: JSON.stringify({ events: data, deviceInfo: this.deviceInfo }), url: selfServer.url, headers: selfServer.headers });
         }
 
         return saveEventsToRilog(data, token);
     }
 
-    /**
-     * Check the need to send events to backend storage.
-     * @param event {string} - parsed to string created rilog event
-     * @param events {string} - parsed to string array of rilog events
-     * @private
-     * @return {boolean}
-     */
-    private async shouldSendEvents(event: string, events: string) {
-        const eventSize = calculateStringSizeInMB(event);
+    private onBeforeUnload() {
+        if (!this.eventsCache.length || !this.init) return;
 
-        const localStorageSize = await calculateLocalStorageSizeInMB();
+        const sorted = this.filter.sortEventsByDate([...this.eventsCache]);
+        const eventsData = JSON.stringify(sorted);
 
-        const freeLocalStorageSpace = MAX_LOCAL_STORAGE_SIZE - localStorageSize;
+        if (this.config?.localServer) {
+            const { url: localUrl, ...localServerData } = this.config.localServer;
+            const payload = new Blob([JSON.stringify({ events: eventsData, uToken: this.uToken, deviceInfo: this.deviceInfo, ...localServerData })], { type: 'application/json' });
+            navigator.sendBeacon && navigator.sendBeacon(`${localUrl || DEFAULT_LOCAL_URL}/api/events/save`, payload);
+            return;
+        }
 
-        if (eventSize >= freeLocalStorageSpace) return true;
+        if (this.config?.selfServer) {
+            const payload = new Blob([JSON.stringify({ events: eventsData, deviceInfo: this.deviceInfo })], { type: 'application/json' });
+            navigator.sendBeacon && navigator.sendBeacon(this.config.selfServer.url, payload);
+            return;
+        }
 
-        const localStorageEventsSize = calculateStringSizeInMB(events);
-
-        if (localStorageEventsSize + eventSize > MAX_EVENTS_SIZE_MB) return true;
-
-        return false;
+        // Rilog cloud — fetch with keepalive supports Authorization header
+        if (this.token) {
+            fetch(`${BASE_URL}/connection/send`, {
+                method: 'POST',
+                keepalive: true,
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.token}` },
+                body: JSON.stringify({ eventsData }),
+            }).catch((err: unknown) => {
+                console.warn('[Rilog-lib]', err);
+            });
+        }
     }
 }
 

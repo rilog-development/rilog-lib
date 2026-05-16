@@ -13,7 +13,7 @@ const parseStackTrace = (stack: string): string => {
 
 const getQueryParamsFromUrl = (url: string) => {
     const dividerIndex = url.indexOf('?');
-    const queryString = dividerIndex !== -1 && dividerIndex > url.length ? url.slice(dividerIndex + 1, url.length) : null;
+    const queryString = dividerIndex !== -1 && dividerIndex < url.length - 1 ? url.slice(dividerIndex + 1) : null;
 
     if (!queryString) return null;
 
