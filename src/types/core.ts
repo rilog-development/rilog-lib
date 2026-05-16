@@ -13,17 +13,12 @@ export interface IAxiosLike {
 }
 
 export interface IRilog {
-    init({ key, config }: TRilogInit): void;
+    init(config?: TRilogInitConfig): void;
     interceptRequestAxios(data: TRilogPushRequest): void;
     interceptResponseAxios(data: TRilogPushResponse): void;
     logData<T>(data: T, config: IRilogMessageConfig): void;
     wrapAxios<T extends IAxiosLike>(instance: T): T;
 }
-
-export type TRilogInit = {
-    key?: string; // app key, need if client use rilog backend app
-    config?: TRilogInitConfig;
-};
 
 export type TRilogInitConfig = Partial<{
     ignoredRequests: string[]; // ignore this requests (do not save this)
@@ -38,6 +33,7 @@ export type TRilogInitConfig = Partial<{
     disableInputInterceptor: boolean; // disable input focusout interception
     localServer: ILocalServerConfig; // for storing events to rilog local server. Needs to install rilog-local-logger.
     selfServer: ISelfServer; // for storing events to client backend. Pass this url to saveEvents method.
+    deployServer: IDeployServerConfig; // for storing events to Rilog cloud backend.
     onPushEvent: TOnPushEvent | null; // add push event callback
     onSaveEvents: TOnSaveEvents | null; // add save events callback
     meta: TExternalInfoMeta; // environment metadata attached to every session
@@ -45,13 +41,17 @@ export type TRilogInitConfig = Partial<{
 
 export interface ILocalServerConfig {
     appName: string; // app name would be used in local saving for creating app logs folder.
-    url?: string; // base URL of the running rilog-local-server instance, defaults to http://localhost:3030
+    url: string; // base URL of the running rilog-local-server instance, e.g. http://localhost:3030
     params?: Record<string, string>; // additional params for storing in the header of logs files.
 }
 
 export interface ISelfServer {
-    url: string; // url should include "events/save" in the url
+    url: string; // full URL of the POST endpoint on your backend (any path you define)
     headers?: Record<string, string>;
+}
+
+export interface IDeployServerConfig {
+    key: string; // app key for Rilog cloud backend
 }
 
 export type TExternalInfoMeta = {
@@ -87,9 +87,8 @@ export type TInitRequest = {
 
 export type TRilogState = {
     init: boolean; // app done init
-    token: null | string; // token for user auth requests
+    token: null | string; // access token returned from deploy server init
     recording: boolean; // enable/disable recording requests
-    key: null | string; // app key for connection to back (to your current app),
     config: null | TRilogInitConfig; // config for requests
 };
 

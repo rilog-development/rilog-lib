@@ -11,7 +11,7 @@ const initRequest = async ({ data, config }: InitRequestParams): Promise<TInitRe
      * Do not make an init request if enabled local saving events or self saving.
      */
 
-    if (config?.localServer || config?.selfServer)
+    if (!config?.deployServer)
         return Promise.resolve({
             access_token: '',
             recording: true,

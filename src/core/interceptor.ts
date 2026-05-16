@@ -40,7 +40,7 @@ class RilogInterceptor implements IRilogInterceptror {
     private deviceInfo: TDeviceInfo;
 
     public init: TRilogState['init'] = false;
-    public token: TRilogState['token'] = null;
+    public token: string | null = null;
     public uToken: string | null = null;
 
     constructor(config: TRilogInitConfig | null) {

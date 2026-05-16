@@ -8,7 +8,7 @@ import { initXHRInterception } from '../feature/interceptors/xhr';
 import XHRAdapter from '../feature/interceptors/xhr/adapter';
 import { IXHRAdapter, TRilogXHRRequest, TRilogXHRResponse } from '../feature/interceptors/xhr/types';
 import { IRilogMessageConfig } from '../feature/interceptors/message/types';
-import { IAxiosLike, IRilog, TRilogExtensions, TRilogInit, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
+import { IAxiosLike, IRilog, TRilogExtensions, TRilogInitConfig, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken, updateUserUniqToken } from '../utils';
 import { getDeviceInfo, getExternalInfo } from '../utils/browser';
@@ -36,20 +36,17 @@ class Rilog implements IRilog {
     }
 
     @logMethods('IRilog')
-    async init({ key, config }: TRilogInit) {
+    async init(config?: TRilogInitConfig) {
         this.interceptor = new RilogInterceptor(config || null);
 
         !config?.disableFetchInterceptor && initFetchInterception(this.interceptFetchRequest.bind(this), this.interceptFetchResponse.bind(this), config?.selfServer);
         !config?.disableXHRInterceptor && initXHRInterception(this.interceptXHRRequest.bind(this), this.interceptXHRResponse.bind(this), config?.selfServer);
 
         const uToken = getUserUniqToken();
-
-        key && this.updateState({ key });
-
         const externalInfo = getExternalInfo(config?.meta);
         const deviceInfo = getDeviceInfo();
 
-        const data = await initRequest({ data: { uToken, appId: key ?? '', externalInfo, deviceInfo }, config });
+        const data = await initRequest({ data: { uToken, appId: config?.deployServer?.key ?? '', externalInfo, deviceInfo }, config });
 
         data?.newToken && updateUserUniqToken(data.newToken);
 

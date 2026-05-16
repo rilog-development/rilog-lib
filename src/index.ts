@@ -5,7 +5,6 @@ const defaultState = {
     init: false,
     token: null,
     recording: false,
-    key: null,
     config: null,
 } as TRilogState;
 

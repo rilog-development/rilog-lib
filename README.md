@@ -1,11 +1,5 @@
 <div align="center">
 
-> ## 🚀 Registration is now open!
-> **[rilog.online](https://www.rilog.online)** is available for everyone. Create your account and start debugging today!
-> ### **[👉 Sign up at rilog.online](https://www.rilog.online)**
-
----
-
 # Rilog lib
 
 **Simple way to log and debug your web apps.**
@@ -14,10 +8,6 @@
 [![npm downloads](https://img.shields.io/npm/dm/@rilog-development/rilog-lib?color=0d2b2b&labelColor=3ecfbf&style=flat-square)](https://www.npmjs.com/package/@rilog-development/rilog-lib)
 [![TypeScript](https://img.shields.io/badge/TypeScript-ready-0d2b2b?labelColor=3ecfbf&style=flat-square)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0d2b2b?labelColor=3ecfbf&style=flat-square)](LICENSE)
-
-<br/>
-
-> 📖 **[Full Documentation → docs.rilog.online](https://docs.rilog.online/docs/rilog-lib/overview)**
 
 </div>
 
@@ -35,35 +25,34 @@ Rilog lib intercepts and stores different events such as HTTP requests (fetch, X
 npm i @rilog-development/rilog-lib
 ```
 
-**2. Init with your app key**
+**2. Init — choose your storage mode**
+
+With [rilog-local-server](https://github.com/rilog-development/local-server) (log files + built-in dashboard, runs locally or on your server):
 
 ```javascript
 import rilog from '@rilog-development/rilog-lib';
 
-rilog.init({ key: 'YOUR_APP_KEY' });
-```
-
-Optionally pass `meta` in `config` to enrich events with environment context:
-
-```javascript
 rilog.init({
-    key: 'YOUR_APP_KEY',
-    config: {
-        meta: {
-            environment: 'production',
-            branch: 'main',
-            framework: 'React 18.0.0',
-            platform: 'Browser',
-        },
+    localServer: {
+        appName: 'my-app',
+        url: 'http://localhost:3030', // wherever rilog-local-server is running
     },
 });
 ```
 
-> Get your key by creating a project in the [Rilog app](http://www.rilog.online).
+Or with your own backend:
 
-**3. Watch events flow in real-time**
+```javascript
+rilog.init({
+    selfServer: {
+        url: 'https://your-backend.com/logs', // any POST endpoint you define
+    },
+});
+```
 
-Open the [Rilog dashboard](http://www.rilog.online) — HTTP requests, errors, clicks and custom events appear automatically.
+**3. Watch events**
+
+Open the rilog-local-server dashboard at the URL where you deployed it — HTTP requests, errors, clicks, and custom events appear automatically.
 
 ---
 
@@ -126,20 +115,20 @@ or
 npm i @rilog-development/rilog-lib
 ```
 
-### Get your app key
+### Init
 
-Before initializing the library, create a project in the [Rilog app](http://www.rilog.online) and copy its **app key**. Pass this key to `rilog.init()` — it links events from your application to your project in the storage.
+`rilog.init(config?)` accepts a single optional config object — all fields are optional.
+
+You must pass either `localServer` or `selfServer` to specify where events are stored. Without either, events are collected but never flushed.
 
 ```javascript
-rilog.init({ key: 'your-app-key' });
+rilog.init({
+    localServer: {
+        appName: 'my-app',
+        url: 'http://localhost:3030',
+    },
+});
 ```
-
-### Init params
-
-| Param  | Type               | Required | Description                                       |
-| ------ | ------------------ | -------- | ------------------------------------------------- |
-| key    | `string`           | No       | App key from your Rilog project.                  |
-| config | `TRilogInitConfig` | No       | Behavioral configuration (see [Config](#config)). |
 
 ### Usage (fetch)
 
@@ -149,7 +138,8 @@ You can disable it via config:
 
 ```javascript
 rilog.init({
-    config: { disableFetchInterceptor: true },
+    disableFetchInterceptor: true,
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
 });
 ```
 
@@ -165,7 +155,10 @@ The recommended way to capture axios requests is `rilog.wrapAxios()`. Call it on
 import axios from 'axios';
 import rilog from '@rilog-development/rilog-lib';
 
-rilog.init({ key: 'your-app-key', config: { disableXHRInterceptor: true } });
+rilog.init({
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    disableXHRInterceptor: true,
+});
 
 // Default axios instance
 rilog.wrapAxios(axios);
@@ -176,7 +169,10 @@ With a custom instance:
 ```javascript
 const api = axios.create({ baseURL: '/api' });
 
-rilog.init({ key: 'your-app-key', config: { disableXHRInterceptor: true } });
+rilog.init({
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    disableXHRInterceptor: true,
+});
 
 rilog.wrapAxios(api);
 ```
@@ -219,7 +215,8 @@ XHR interception is enabled by default. Disable it via config:
 
 ```javascript
 rilog.init({
-    config: { disableXHRInterceptor: true },
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    disableXHRInterceptor: true,
 });
 ```
 
@@ -238,7 +235,10 @@ Because axios uses XHR (or fetch) internally, there is a potential for **double-
 Use `wrapAxios` and disable XHR interception. You get better data quality (structured body, parsed JSON, full headers) with no duplicates.
 
 ```javascript
-rilog.init({ key: 'your-app-key', config: { disableXHRInterceptor: true } });
+rilog.init({
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    disableXHRInterceptor: true,
+});
 rilog.wrapAxios(axios);
 ```
 
@@ -247,7 +247,7 @@ rilog.wrapAxios(axios);
 No extra configuration needed. Fetch is intercepted automatically.
 
 ```javascript
-rilog.init({ key: 'your-app-key' });
+rilog.init({ localServer: { appName: 'my-app', url: 'http://localhost:3030' } });
 ```
 
 ### App uses axios + third-party libraries that use XHR
@@ -255,8 +255,8 @@ rilog.init({ key: 'your-app-key' });
 Use `wrapAxios` for axios and keep XHR interception active for third-party requests. Axios requests are captured twice in this case, but third-party XHR requests are covered.
 
 ```javascript
-rilog.init({ key: 'your-app-key' }); // XHR stays active
-rilog.wrapAxios(axios);              // axios also captured via adapter
+rilog.init({ localServer: { appName: 'my-app', url: 'http://localhost:3030' } }); // XHR stays active
+rilog.wrapAxios(axios);                                                            // axios also captured via adapter
 ```
 
 ### App uses no axios (only plain fetch / XHR)
@@ -264,7 +264,7 @@ rilog.wrapAxios(axios);              // axios also captured via adapter
 Everything is captured automatically. No additional setup required.
 
 ```javascript
-rilog.init({ key: 'your-app-key' });
+rilog.init({ localServer: { appName: 'my-app', url: 'http://localhost:3030' } });
 ```
 
 ### Data quality comparison
@@ -295,7 +295,8 @@ Disable input interception via config:
 
 ```javascript
 rilog.init({
-    config: { disableInputInterceptor: true },
+    disableInputInterceptor: true,
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
 });
 ```
 
@@ -329,7 +330,8 @@ The original `console.warn` / `console.error` behavior is preserved — messages
 
 ```javascript
 rilog.init({
-    config: { disableConsoleInterceptor: true },
+    disableConsoleInterceptor: true,
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
 });
 ```
 
@@ -345,7 +347,7 @@ For React applications, Rilog provides a `RilogErrorBoundary` component that cat
 import rilog from '@rilog-development/rilog-lib';
 import { RilogErrorBoundary } from '@rilog-development/rilog-lib/dist/react/RilogErrorBoundary';
 
-rilog.init({ key: 'your-app-key' });
+rilog.init({ localServer: { appName: 'my-app', url: 'http://localhost:3030' } });
 
 function App() {
     return (
@@ -432,9 +434,9 @@ debug({ userId, step: 'payment' }, 'CheckoutForm');
 
 ---
 
-You can use your own server for storing intercepted events. Create a `POST` endpoint and pass the `selfServer` config with a `url` param.
+You can use your own backend for storing intercepted events. Create a `POST` endpoint at any path you choose and pass its full URL in the `selfServer` config.
 
-Every time events are collected, Rilog calls your endpoint with the following body:
+Every time events are flushed, Rilog sends a `POST` to your endpoint with the following body:
 
 ```typescript
 {
@@ -446,29 +448,37 @@ Every time events are collected, Rilog calls your endpoint with the following bo
 
 ```javascript
 rilog.init({
-    config: {
-        selfServer: {
-            url: 'https://your-backend.com/api/events/save',
-            headers: { Authorization: 'Bearer your-token' },
-        },
+    selfServer: {
+        url: 'https://your-backend.com/logs',
     },
 });
 ```
 
-The endpoint must respond with:
+With auth headers:
+
+```javascript
+rilog.init({
+    selfServer: {
+        url: 'https://your-backend.com/logs',
+        headers: { Authorization: 'Bearer your-token' },
+    },
+});
+```
+
+Your endpoint must respond with:
 
 ```json
 { "result": "success" }
 ```
 
-Events are cleared from storage only after receiving a successful response.
+Events are cleared from storage only after a successful response.
 
 ### Self server config
 
-| Param   | Type                     | Required | Description                                     |
-| ------- | ------------------------ | -------- | ----------------------------------------------- |
-| url     | `string`                 | Yes      | URL of your `POST` endpoint for storing events. |
-| headers | `Record<string, string>` | No       | Additional headers sent with each save request. |
+| Param   | Type                     | Required | Description                                                      |
+| ------- | ------------------------ | -------- | ---------------------------------------------------------------- |
+| url     | `string`                 | Yes      | Full URL of your `POST` endpoint. You define the path — it can be anything. |
+| headers | `Record<string, string>` | No       | Additional headers sent with each save request.                  |
 
 ---
 
@@ -476,35 +486,51 @@ Events are cleared from storage only after receiving a successful response.
 
 ---
 
-`rilog-local-server` is a lightweight companion server that saves captured events to structured log files on your disk — no cloud, no database, no auth required. Ideal for local debugging and development.
+[rilog-local-server](https://github.com/rilog-development/local-server) is a companion server that receives events from rilog-lib and saves them to structured log files. It includes a **built-in dashboard** for browsing and inspecting logs — no cloud, no database, no auth required.
 
-### 1. Start rilog-local-server
+### Deployment options
+
+**Option A — run locally** (on your dev machine):
 
 ```bash
-git clone https://github.com/rilog-development/rilog-local-server.git
-cd rilog-local-server
+git clone https://github.com/rilog-development/local-server.git
+cd local-server
 npm install
 npm run start
 ```
 
-Server starts on **http://localhost:3030**. Start it before your frontend dev server.
+The server starts on `http://localhost:3030` by default (port is configurable). The dashboard is available at the same URL in your browser.
 
-> See the [rilog-local-server repository](https://github.com/rilog-development/rilog-local-server) for full server configuration (port, log format, CORS, file rotation, etc.).
+**Option B — deploy to your own server** (shared team instance, staging environment, etc.):
 
-### 2. Configure rilog-lib
+Deploy rilog-local-server to any host — VPS, Docker, cloud VM. Configure the port and CORS origins as needed. The `url` you pass to rilog-lib should point to wherever the server is running.
 
-Pass the `localServer` config to `rilog.init()`. No `key` is required — events are stored locally and never sent to the Rilog cloud.
+> See the [rilog-local-server repository](https://github.com/rilog-development/local-server) for full server configuration (port, log format, CORS, file rotation, dashboard auth, etc.).
 
-**Minimal setup:**
+### Configure rilog-lib
+
+Pass `localServer` to `rilog.init()`. The `url` is the base URL of wherever your rilog-local-server is running.
+
+**Local dev setup:**
 
 ```javascript
 import rilog from '@rilog-development/rilog-lib';
 
 rilog.init({
-    config: {
-        localServer: {
-            appName: 'my-app',
-        },
+    localServer: {
+        appName: 'my-app',
+        url: 'http://localhost:3030',
+    },
+});
+```
+
+**Remote/shared server:**
+
+```javascript
+rilog.init({
+    localServer: {
+        appName: 'my-app',
+        url: 'https://rilog.your-company.com',
     },
 });
 ```
@@ -513,14 +539,13 @@ rilog.init({
 
 ```javascript
 rilog.init({
-    config: {
-        localServer: {
-            appName: 'my-app',
-            params: {
-                environment: 'development',
-                branch: 'feature/login',
-                version: '1.2.0',
-            },
+    localServer: {
+        appName: 'my-app',
+        url: 'http://localhost:3030',
+        params: {
+            environment: 'development',
+            branch: 'feature/login',
+            version: '1.2.0',
         },
     },
 });
@@ -530,22 +555,9 @@ rilog.init({
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
-| `appName` | `string` | Yes | Identifies the app. Events are saved to `logs/<appName>/`. |
-| `url` | `string` | No | Base URL of the running rilog-local-server. Defaults to `http://localhost:3030`. Change if you configured a different port or host. |
+| `appName` | `string` | Yes | Identifies the app. Events are saved to `logs/<appName>/` on the server. |
+| `url` | `string` | Yes | Base URL of the running rilog-local-server — local or remote. |
 | `params` | `Record<string, string>` | No | Arbitrary metadata attached to every log batch. Useful for environment, branch, build version, etc. |
-
-**С кастомным портом или хостом:**
-
-```javascript
-rilog.init({
-    config: {
-        localServer: {
-            appName: 'my-app',
-            url: 'http://localhost:4040', // if the server runs on a different port
-        },
-    },
-});
-```
 
 ### Framework examples
 
@@ -556,11 +568,10 @@ rilog.init({
 import rilog from '@rilog-development/rilog-lib';
 
 rilog.init({
-    config: {
-        localServer: {
-            appName: 'my-react-app',
-            params: { env: process.env.NODE_ENV ?? 'development' },
-        },
+    localServer: {
+        appName: 'my-react-app',
+        url: 'http://localhost:3030',
+        params: { env: process.env.NODE_ENV ?? 'development' },
     },
 });
 
@@ -592,11 +603,10 @@ import rilog from '@rilog-development/rilog-lib';
 export function RilogProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         rilog.init({
-            config: {
-                localServer: {
-                    appName: 'my-next-app',
-                    params: { env: process.env.NODE_ENV },
-                },
+            localServer: {
+                appName: 'my-next-app',
+                url: 'http://localhost:3030',
+                params: { env: process.env.NODE_ENV },
             },
         });
     }, []);
@@ -613,28 +623,27 @@ import rilog from '@rilog-development/rilog-lib';
 
 export function installRilog(app: App) {
     rilog.init({
-        config: {
-            localServer: {
-                appName: 'my-vue-app',
-                params: { env: import.meta.env.MODE },
-            },
+        localServer: {
+            appName: 'my-vue-app',
+            url: 'http://localhost:3030',
+            params: { env: import.meta.env.MODE },
         },
     });
 }
 ```
 
-### Log files
+### Log files and dashboard
 
-Events are written to date-stamped files under the `logs/` directory of the running server:
+Events are saved to date-stamped files on the server:
 
 ```
 logs/
   my-app/
-    2025-05-15.log.ndjson    ← one batch per line (default format)
+    2025-05-15.log.ndjson
     2025-05-16.log.ndjson
 ```
 
-Watch events arrive in real time:
+Open the dashboard at the server URL in your browser to browse sessions, filter events, and inspect requests. To tail logs from the terminal:
 
 ```bash
 tail -f logs/my-app/2025-05-16.log.ndjson
@@ -666,7 +675,6 @@ Full list of `TRilogInitConfig` options:
 | `onSaveEvents` | `(events) => void` | Callback fired before events are sent to storage. |
 | `meta` | [`TExternalInfoMeta`](#meta) | Environment metadata attached to every session. |
 
-> For detailed configuration examples and advanced usage, see the **[full documentation](https://docs.rilog.online/docs/rilog-lib/overview)**.
 
 ---
 
@@ -685,14 +693,12 @@ The `meta` object lets you attach environment context to each session. All field
 
 ```javascript
 rilog.init({
-    key: 'your-app-key',
-    config: {
-        meta: {
-            environment: process.env.NODE_ENV,
-            branch: 'main',
-            framework: 'React 18.0.0',
-            platform: 'Browser',
-        },
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    meta: {
+        environment: process.env.NODE_ENV,
+        branch: 'main',
+        framework: 'React 18.0.0',
+        platform: 'Browser',
     },
 });
 ```
@@ -710,11 +716,9 @@ import axios from 'axios';
 import rilog from '@rilog-development/rilog-lib';
 
 rilog.init({
-    key: 'your-app-key',
-    config: {
-        disableXHRInterceptor: true,
-        meta: { environment: process.env.NODE_ENV, framework: 'React 18' },
-    },
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    disableXHRInterceptor: true,
+    meta: { environment: process.env.NODE_ENV, framework: 'React 18' },
 });
 
 rilog.wrapAxios(axios);
@@ -727,11 +731,9 @@ rilog.wrapAxios(axios);
 import rilog from '@rilog-development/rilog-lib';
 
 rilog.init({
-    key: 'your-app-key',
-    config: {
-        disableXHRInterceptor: true,
-        meta: { environment: process.env.NODE_ENV, framework: 'Next.js 14' },
-    },
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    disableXHRInterceptor: true,
+    meta: { environment: process.env.NODE_ENV, framework: 'Next.js 14' },
 });
 
 rilog.wrapAxios(axios);
@@ -743,7 +745,10 @@ rilog.wrapAxios(axios);
 import rilog from '@rilog-development/rilog-lib';
 import { RilogErrorBoundary } from '@rilog-development/rilog-lib/dist/react/RilogErrorBoundary';
 
-rilog.init({ key: 'your-app-key', config: { disableXHRInterceptor: true } });
+rilog.init({
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    disableXHRInterceptor: true,
+});
 rilog.wrapAxios(axios);
 
 export default function App() {
@@ -759,12 +764,10 @@ export default function App() {
 
 ```javascript
 rilog.init({
-    config: {
-        selfServer: {
-            url: 'https://your-worker.your-subdomain.workers.dev/events/save',
-        },
-        disableXHRInterceptor: true,
+    selfServer: {
+        url: 'https://your-worker.your-subdomain.workers.dev/logs',
     },
+    disableXHRInterceptor: true,
 });
 
 rilog.wrapAxios(axios);
@@ -774,9 +777,8 @@ rilog.wrapAxios(axios);
 
 ```javascript
 rilog.init({
-    config: {
-        sensetiveDataRequests: ['/api/v1/pay/card', '/api/v1/send/card'],
-    },
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    sensetiveDataRequests: ['/api/v1/pay/card', '/api/v1/send/card'],
 });
 ```
 
@@ -784,9 +786,8 @@ rilog.init({
 
 ```javascript
 rilog.init({
-    config: {
-        ignoredRequests: ['https://analytics.example.com', '/api/health'],
-    },
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    ignoredRequests: ['https://analytics.example.com', '/api/health'],
 });
 ```
 
@@ -794,27 +795,25 @@ rilog.init({
 
 ```javascript
 rilog.init({
-    config: {
-        headers: ['Authorization', 'X-Request-Id'],
-        localStorage: ['token', 'userId'],
-    },
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    headers: ['Authorization', 'X-Request-Id'],
+    localStorage: ['token', 'userId'],
 });
 ```
 
-### Local server (development mode)
+### Local server with axios
 
 ```javascript
 rilog.init({
-    config: {
-        localServer: {
-            appName: 'my-app',
-            params: {
-                environment: process.env.NODE_ENV,
-                branch: 'main',
-            },
+    localServer: {
+        appName: 'my-app',
+        url: 'http://localhost:3030',
+        params: {
+            environment: process.env.NODE_ENV,
+            branch: 'main',
         },
-        disableXHRInterceptor: true,
     },
+    disableXHRInterceptor: true,
 });
 
 rilog.wrapAxios(axios);
@@ -824,13 +823,12 @@ rilog.wrapAxios(axios);
 
 ```javascript
 rilog.init({
-    config: {
-        onPushEvent: (event) => {
-            console.log('New event intercepted:', event);
-        },
-        onSaveEvents: (events) => {
-            console.log('Sending events to storage:', events);
-        },
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    onPushEvent: (event) => {
+        console.log('New event intercepted:', event);
+    },
+    onSaveEvents: (events) => {
+        console.log('Sending events to storage:', events);
     },
 });
 ```
