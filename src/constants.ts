@@ -1,4 +1,5 @@
 export { BASE_URL, LOCAL_BASE_URL, TOKEN_GENERATION_SALT, TOKEN_GENERATION_TIMESTAMP } from './secrets';
+export const DEFAULT_LOCAL_URL = 'http://localhost:3030';
 
 export const RIL_TOKEN = 'riltoken';
 export const RIL_EVENTS = 'rilevents';

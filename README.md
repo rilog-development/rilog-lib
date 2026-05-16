@@ -531,7 +531,21 @@ rilog.init({
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
 | `appName` | `string` | Yes | Identifies the app. Events are saved to `logs/<appName>/`. |
+| `url` | `string` | No | Base URL of the running rilog-local-server. Defaults to `http://localhost:3030`. Change if you configured a different port or host. |
 | `params` | `Record<string, string>` | No | Arbitrary metadata attached to every log batch. Useful for environment, branch, build version, etc. |
+
+**С кастомным портом или хостом:**
+
+```javascript
+rilog.init({
+    config: {
+        localServer: {
+            appName: 'my-app',
+            url: 'http://localhost:4040', // if the server runs on a different port
+        },
+    },
+});
+```
 
 ### Framework examples
 

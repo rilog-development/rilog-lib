@@ -1,5 +1,5 @@
 import { saveEventsCustom, saveEventsToRilog } from '../api';
-import { BASE_URL, EVENTS_ARRAY_LIMIT, LOCAL_BASE_URL, LONG_TIMER_LIMIT, REQUEST_TIMEOUT_LIMIT } from '../constants';
+import { BASE_URL, DEFAULT_LOCAL_URL, EVENTS_ARRAY_LIMIT, LONG_TIMER_LIMIT, REQUEST_TIMEOUT_LIMIT } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
@@ -241,9 +241,10 @@ class RilogInterceptor implements IRilogInterceptror {
 
     private async sendEvents({ data, token, localServer, selfServer }: TSendEvents) {
         if (localServer) {
+            const { url: localUrl, ...localServerData } = localServer;
             return saveEventsCustom({
-                data: JSON.stringify({ events: data, uToken: this.uToken, deviceInfo: this.deviceInfo, ...this.config?.localServer }),
-                url: `${LOCAL_BASE_URL}/api/events/save`,
+                data: JSON.stringify({ events: data, uToken: this.uToken, deviceInfo: this.deviceInfo, ...localServerData }),
+                url: `${localUrl || DEFAULT_LOCAL_URL}/api/events/save`,
             });
         }
 
@@ -261,8 +262,9 @@ class RilogInterceptor implements IRilogInterceptror {
         const eventsData = JSON.stringify(sorted);
 
         if (this.config?.localServer) {
-            const payload = new Blob([JSON.stringify({ events: eventsData, uToken: this.uToken, deviceInfo: this.deviceInfo, ...this.config.localServer })], { type: 'application/json' });
-            navigator.sendBeacon && navigator.sendBeacon(`${LOCAL_BASE_URL}/api/events/save`, payload);
+            const { url: localUrl, ...localServerData } = this.config.localServer;
+            const payload = new Blob([JSON.stringify({ events: eventsData, uToken: this.uToken, deviceInfo: this.deviceInfo, ...localServerData })], { type: 'application/json' });
+            navigator.sendBeacon && navigator.sendBeacon(`${localUrl || DEFAULT_LOCAL_URL}/api/events/save`, payload);
             return;
         }
 

@@ -45,6 +45,7 @@ export type TRilogInitConfig = Partial<{
 
 export interface ILocalServerConfig {
     appName: string; // app name would be used in local saving for creating app logs folder.
+    url?: string; // base URL of the running rilog-local-server instance, defaults to http://localhost:3030
     params?: Record<string, string>; // additional params for storing in the header of logs files.
 }
 
