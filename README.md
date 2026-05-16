@@ -27,7 +27,7 @@ npm i @rilog-development/rilog-lib
 
 **2. Init — choose your storage mode**
 
-With [rilog-local-server](https://github.com/rilog-development/local-server) (log files + built-in dashboard, runs locally or on your server):
+With [rilog local server](https://github.com/rilog-development/local-server) (log files + built-in dashboard, runs locally or on your server):
 
 ```javascript
 import rilog from '@rilog-development/rilog-lib';
@@ -52,33 +52,33 @@ rilog.init({
 
 **3. Watch events**
 
-Open the rilog-local-server dashboard at the URL where you deployed it — HTTP requests, errors, clicks, and custom events appear automatically.
+Open the rilog local server dashboard at the URL where you deployed it — HTTP requests, errors, clicks, and custom events appear automatically.
 
 ---
 
 ## What gets captured
 
-| | Event | Description | Automatic |
-| --- | --- | --- | --- |
-| 🌐 | `REQUEST` | HTTP requests via fetch | ✓ |
-| 🌐 | `REQUEST` | HTTP requests via XMLHttpRequest | ✓ |
-| 🌐 | `REQUEST` | HTTP requests via axios (with `wrapAxios`) | ✓ |
-| 🖱️ | `CLICK` | Clicks on `button`, `a` elements | ✓ |
-| ⌨️ | `INPUT` | Input field values on focus-out | ✓ |
-| 🚨 | `CONSOLE_ERROR` | `console.error()`, uncaught exceptions, unhandled rejections | ✓ |
-| ⚠️ | `CONSOLE_WARN` | `console.warn()` calls | ✓ |
-| 📡 | `DEBUG_MESSAGE` | Manual call via `rilog.logData()` | manual |
+|     | Event           | Description                                                  | Automatic |
+| --- | --------------- | ------------------------------------------------------------ | --------- |
+| 🌐  | `REQUEST`       | HTTP requests via fetch                                      | ✓         |
+| 🌐  | `REQUEST`       | HTTP requests via XMLHttpRequest                             | ✓         |
+| 🌐  | `REQUEST`       | HTTP requests via axios (with `wrapAxios`)                   | ✓         |
+| 🖱️  | `CLICK`         | Clicks on `button`, `a` elements                             | ✓         |
+| ⌨️  | `INPUT`         | Input field values on focus-out                              | ✓         |
+| 🚨  | `CONSOLE_ERROR` | `console.error()`, uncaught exceptions, unhandled rejections | ✓         |
+| ⚠️  | `CONSOLE_WARN`  | `console.warn()` calls                                       | ✓         |
+| 📡  | `DEBUG_MESSAGE` | Manual call via `rilog.logData()`                            | manual    |
 
 ## Framework compatibility
 
-| Framework | Support |
-| --- | --- |
-| React 16+ | ✅ Full |
-| Next.js | ✅ Full |
-| Vue 2/3 | ✅ Full |
-| Angular 12+ | ⚡ Partial |
-| Svelte | ⚡ Partial |
-| Plain HTML + JS | ✅ Full |
+| Framework       | Support    |
+| --------------- | ---------- |
+| React 16+       | ✅ Full    |
+| Next.js         | ✅ Full    |
+| Vue 2/3         | ✅ Full    |
+| Angular 12+     | ⚡ Partial |
+| Svelte          | ⚡ Partial |
+| Plain HTML + JS | ✅ Full    |
 
 ## Table of Contents
 
@@ -93,7 +93,7 @@ Open the rilog-local-server dashboard at the URL where you deployed it — HTTP 
 -   [React ErrorBoundary](#react-errorboundary)
 -   [Debug messages](#debug-messages)
 -   [Storing to your server](#your-server)
--   [Local server (rilog-local-server)](#local-server)
+-   [Local server (rilog local server)](#local-server)
 -   [Config](#config)
 -   [Meta](#meta)
 -   [Examples](#examples)
@@ -256,7 +256,7 @@ Use `wrapAxios` for axios and keep XHR interception active for third-party reque
 
 ```javascript
 rilog.init({ localServer: { appName: 'my-app', url: 'http://localhost:3030' } }); // XHR stays active
-rilog.wrapAxios(axios);                                                            // axios also captured via adapter
+rilog.wrapAxios(axios); // axios also captured via adapter
 ```
 
 ### App uses no axios (only plain fetch / XHR)
@@ -269,12 +269,12 @@ rilog.init({ localServer: { appName: 'my-app', url: 'http://localhost:3030' } })
 
 ### Data quality comparison
 
-| | `wrapAxios` | Automatic XHR |
-| --- | --- | --- |
-| Request body | Structured object | Serialized string |
-| Response body | Parsed JSON | Raw `responseText` |
-| 4xx / 5xx responses | Via error handler | Via `loadend` event |
-| Query params | From `config.params` | From URL only |
+|                     | `wrapAxios`          | Automatic XHR       |
+| ------------------- | -------------------- | ------------------- |
+| Request body        | Structured object    | Serialized string   |
+| Response body       | Parsed JSON          | Raw `responseText`  |
+| 4xx / 5xx responses | Via error handler    | Via `loadend` event |
+| Query params        | From `config.params` | From URL only       |
 
 ---
 
@@ -362,11 +362,11 @@ The captured event includes the error `message`, `stack`, and React's `component
 
 `RilogErrorBoundary` props:
 
-| Prop | Type | Required | Description |
-| --- | --- | --- | --- |
-| rilog | `IRilog` | Yes | The rilog instance. |
-| children | `ReactNode` | Yes | The component tree to protect. |
-| fallback | `ReactNode` | No | UI to render when an error is caught. |
+| Prop     | Type        | Required | Description                           |
+| -------- | ----------- | -------- | ------------------------------------- |
+| rilog    | `IRilog`    | Yes      | The rilog instance.                   |
+| children | `ReactNode` | Yes      | The component tree to protect.        |
+| fallback | `ReactNode` | No       | UI to render when an error is caught. |
 
 ---
 
@@ -475,10 +475,10 @@ Events are cleared from storage only after a successful response.
 
 ### Self server config
 
-| Param   | Type                     | Required | Description                                                      |
-| ------- | ------------------------ | -------- | ---------------------------------------------------------------- |
+| Param   | Type                     | Required | Description                                                                 |
+| ------- | ------------------------ | -------- | --------------------------------------------------------------------------- |
 | url     | `string`                 | Yes      | Full URL of your `POST` endpoint. You define the path — it can be anything. |
-| headers | `Record<string, string>` | No       | Additional headers sent with each save request.                  |
+| headers | `Record<string, string>` | No       | Additional headers sent with each save request.                             |
 
 ---
 
@@ -486,7 +486,7 @@ Events are cleared from storage only after a successful response.
 
 ---
 
-[rilog-local-server](https://github.com/rilog-development/local-server) is a companion server that receives events from rilog-lib and saves them to structured log files. It includes a **built-in dashboard** for browsing and inspecting logs — no cloud, no database, no auth required.
+[rilog local server](https://github.com/rilog-development/local-server) is a companion server that receives events from rilog-lib and saves them to structured log files. It includes a **built-in dashboard** for browsing and inspecting logs — no cloud, no database, no auth required.
 
 ### Deployment options
 
@@ -503,13 +503,13 @@ The server starts on `http://localhost:3030` by default (port is configurable). 
 
 **Option B — deploy to your own server** (shared team instance, staging environment, etc.):
 
-Deploy rilog-local-server to any host — VPS, Docker, cloud VM. Configure the port and CORS origins as needed. The `url` you pass to rilog-lib should point to wherever the server is running.
+Deploy rilog local server to any host — VPS, Docker, cloud VM. Configure the port and CORS origins as needed. The `url` you pass to rilog-lib should point to wherever the server is running.
 
-> See the [rilog-local-server repository](https://github.com/rilog-development/local-server) for full server configuration (port, log format, CORS, file rotation, dashboard auth, etc.).
+> See the [rilog local server repository](https://github.com/rilog-development/local-server) for full server configuration (port, log format, CORS, file rotation, dashboard auth, etc.).
 
 ### Configure rilog-lib
 
-Pass `localServer` to `rilog.init()`. The `url` is the base URL of wherever your rilog-local-server is running.
+Pass `localServer` to `rilog.init()`. The `url` is the base URL of wherever your rilog local server is running.
 
 **Local dev setup:**
 
@@ -553,11 +553,11 @@ rilog.init({
 
 ### localServer config
 
-| Param | Type | Required | Description |
-| --- | --- | --- | --- |
-| `appName` | `string` | Yes | Identifies the app. Events are saved to `logs/<appName>/` on the server. |
-| `url` | `string` | Yes | Base URL of the running rilog-local-server — local or remote. |
-| `params` | `Record<string, string>` | No | Arbitrary metadata attached to every log batch. Useful for environment, branch, build version, etc. |
+| Param     | Type                     | Required | Description                                                                                         |
+| --------- | ------------------------ | -------- | --------------------------------------------------------------------------------------------------- |
+| `appName` | `string`                 | Yes      | Identifies the app. Events are saved to `logs/<appName>/` on the server.                            |
+| `url`     | `string`                 | Yes      | Base URL of the running rilog local server — local or remote.                                       |
+| `params`  | `Record<string, string>` | No       | Arbitrary metadata attached to every log batch. Useful for environment, branch, build version, etc. |
 
 ### Framework examples
 
@@ -657,24 +657,23 @@ tail -f logs/my-app/2025-05-16.log.ndjson
 
 Full list of `TRilogInitConfig` options:
 
-| Param | Type | Description |
-| --- | --- | --- |
-| `ignoredRequests` | `string[]` | URLs of requests that will not be stored. |
-| `sensetiveRequsts` | `string[]` | Requests whose headers and body will be replaced with `"sensitive"`. |
-| `sensetiveDataRequests` | `string[]` | Requests whose body only will be replaced with `"sensitive"` (e.g. card data). |
-| `headers` | `string[]` | Only these headers will be stored. By default no headers are stored. |
-| `localStorage` | `string[]` | Only these localStorage keys will be captured per request snapshot. |
-| `disableFetchInterceptor` | `boolean` | Disable automatic `fetch` interception. |
-| `disableXHRInterceptor` | `boolean` | Disable automatic `XMLHttpRequest` interception. Set to `true` when using `wrapAxios`. |
-| `disableClickInterceptor` | `boolean` | Disable automatic click interception on `button` and `a` elements. |
-| `disableConsoleInterceptor` | `boolean` | Disable automatic `console.warn` / `console.error` interception. |
-| `disableInputInterceptor` | `boolean` | Disable automatic input field value capture on focus-out. |
-| `selfServer` | [`ISelfServer`](#self-server-config) | Config for storing events to your own backend. |
-| `localServer` | `ILocalServerConfig` | Config for storing events to a local rilog-local-logger instance. |
-| `onPushEvent` | `(event) => void` | Callback fired each time an event is intercepted. |
-| `onSaveEvents` | `(events) => void` | Callback fired before events are sent to storage. |
-| `meta` | [`TExternalInfoMeta`](#meta) | Environment metadata attached to every session. |
-
+| Param                       | Type                                 | Description                                                                            |
+| --------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------- |
+| `ignoredRequests`           | `string[]`                           | URLs of requests that will not be stored.                                              |
+| `sensetiveRequsts`          | `string[]`                           | Requests whose headers and body will be replaced with `"sensitive"`.                   |
+| `sensetiveDataRequests`     | `string[]`                           | Requests whose body only will be replaced with `"sensitive"` (e.g. card data).         |
+| `headers`                   | `string[]`                           | Only these headers will be stored. By default no headers are stored.                   |
+| `localStorage`              | `string[]`                           | Only these localStorage keys will be captured per request snapshot.                    |
+| `disableFetchInterceptor`   | `boolean`                            | Disable automatic `fetch` interception.                                                |
+| `disableXHRInterceptor`     | `boolean`                            | Disable automatic `XMLHttpRequest` interception. Set to `true` when using `wrapAxios`. |
+| `disableClickInterceptor`   | `boolean`                            | Disable automatic click interception on `button` and `a` elements.                     |
+| `disableConsoleInterceptor` | `boolean`                            | Disable automatic `console.warn` / `console.error` interception.                       |
+| `disableInputInterceptor`   | `boolean`                            | Disable automatic input field value capture on focus-out.                              |
+| `selfServer`                | [`ISelfServer`](#self-server-config) | Config for storing events to your own backend.                                         |
+| `localServer`               | `ILocalServerConfig`                 | Config for storing events to a rilog local server.                                     |
+| `onPushEvent`               | `(event) => void`                    | Callback fired each time an event is intercepted.                                      |
+| `onSaveEvents`              | `(events) => void`                   | Callback fired before events are sent to storage.                                      |
+| `meta`                      | [`TExternalInfoMeta`](#meta)         | Environment metadata attached to every session.                                        |
 
 ---
 
@@ -689,7 +688,7 @@ The `meta` object lets you attach environment context to each session. All field
 | environment | `string` | `"production"`, `"staging"`  |
 | branch      | `string` | `"main"`, `"feat/my-branch"` |
 | framework   | `string` | `"React 18.0.0"`             |
-| platform    | `string` | `"Browser"`, `"Node.js 20"` |
+| platform    | `string` | `"Browser"`, `"Node.js 20"`  |
 
 ```javascript
 rilog.init({
@@ -841,6 +840,5 @@ rilog.init({
 
 If you have any questions, feel free to reach out:
 
--   **Rilog app contact form:** [rilog.online/auth/contact](https://www.rilog.online/auth/contact)
 -   **Email:** [kaowebdev@gmail.com](mailto:kaowebdev@gmail.com)
 -   **LinkedIn:** [andrii-karnaukh-webdev](https://www.linkedin.com/in/andrii-karnaukh-webdev/)
