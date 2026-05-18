@@ -671,6 +671,7 @@ Full list of `TRilogInitConfig` options:
 | `disableInputInterceptor`   | `boolean`                            | Disable automatic input field value capture on focus-out.                              |
 | `selfServer`                | [`ISelfServer`](#self-server-config) | Config for storing events to your own backend.                                         |
 | `localServer`               | `ILocalServerConfig`                 | Config for storing events to a rilog local server.                                     |
+| `deployServer`              | `IDeployServerConfig`                | Config for Rilog cloud. **Closed beta** — not publicly available yet.                  |
 | `onPushEvent`               | `(event) => void`                    | Callback fired each time an event is intercepted.                                      |
 | `onSaveEvents`              | `(events) => void`                   | Callback fired before events are sent to storage.                                      |
 | `meta`                      | [`TExternalInfoMeta`](#meta)         | Environment metadata attached to every session.                                        |
@@ -840,5 +841,5 @@ rilog.init({
 
 If you have any questions, feel free to reach out:
 
--   **Email:** [kaowebdev@gmail.com](mailto:kaowebdev@gmail.com)
+-   **Email:** [rilog.ceo@gmail.com](mailto:rilog.ceo@gmail.com)
 -   **LinkedIn:** [andrii-karnaukh-webdev](https://www.linkedin.com/in/andrii-karnaukh-webdev/)
