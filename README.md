@@ -2,7 +2,7 @@
 
 # Rilog lib
 
-**Simple way to log and debug your web apps.**
+**See exactly what happened in your app before the bug was filed.**
 
 [![npm version](https://img.shields.io/npm/v/@rilog-development/rilog-lib?color=0d2b2b&labelColor=3ecfbf&style=flat-square)](https://www.npmjs.com/package/@rilog-development/rilog-lib)
 [![npm downloads](https://img.shields.io/npm/dm/@rilog-development/rilog-lib?color=0d2b2b&labelColor=3ecfbf&style=flat-square)](https://www.npmjs.com/package/@rilog-development/rilog-lib)
@@ -13,7 +13,23 @@
 
 ---
 
-Rilog lib intercepts and stores different events such as HTTP requests (fetch, XHR, axios), button clicks, input changes, console errors/warnings, runtime exceptions, and custom debug messages.
+You get a bug report with no steps to reproduce. The user just says "it didn't work." Sound familiar?
+
+Rilog captures the full picture automatically — every HTTP request, console error, button click, and input change — and streams it to a local dashboard or your own backend. No cloud account. No data leaves your infrastructure. Two lines of code to set up.
+
+Drop it into any React, Next.js, or Vue app and immediately know the exact sequence of events that led to the crash.
+
+---
+
+## Dashboard preview
+
+**Event list** — all captured events for an app and date, with type badges, timestamps, and HTTP status codes at a glance:
+
+![Event list](https://raw.githubusercontent.com/rilog-development/resources/main/example1.png)
+
+**Event detail** — click any event to inspect the full payload: URL, method, request and response body, headers, device info, and custom params:
+
+![Event detail](https://raw.githubusercontent.com/rilog-development/resources/main/example2.png)
 
 ---
 
@@ -84,6 +100,7 @@ Open the rilog local server dashboard at the URL where you deployed it — HTTP 
 
 ---
 
+-   [Dashboard preview](#dashboard-preview)
 -   [Installation and usage](#installation-and-usage)
 -   [Axios — wrapAxios](#axios--wrapaxios)
 -   [XHR interception](#xhr-interception)
