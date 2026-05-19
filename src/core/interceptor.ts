@@ -1,5 +1,5 @@
 import { saveEventsCustom, saveEventsToRilog } from '../api';
-import { BASE_URL, DEFAULT_LOCAL_URL, EVENTS_ARRAY_LIMIT, LONG_TIMER_LIMIT, REQUEST_TIMEOUT_LIMIT } from '../constants';
+import { BASE_URL, DEFAULT_LOCAL_URL, EVENTS_ARRAY_LIMIT, LONG_TIMER_LIMIT, MAX_SEND_FAILURES, REQUEST_TIMEOUT_LIMIT, SEND_COOLDOWN_MS } from '../constants';
 import ClickInterceptor from '../feature/interceptors/click';
 import { IRilogClickInterceptor } from '../feature/interceptors/click/types';
 import { isButtonElement } from '../feature/interceptors/click/utils';
@@ -37,6 +37,8 @@ class RilogInterceptor implements IRilogInterceptror {
     private storage: IEventStorage;
     private eventsCache: IRilogEventItem[] = [];
     private isSending = false;
+    private sendFailures = 0;
+    private sendCooldownUntil = 0;
     private deviceInfo: TDeviceInfo;
 
     public init: TRilogState['init'] = false;
@@ -219,6 +221,8 @@ class RilogInterceptor implements IRilogInterceptror {
 
     private async saveEvents(data: IRilogEventItem[], idsToDelete: string[]) {
         if (this.isSending) return;
+        if (Date.now() < this.sendCooldownUntil) return;
+
         this.isSending = true;
 
         try {
@@ -230,12 +234,26 @@ class RilogInterceptor implements IRilogInterceptror {
             this.timer.clearLong();
 
             if (result?.result?.toLowerCase() === 'success') {
+                this.sendFailures = 0;
+                this.sendCooldownUntil = 0;
                 await this.storage.clearByIds(idsToDelete);
                 const deletedIds = new Set(idsToDelete);
                 this.eventsCache = this.eventsCache.filter((e) => !deletedIds.has(e._id));
+            } else {
+                this.onSendFailure();
             }
+        } catch {
+            this.onSendFailure();
         } finally {
             this.isSending = false;
+        }
+    }
+
+    private onSendFailure() {
+        this.sendFailures++;
+        if (this.sendFailures >= MAX_SEND_FAILURES) {
+            this.sendCooldownUntil = Date.now() + SEND_COOLDOWN_MS;
+            console.warn(`[Rilog-lib] Failed to send events ${MAX_SEND_FAILURES} times in a row. Pausing for ${SEND_COOLDOWN_MS / 1000}s.`);
         }
     }
 
