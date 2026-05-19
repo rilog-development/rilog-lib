@@ -59,8 +59,7 @@ describe('browser utils', () => {
     });
 
     describe('resolveDeviceType (via getDeviceInfo)', () => {
-        const setUA = (ua: string) =>
-            Object.defineProperty(window.navigator, 'userAgent', { value: ua, configurable: true });
+        const setUA = (ua: string) => Object.defineProperty(window.navigator, 'userAgent', { value: ua, configurable: true });
 
         it('detects mobile from iPhone UA', () => {
             setUA('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) AppleWebKit/605.1');

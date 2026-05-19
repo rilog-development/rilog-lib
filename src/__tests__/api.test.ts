@@ -4,8 +4,7 @@ import { initRequest } from '../api/init';
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-const jsonResponse = (body: object, status = 200) =>
-    Promise.resolve({ ok: status < 400, status, json: () => Promise.resolve(body) } as Response);
+const jsonResponse = (body: object, status = 200) => Promise.resolve({ ok: status < 400, status, json: () => Promise.resolve(body) } as Response);
 
 beforeEach(() => {
     mockFetch.mockReset();

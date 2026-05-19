@@ -243,7 +243,9 @@ describe('RilogInterceptor', () => {
     describe('onLogData', () => {
         it('pushes a DEBUG_MESSAGE event to storage', async () => {
             await new Promise<void>((resolve) => {
-                storage.push.mockImplementation(async () => { resolve(); });
+                storage.push.mockImplementation(async () => {
+                    resolve();
+                });
                 interceptor.onLogData('hello world', { label: 'test' });
             });
             const event = storage.push.mock.calls[0][0];
@@ -335,7 +337,7 @@ describe('RilogInterceptor', () => {
             expect(storage.push).toHaveBeenCalledTimes(1);
             const event = storage.push.mock.calls[0][0];
             expect(event.type).toBe(ERilogEvent.REQUEST);
-            expect((event.data as any).response.data).toContain("Timeout");
+            expect((event.data as any).response.data).toContain('Timeout');
             jest.useRealTimers();
         });
     });
