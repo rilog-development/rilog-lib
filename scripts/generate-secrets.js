@@ -29,7 +29,7 @@ const content = `// Auto-generated from .env — DO NOT COMMIT
 // Regenerated on every build via: node scripts/generate-secrets.js
 
 export const BASE_URL = '${get('RILOG_BASE_URL', 'http://localhost:3000')}';
-export const LOCAL_BASE_URL = '${get('RILOG_LOCAL_BASE_URL', 'http://localhost:3025')}';
+export const LOCAL_BASE_URL = '${get('RILOG_LOCAL_BASE_URL', 'http://localhost:3030')}';
 export const TOKEN_GENERATION_SALT = '${get('RILOG_TOKEN_GENERATION_SALT', 'rilog by kaowebdev')}';
 export const TOKEN_GENERATION_TIMESTAMP = '${get('RILOG_TOKEN_GENERATION_TIMESTAMP', '3456745647')}';
 `;

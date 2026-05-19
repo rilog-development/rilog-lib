@@ -1,5 +1,6 @@
 import Rilog from './core/Rilog';
 import { TRilogState } from './types';
+import { presets } from './presets';
 
 const defaultState = {
     init: false,
@@ -10,4 +11,5 @@ const defaultState = {
 
 const rilog = new Rilog(defaultState);
 
+export { presets };
 export default rilog;

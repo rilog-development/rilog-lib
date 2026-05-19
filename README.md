@@ -96,12 +96,44 @@ Open the rilog local server dashboard at the URL where you deployed it — HTTP 
 | Svelte          | ⚡ Partial |
 | Plain HTML + JS | ✅ Full    |
 
+## Framework presets
+
+> **Important:** Without presets, Rilog captures every HTTP request — including internal framework and dev-server traffic. In a Next.js app this means hundreds of `__nextjs_*`, `_vercel/` and HMR requests filling your storage with noise. Add the matching preset when you initialise the library.
+
+`rilog-lib` exports ready-made `ignoredRequests` arrays for popular frameworks and common third-party tools. Spread one or more into your config — they combine cleanly because each preset is just a plain `string[]`.
+
+```typescript
+import rilog, { presets } from '@rilog-development/rilog-lib';
+
+rilog.init({
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    ignoredRequests: [
+        ...presets.nextjs,       // /__nextjs_*, _next/webpack-hmr, _vercel/
+        ...presets.noAnalytics,  // google-analytics.com, gtm, hotjar, segment, mixpanel
+        '/api/health',           // your own additions go right here
+    ],
+});
+```
+
+### Available presets
+
+| Preset | Filters | Use when |
+| --- | --- | --- |
+| `presets.nextjs` | `__nextjs_*`, `_next/webpack-hmr`, `_vercel/` | App runs on Next.js or is deployed to Vercel |
+| `presets.vite` | `/@vite/`, `/@react-refresh`, `/@fs/` | App uses Vite as the dev server (React, Vue, Svelte…) |
+| `presets.noAnalytics` | Google Analytics, GTM, Hotjar, Segment, Mixpanel | You don't need to track third-party analytics requests |
+
+You can also mix presets with `config.ignoredRequests` from the full [Config reference](#config) — they are merged into a single list.
+
+---
+
 ## Table of Contents
 
 ---
 
 -   [Dashboard preview](#dashboard-preview)
 -   [Installation and usage](#installation-and-usage)
+-   [Framework presets](#framework-presets)
 -   [Axios — wrapAxios](#axios--wrapaxios)
 -   [XHR interception](#xhr-interception)
 -   [Axios vs XHR strategy](#axios-vs-xhr-strategy)
@@ -615,7 +647,7 @@ createRoot(document.getElementById('root')!).render(
 // app/providers.tsx
 'use client';
 import { useEffect } from 'react';
-import rilog from '@rilog-development/rilog-lib';
+import rilog, { presets } from '@rilog-development/rilog-lib';
 
 export function RilogProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
@@ -625,18 +657,20 @@ export function RilogProvider({ children }: { children: React.ReactNode }) {
                 url: 'http://localhost:3030',
                 params: { env: process.env.NODE_ENV },
             },
+            // Recommended: filter out Next.js internal requests to keep storage clean
+            ignoredRequests: [...presets.nextjs],
         });
     }, []);
     return <>{children}</>;
 }
 ```
 
-**Vue 3**
+**Vue 3 (Vite)**
 
 ```typescript
 // src/plugins/rilog.ts
 import type { App } from 'vue';
-import rilog from '@rilog-development/rilog-lib';
+import rilog, { presets } from '@rilog-development/rilog-lib';
 
 export function installRilog(app: App) {
     rilog.init({
@@ -645,6 +679,8 @@ export function installRilog(app: App) {
             url: 'http://localhost:3030',
             params: { env: import.meta.env.MODE },
         },
+        // Recommended: filter out Vite dev-server requests to keep storage clean
+        ignoredRequests: [...presets.vite],
     });
 }
 ```
@@ -801,10 +837,27 @@ rilog.init({
 
 ### Ignored requests
 
+Pass a list of URL substrings. Any request whose URL contains one of these strings will be skipped entirely.
+
 ```javascript
 rilog.init({
     localServer: { appName: 'my-app', url: 'http://localhost:3030' },
     ignoredRequests: ['https://analytics.example.com', '/api/health'],
+});
+```
+
+Use [framework presets](#framework-presets) to quickly add common filters without listing each URL manually:
+
+```javascript
+import rilog, { presets } from '@rilog-development/rilog-lib';
+
+rilog.init({
+    localServer: { appName: 'my-app', url: 'http://localhost:3030' },
+    ignoredRequests: [
+        ...presets.nextjs,
+        ...presets.noAnalytics,
+        '/api/health',
+    ],
 });
 ```
 
