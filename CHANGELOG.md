@@ -1,6 +1,30 @@
 # Changelog
 
 
+## v0.6.7...v0.6.8
+
+[compare changes](https://github.com/rilog-development/rilog-lib/compare/v0.6.7...v0.6.8)
+
+### 🚀 Enhancements
+
+- **presets:** Add framework preset arrays for ignoredRequests filtering ([8bd777b](https://github.com/rilog-development/rilog-lib/commit/8bd777b))
+
+### 🩹 Fixes
+
+- **interceptor:** Add send failure counter with cooldown to prevent infinite retry loop ([69ee1b5](https://github.com/rilog-development/rilog-lib/commit/69ee1b5))
+
+### 🏡 Chore
+
+- Untrack .idea/git_toolbox_prj.xml (already in .gitignore) ([a6e0ec1](https://github.com/rilog-development/rilog-lib/commit/a6e0ec1))
+
+### ✅ Tests
+
+- Add coverage for api, IDBStorage, and core interceptor ([e56d5f8](https://github.com/rilog-development/rilog-lib/commit/e56d5f8))
+
+### ❤️ Contributors
+
+- Andrii Karnaukh <a.karnaukh@sagax.software>
+
 ## v0.4.0...v0.5.9
 
 [compare changes](https://github.com/rilog-development/rilog-lib/compare/v0.4.0...v0.5.9)

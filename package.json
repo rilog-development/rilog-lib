@@ -22,7 +22,7 @@
     "lint": "tslint -p tsconfig.json",
     "prepare": "npm run build && husky",
     "prepublishOnly": "npm run lint",
-    "version": "npm run format && changelogen && git add -A src CHANGELOG.md",
+    "version": "npm run format && changelogen --from $(git describe --abbrev=0 --tags) && git add -A src CHANGELOG.md",
     "postversion": "git push && git push --tags",
     "minor": "npm version minor",
     "patch": "npm version patch",
