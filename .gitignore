@@ -3,6 +3,6 @@ node_modules
 dist
 .idea
 .env
-src/secrets.ts
+**/secrets.ts
 coverage
 .claude

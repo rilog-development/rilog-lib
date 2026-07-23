@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - run: npm run build
+      - run: npm run build --workspace=@rilog-development/rilog-lib
 
   publish-gpr:
     needs: build
@@ -28,7 +28,7 @@ jobs:
           node-version: 20
           registry-url: https://npm.pkg.github.com/
       - run: npm install
-      - run: npm run build
-      - run: npm publish
+      - run: npm run build --workspace=@rilog-development/rilog-lib
+      - run: npm publish --workspace=@rilog-development/rilog-lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
