@@ -1,7 +1,5 @@
 import RilogFilterRequest from '../core/filterRequest';
-import { TRilogInitConfig } from '../types';
-import { IRilogRequestTimed } from '../types/requests';
-import { IRilogEventItem, ERilogEvent } from '../types/events';
+import { ERilogEvent, IRilogEventItem, IRilogRequestTimed, TRilogCaptureConfig } from '@rilog-development/rilog-shared';
 
 const makeRequest = (overrides: Partial<IRilogRequestTimed> = {}): IRilogRequestTimed => ({
     url: 'https://api.example.com/data',
@@ -30,13 +28,13 @@ describe('RilogFilterRequest', () => {
         });
 
         it('returns true when url matches an ignored entry (case-insensitive)', () => {
-            const config: TRilogInitConfig = { ignoredRequests: ['API.EXAMPLE.COM'] };
+            const config: TRilogCaptureConfig = { ignoredRequests: ['API.EXAMPLE.COM'] };
             const filter = new RilogFilterRequest(config);
             expect(filter.isIgnoredRequest(makeRequest())).toBe(true);
         });
 
         it('returns false when url does not match any ignored entry', () => {
-            const config: TRilogInitConfig = { ignoredRequests: ['other-domain.com'] };
+            const config: TRilogCaptureConfig = { ignoredRequests: ['other-domain.com'] };
             const filter = new RilogFilterRequest(config);
             expect(filter.isIgnoredRequest(makeRequest())).toBe(false);
         });
@@ -56,7 +54,7 @@ describe('RilogFilterRequest', () => {
 
     describe('getRequests — sensitive URL (headers + body masked)', () => {
         it('masks headers and data when url matches sensetiveRequsts', () => {
-            const config: TRilogInitConfig = { sensetiveRequsts: ['/api/auth'] };
+            const config: TRilogCaptureConfig = { sensetiveRequsts: ['/api/auth'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest({ url: 'https://api.example.com/api/auth/login' }));
             expect(result.headers).toBe('sensetive');
@@ -64,7 +62,7 @@ describe('RilogFilterRequest', () => {
         });
 
         it('does not mask non-matching URLs', () => {
-            const config: TRilogInitConfig = { sensetiveRequsts: ['/api/auth'] };
+            const config: TRilogCaptureConfig = { sensetiveRequsts: ['/api/auth'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest());
             expect(result.data).not.toBe('sensetive');
@@ -73,7 +71,7 @@ describe('RilogFilterRequest', () => {
 
     describe('getRequests — sensetiveDataRequests (body only masked)', () => {
         it('masks only data, not headers, for matching URL', () => {
-            const config: TRilogInitConfig = { sensetiveDataRequests: ['/api/pay'] };
+            const config: TRilogCaptureConfig = { sensetiveDataRequests: ['/api/pay'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest({ url: 'https://api.example.com/api/pay/card' }));
             expect(result.data).toBe('sensetive');
@@ -83,7 +81,7 @@ describe('RilogFilterRequest', () => {
 
     describe('getRequests — headers allowlist', () => {
         it('returns only allowlisted headers', () => {
-            const config: TRilogInitConfig = { headers: ['Content-Type'] };
+            const config: TRilogCaptureConfig = { headers: ['Content-Type'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest());
             expect(result.headers).toEqual({ 'Content-Type': 'application/json' });
@@ -91,7 +89,7 @@ describe('RilogFilterRequest', () => {
         });
 
         it('returns empty object when allowlisted header is not present', () => {
-            const config: TRilogInitConfig = { headers: ['X-Custom-Header'] };
+            const config: TRilogCaptureConfig = { headers: ['X-Custom-Header'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest());
             expect(result.headers).toEqual({});
@@ -105,7 +103,7 @@ describe('RilogFilterRequest', () => {
         });
 
         it('preserves sensetive headers marker and skips header filtering', () => {
-            const config: TRilogInitConfig = { sensetiveRequsts: ['/api/auth'], headers: ['Content-Type'] };
+            const config: TRilogCaptureConfig = { sensetiveRequsts: ['/api/auth'], headers: ['Content-Type'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest({ url: 'https://api.example.com/api/auth' }));
             expect(result.headers).toBe('sensetive');
@@ -120,21 +118,21 @@ describe('RilogFilterRequest', () => {
         });
 
         it('returns empty string when localStorage data is null', () => {
-            const config: TRilogInitConfig = { localStorage: ['token'] };
+            const config: TRilogCaptureConfig = { localStorage: ['token'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest({ localStorage: null }));
             expect(result.localStorage).toBe('');
         });
 
         it('filters localStorage to only allowlisted keys', () => {
-            const config: TRilogInitConfig = { localStorage: ['token'] };
+            const config: TRilogCaptureConfig = { localStorage: ['token'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest({ localStorage: JSON.stringify({ token: 'abc', userId: '1' }) }));
             expect(result.localStorage).toEqual({ token: 'abc' });
         });
 
         it('returns empty string when no allowlisted key is present in storage', () => {
-            const config: TRilogInitConfig = { localStorage: ['missingKey'] };
+            const config: TRilogCaptureConfig = { localStorage: ['missingKey'] };
             const filter = new RilogFilterRequest(config);
             const result = filter.getRequests(makeRequest({ localStorage: JSON.stringify({ token: 'abc' }) }));
             expect(result.localStorage).toBe('');

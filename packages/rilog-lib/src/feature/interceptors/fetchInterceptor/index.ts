@@ -1,4 +1,4 @@
-import { ISelfServer, TRilogPushRequest, TRilogPushResponse } from '../../../types';
+import { ISelfServer, TRilogPushRequest, TRilogPushResponse } from '@rilog-development/rilog-shared';
 import { isLibruarySensetiveRequest, isUrlIgnored } from '../../../utils/filters';
 
 const resolveUrl = (input: RequestInfo | URL): string => {

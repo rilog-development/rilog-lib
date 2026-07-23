@@ -1,7 +1,5 @@
-import { ERilogEvent, IRilogEventItem } from '../../../types/events';
-import { generateUniqueId, getLocation } from '../../../utils';
-import { parseStackTrace } from '../../../utils/transforms';
-import { IRilogConsoleData, IRilogConsoleInterceptor } from './types';
+import { ERilogEvent, generateUniqueId, getLocation, IRilogConsoleData, IRilogEventItem, parseStackTrace } from '@rilog-development/rilog-shared';
+import { IRilogConsoleInterceptor } from './types';
 
 type TConsoleLevel = 'warn' | 'error';
 

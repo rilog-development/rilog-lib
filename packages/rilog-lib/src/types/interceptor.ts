@@ -1,6 +1,5 @@
-import { IRilogMessageConfig } from '../feature/interceptors/message/types';
+import { IRilogMessageConfig, IRilogRequest, IRilogResponse } from '@rilog-development/rilog-shared';
 import { TRilogInitConfig, TRilogState } from './core';
-import { IRilogRequest, IRilogResponse } from './requests';
 
 export interface IRilogInterceptror {
     init: TRilogState['init'];

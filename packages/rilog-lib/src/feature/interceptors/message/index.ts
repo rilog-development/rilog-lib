@@ -1,6 +1,5 @@
-import { ERilogEvent } from '../../../types/events';
-import { generateUniqueId, getLocation } from '../../../utils';
-import { IRilogMessageConfig, IRilogMessageData, IRilogMessageInterceptor } from './types';
+import { ERilogEvent, generateUniqueId, getLocation, IRilogMessageConfig, IRilogMessageData } from '@rilog-development/rilog-shared';
+import { IRilogMessageInterceptor } from './types';
 
 class MessageInterceptor implements IRilogMessageInterceptor {
     public getMessageEvent<T>(data: T, config: IRilogMessageConfig | undefined, stackTrace?: string) {

@@ -1,4 +1,4 @@
-import { ISelfServer } from '../../../types';
+import { ISelfServer } from '@rilog-development/rilog-shared';
 import { isLibruarySensetiveRequest, isUrlIgnored } from '../../../utils/filters';
 import { TRilogXHRRequest, TRilogXHRResponse } from './types';
 

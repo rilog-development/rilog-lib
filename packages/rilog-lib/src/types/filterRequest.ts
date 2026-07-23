@@ -1,5 +1,4 @@
-import { IRilogEventItem } from './events';
-import { IRilogRequestTimed } from './requests';
+import { IRilogEventItem, IRilogRequestTimed } from '@rilog-development/rilog-shared';
 
 export interface IRilogFilterRequest {
     getRequests(data: IRilogRequestTimed): IRilogRequestTimed;

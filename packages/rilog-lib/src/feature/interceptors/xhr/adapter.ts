@@ -1,4 +1,4 @@
-import { IRilogRequest, IRilogResponse } from '../../../types';
+import { IRilogRequest, IRilogResponse } from '@rilog-development/rilog-shared';
 import { IXHRAdapter, TRilogXHRRequest, TRilogXHRResponse } from './types';
 
 class XHRAdapter implements IXHRAdapter {

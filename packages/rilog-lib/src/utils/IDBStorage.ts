@@ -1,4 +1,4 @@
-import { IRilogEventItem } from '../types/events';
+import { IRilogEventItem } from '@rilog-development/rilog-shared';
 import { IEventStorage } from '../types/storage';
 
 const DB_NAME = 'rilog_db';

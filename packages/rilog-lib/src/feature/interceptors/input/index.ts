@@ -1,6 +1,5 @@
-import { ERilogEvent, IRilogEventItem } from '../../../types/events';
-import { generateUniqueId, getLocation } from '../../../utils';
-import { IRilogInput, IRilogInputInterceptor, RilogInputEvent } from './types';
+import { ERilogEvent, generateUniqueId, getLocation, IRilogEventItem, IRilogInput, RilogInputEvent } from '@rilog-development/rilog-shared';
+import { IRilogInputInterceptor } from './types';
 
 const INPUT_NODES = ['input', 'textarea', 'select'];
 

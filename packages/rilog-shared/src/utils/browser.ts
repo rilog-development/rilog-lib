@@ -1,4 +1,4 @@
-import { TDeviceInfo, TExternalInfoMeta } from '../types/core';
+import { TDeviceInfo, TExternalInfoMeta } from '../types/config';
 import { IRilogLocation } from '../types/events';
 
 const getExternalInfo = (meta?: TExternalInfoMeta) => {

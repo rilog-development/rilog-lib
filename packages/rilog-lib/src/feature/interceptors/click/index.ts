@@ -1,8 +1,6 @@
-import { ERilogEvent, IRilogEventItem } from '../../../types/events';
-import { generateUniqueId, getLocation } from '../../../utils';
-import { logMethods } from '../../../utils/logger';
+import { ERilogEvent, generateUniqueId, getLocation, IRilogClick, IRilogEventItem, logMethods } from '@rilog-development/rilog-shared';
 import { BUTTON_NODES } from './constants';
-import { IRilogClick, IRilogClickInterceptor } from './types';
+import { IRilogClickInterceptor } from './types';
 import { SELF_SENSETIVE_CLICK_IDS } from '../../../constants';
 
 class ClickInterceptor implements IRilogClickInterceptor {

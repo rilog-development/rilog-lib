@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import MessageInterceptor from '../feature/interceptors/message';
-import { ERilogEvent } from '../types/events';
+import { ERilogEvent } from '@rilog-development/rilog-shared';
 
 describe('MessageInterceptor', () => {
     const interceptor = new MessageInterceptor();

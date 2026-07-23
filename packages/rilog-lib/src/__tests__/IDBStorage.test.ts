@@ -1,7 +1,6 @@
 import { IDBFactory } from 'fake-indexeddb';
 import IDBStorage from '../utils/IDBStorage';
-import { IRilogEventItem } from '../types/events';
-import { ERilogEvent } from '../types/events';
+import { ERilogEvent, IRilogEventItem } from '@rilog-development/rilog-shared';
 
 const makeEvent = (id: string): IRilogEventItem => ({
     _id: id,

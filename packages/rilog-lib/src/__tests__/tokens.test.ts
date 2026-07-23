@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import { getUserUniqToken, updateUserUniqToken, generateUniqueId } from '../utils/tokens';
+import { getUserUniqToken, updateUserUniqToken } from '../utils/tokens';
 import { RIL_TOKEN } from '../constants';
 
 describe('tokens', () => {
@@ -39,19 +39,6 @@ describe('tokens', () => {
             localStorage.setItem(RIL_TOKEN, 'old-token');
             updateUserUniqToken('replaced-token');
             expect(localStorage.getItem(RIL_TOKEN)).toBe('replaced-token');
-        });
-    });
-
-    describe('generateUniqueId', () => {
-        it('returns a non-empty string', () => {
-            const id = generateUniqueId();
-            expect(typeof id).toBe('string');
-            expect(id.length).toBeGreaterThan(0);
-        });
-
-        it('returns a unique value each call', () => {
-            const ids = new Set(Array.from({ length: 200 }, () => generateUniqueId()));
-            expect(ids.size).toBe(200);
         });
     });
 });

@@ -20,8 +20,7 @@ import RilogInterceptor from '../core/interceptor';
 import IDBStorage from '../utils/IDBStorage';
 import { saveEventsCustom, saveEventsToRilog } from '../api';
 import { EVENTS_ARRAY_LIMIT } from '../constants';
-import { ERilogEvent } from '../types/events';
-import { IRilogRequest, IRilogResponse } from '../types';
+import { ERilogEvent, IRilogRequest, IRilogResponse } from '@rilog-development/rilog-shared';
 
 const mockSaveEventsCustom = saveEventsCustom as jest.Mock;
 const mockSaveEventsToRilog = saveEventsToRilog as jest.Mock;

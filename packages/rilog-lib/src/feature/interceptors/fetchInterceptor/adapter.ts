@@ -1,5 +1,4 @@
-import { IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } from '../../../types';
-import { getQueryParamsFromUrl } from '../../../utils/transforms';
+import { getQueryParamsFromUrl, IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } from '@rilog-development/rilog-shared';
 import { IFetchAdapter } from './types';
 
 class FetchAdapter implements IFetchAdapter {

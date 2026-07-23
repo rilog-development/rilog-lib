@@ -1,12 +1,11 @@
-import { IRilogRequestTimed, TRilogInitConfig } from '../types';
-import { IRilogEventItem } from '../types/events';
+import { IRilogEventItem, IRilogRequestTimed, TRilogCaptureConfig } from '@rilog-development/rilog-shared';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { isLibruarySensetiveRequest, isUrlIgnored } from '../utils/filters';
 
 class RilogFilterRequest implements IRilogFilterRequest {
-    private config: TRilogInitConfig | null;
+    private config: TRilogCaptureConfig | null;
 
-    constructor(config: TRilogInitConfig | null) {
+    constructor(config: TRilogCaptureConfig | null) {
         this.config = config;
     }
 

@@ -16,7 +16,7 @@ if (typeof PromiseRejectionEvent === 'undefined') {
 }
 
 import ConsoleInterceptor from '../feature/interceptors/console';
-import { ERilogEvent } from '../types/events';
+import { ERilogEvent } from '@rilog-development/rilog-shared';
 
 describe('ConsoleInterceptor', () => {
     let interceptor: ConsoleInterceptor;

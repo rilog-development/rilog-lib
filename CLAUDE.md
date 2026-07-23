@@ -9,8 +9,10 @@ Monorepo (npm workspaces) for the Rilog client-side ecosystem — the frontend m
 ```
 packages/
 ├── rilog-lib/              # @rilog-development/rilog-lib — the published npm library. See packages/rilog-lib/CLAUDE.md.
-├── rilog-shared/            # @rilog-development/rilog-shared — placeholder. Will hold interceptor logic + types shared
-│                             # between rilog-lib and the Chrome extension (not yet extracted).
+├── rilog-shared/            # @rilog-development/rilog-shared — event/request types + generic capture-agnostic
+│                             # utilities shared with the Chrome extension. See packages/rilog-shared/README.md.
+│                             # Deliberately does NOT hold interceptor implementations — those stay in rilog-lib,
+│                             # since the extension is expected to implement its own capture mechanics.
 └── rilog-chrome-extension/  # rilog-chrome-extension — placeholder. Manifest V3 DevTools extension (not yet scaffolded).
 ```
 
@@ -28,13 +30,13 @@ npm test --workspace=@rilog-development/rilog-lib
 
 ## Repo-wide conventions
 
-- **Intentional typos** in identifiers (`sensetive`, `libruaryRequest`, `queque`) originate in `rilog-lib` and should be preserved wherever that code is reused (e.g. once extracted into `rilog-shared`) — do not rename them.
+- **Intentional typos** in identifiers (`sensetive`, `libruaryRequest`, `queque`) originate in `rilog-lib` and should be preserved wherever that code is reused (e.g. in `rilog-shared`'s types) — do not rename them.
 - CI (`.github/workflows/ci.yml`, `.github/workflows/release-package.yml`) installs from the repo root and scopes build/test/publish to the `@rilog-development/rilog-lib` workspace. Update these when a package gains its own CI needs (e.g. the extension's own build/package step).
 - `rilog-lib` is the only package currently published (to npm). `rilog-shared` and `rilog-chrome-extension` are unpublished scaffolds — do not add real publish steps for them until they have real content.
 
 ## History
 
-This repo was `rilog-lib` as a standalone package until it was restructured into this monorepo (on branch `feature/rilog-chrome-extension`) to support building a Chrome DevTools extension that reuses `rilog-lib`'s capture logic. The GitHub remote is still named `rilog-lib` — renaming it is a separate, manual step outside of git.
+This repo was `rilog-lib` as a standalone package until it was restructured into this monorepo (on branch `feature/rilog-chrome-extension`) to support building a Chrome DevTools extension that shares `rilog-lib`'s event/type contract (not its capture implementation — see `rilog-shared`'s README for that boundary). The GitHub remote is still named `rilog-lib` — renaming it is a separate, manual step outside of git.
 
 ---
 

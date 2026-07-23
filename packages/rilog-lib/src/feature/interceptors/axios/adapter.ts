@@ -1,5 +1,5 @@
 import { SUCCESS_RESPONSE_STATUS_START_CODE } from '../../../constants';
-import { IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } from '../../../types/requests';
+import { IRilogRequest, IRilogResponse, TRilogPushRequest, TRilogPushResponse } from '@rilog-development/rilog-shared';
 import { IAxiosAdapter } from './types';
 
 class AxiosAdapter implements IAxiosAdapter {

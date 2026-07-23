@@ -1,4 +1,4 @@
-import { IRilogRequest, IRilogResponse } from '../../../types';
+import { IRilogRequest, IRilogResponse } from '@rilog-development/rilog-shared';
 
 export type TRilogXHRRequest = {
     url: string;

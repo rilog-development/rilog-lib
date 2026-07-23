@@ -8,15 +8,13 @@ import { IRilogConsoleInterceptor } from '../feature/interceptors/console/types'
 import InputInterceptor from '../feature/interceptors/input';
 import { IRilogInputInterceptor } from '../feature/interceptors/input/types';
 import MessageInterceptor from '../feature/interceptors/message';
-import { IRilogMessageConfig, IRilogMessageInterceptor } from '../feature/interceptors/message/types';
-import { IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, TRilogInitConfig, TRilogState } from '../types';
-import { ERilogEvent, IRilogEventItem } from '../types/events';
+import { IRilogMessageInterceptor } from '../feature/interceptors/message/types';
+import { ERilogEvent, generateUniqueId, getDeviceInfo, getLocation, IRilogEventItem, IRilogMessageConfig, IRilogRequest, IRilogRequestItem, IRilogRequestTimed, IRilogResponse, TDeviceInfo } from '@rilog-development/rilog-shared';
+import { TRilogInitConfig, TRilogState } from '../types';
 import { IRilogFilterRequest } from '../types/filterRequest';
 import { IRilogInterceptror, TSendEvents } from '../types/interceptor';
 import { IEventStorage } from '../types/storage';
 import { IRilogTimer } from '../types/timer';
-import { generateUniqueId, getDeviceInfo, getLocation } from '../utils';
-import { TDeviceInfo } from '../types/core';
 import IDBStorage from '../utils/IDBStorage';
 import RilogFilterRequest from './filterRequest';
 import RilogTimer from './timer';

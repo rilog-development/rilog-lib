@@ -7,13 +7,10 @@ import { IFetchAdapter } from '../feature/interceptors/fetchInterceptor/types';
 import { initXHRInterception } from '../feature/interceptors/xhr';
 import XHRAdapter from '../feature/interceptors/xhr/adapter';
 import { IXHRAdapter, TRilogXHRRequest, TRilogXHRResponse } from '../feature/interceptors/xhr/types';
-import { IRilogMessageConfig } from '../feature/interceptors/message/types';
-import { IAxiosLike, IRilog, TRilogExtensions, TRilogInitConfig, TRilogPushRequest, TRilogPushResponse, TRilogState } from '../types';
+import { getDeviceInfo, getExternalInfo, IRilogMessageConfig, logMethods, parseStackTrace, TRilogPushRequest, TRilogPushResponse } from '@rilog-development/rilog-shared';
+import { IAxiosLike, IRilog, TRilogExtensions, TRilogInitConfig, TRilogState } from '../types';
 import { IRilogInterceptror } from '../types/interceptor';
 import { getUserUniqToken, updateUserUniqToken } from '../utils';
-import { getDeviceInfo, getExternalInfo } from '../utils/browser';
-import { parseStackTrace } from '../utils/transforms';
-import { logMethods } from '../utils/logger';
 import RilogInterceptor from './interceptor';
 
 class Rilog implements IRilog {
