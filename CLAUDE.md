@@ -13,10 +13,11 @@ packages/
 │                             # utilities shared with the Chrome extension. See packages/rilog-shared/README.md.
 │                             # Deliberately does NOT hold interceptor implementations — those stay in rilog-lib,
 │                             # since the extension is expected to implement its own capture mechanics.
-└── rilog-chrome-extension/  # rilog-chrome-extension — placeholder. Manifest V3 DevTools extension (not yet scaffolded).
+└── rilog-chrome-extension/  # rilog-chrome-extension — Manifest V3 DevTools extension (vite + @crxjs/vite-plugin).
+│                             # See packages/rilog-chrome-extension/README.md.
 ```
 
-Each package has its own `CLAUDE.md` with package-specific commands and architecture once it has real content — start there for anything below `packages/<name>/`. This root file only covers cross-package/repo-wide concerns.
+Each package has its own `CLAUDE.md`/`README.md` with package-specific commands and architecture — start there for anything below `packages/<name>/`. This root file only covers cross-package/repo-wide concerns.
 
 ## Commands
 
@@ -24,6 +25,7 @@ Each package has its own `CLAUDE.md` with package-specific commands and architec
 npm install                                              # installs all workspaces from the root
 npm run build --workspace=@rilog-development/rilog-lib   # or: cd packages/rilog-lib && npm run build
 npm test --workspace=@rilog-development/rilog-lib
+npm run build --workspace=rilog-chrome-extension          # or: cd packages/rilog-chrome-extension && npm run build
 ```
 
 `rilog-lib` keeps its own local dev scripts (`yarn build`/`yarn test`/`yarn patch`/`yarn release`, see `packages/rilog-lib/CLAUDE.md`) — those are run from inside `packages/rilog-lib` directly and are unaffected by the workspace root, except that `node_modules` are hoisted to the repo root by npm workspaces.
@@ -32,7 +34,7 @@ npm test --workspace=@rilog-development/rilog-lib
 
 - **Intentional typos** in identifiers (`sensetive`, `libruaryRequest`, `queque`) originate in `rilog-lib` and should be preserved wherever that code is reused (e.g. in `rilog-shared`'s types) — do not rename them.
 - CI (`.github/workflows/ci.yml`, `.github/workflows/release-package.yml`) installs from the repo root and scopes build/test/publish to the `@rilog-development/rilog-lib` workspace. Update these when a package gains its own CI needs (e.g. the extension's own build/package step).
-- `rilog-lib` is the only package currently published (to npm). `rilog-shared` and `rilog-chrome-extension` are unpublished scaffolds — do not add real publish steps for them until they have real content.
+- `rilog-lib` is the only package currently published (to npm). `rilog-shared` is an internal npm-workspace-only package (never published). `rilog-chrome-extension` is not yet published to the Chrome Web Store — do not add a real publish/release step until that's actually wanted.
 
 ## History
 

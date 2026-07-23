@@ -1,6 +1,25 @@
 {
   "name": "rilog-chrome-extension",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rilog-development/rilog-shared": "*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.7.1",
+    "@types/chrome": "^0.0.287",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "5.6.3",
+    "vite": "^5.4.20"
+  }
 }
