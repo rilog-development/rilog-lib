@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
+    "test": "npm test --workspaces --if-present",
     "build:lib": "npm run build --workspace=@rilog-development/rilog-lib",
     "test:lib": "npm run test --workspace=@rilog-development/rilog-lib",
     "lint:lib": "npm run lint --workspace=@rilog-development/rilog-lib",

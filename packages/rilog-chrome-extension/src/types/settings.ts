@@ -7,6 +7,6 @@ export interface IRilogSettings {
 }
 
 export const createDefaultSettings = (): IRilogSettings => ({
-    autoScroll: false,
+    autoScroll: true,
     ignoredUrlPatterns: [],
 });

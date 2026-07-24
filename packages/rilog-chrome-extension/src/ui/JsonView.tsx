@@ -12,7 +12,7 @@ function PrimitiveValue({ value }: { value: unknown }) {
 function JsonNode({ label, value, depth }: { label?: string; value: unknown; depth: number }) {
     const isObject = value !== null && typeof value === 'object';
     const isArray = Array.isArray(value);
-    const [collapsed, setCollapsed] = useState(depth >= 2);
+    const [collapsed, setCollapsed] = useState(false);
 
     const labelNode = label !== undefined && <span style={{ color: 'var(--text-muted)' }}>{label}: </span>;
 
