@@ -10,6 +10,11 @@ export default defineConfig({
         emptyOutDir: true,
         rollupOptions: {
             input: {
+                // Only pages crxjs can't auto-discover from manifest.json need to be listed here.
+                // The devtools panel page is referenced solely as a runtime string argument to
+                // chrome.devtools.panels.create(...) inside devtools.ts, so the build tool has no
+                // static way to find it — without this it silently never gets emitted to dist/.
+                panel: 'src/devtools/panel/index.html',
                 share: 'src/share/index.html',
             },
         },

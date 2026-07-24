@@ -140,3 +140,41 @@ button {
     background: var(--row-hover);
     color: var(--text);
 }
+
+.rilog-resize-handle {
+    position: absolute;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.rilog-resize-handle.col {
+    top: 0;
+    bottom: 0;
+    left: -5px;
+    width: 11px;
+    cursor: col-resize;
+}
+.rilog-resize-handle.row {
+    left: 0;
+    right: 0;
+    top: -5px;
+    height: 11px;
+    cursor: row-resize;
+}
+.rilog-resize-grip {
+    background: var(--border-strong);
+    border-radius: 3px;
+    transition: background 0.12s ease;
+}
+.rilog-resize-handle.col .rilog-resize-grip {
+    width: 4px;
+    height: 36px;
+}
+.rilog-resize-handle.row .rilog-resize-grip {
+    height: 4px;
+    width: 36px;
+}
+.rilog-resize-handle:hover .rilog-resize-grip {
+    background: var(--accent);
+}

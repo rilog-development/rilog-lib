@@ -1,5 +1,6 @@
 import { IRilogEventItem } from '@rilog-development/rilog-shared';
 import { IRilogRule } from './rules';
+import { IRilogSettings } from './settings';
 
 /** window.postMessage source tags used by the page <-> content-script bridge. */
 export const BRIDGE_SOURCE_CAPTURE = 'rilog-devtools-capture';
@@ -32,16 +33,23 @@ export type TRuntimeMessage =
     | { type: 'rilog/get-rules' }
     | { type: 'rilog/save-rule'; rule: IRilogRule }
     | { type: 'rilog/delete-rule'; ruleId: string }
-    | { type: 'rilog/share-event'; extensionEventId: string; tabId: number };
+    | { type: 'rilog/share-event'; extensionEventId: string; tabId: number }
+    | { type: 'rilog/get-settings' }
+    | { type: 'rilog/save-settings'; settings: IRilogSettings };
 
 export type TRuntimeResponse =
     | { type: 'rilog/events'; events: IExtensionEvent[] }
     | { type: 'rilog/rules'; rules: IRilogRule[] }
     | { type: 'rilog/share-result'; url: string }
+    | { type: 'rilog/settings'; settings: IRilogSettings }
     | { type: 'rilog/error'; message: string }
     | { type: 'rilog/ok' };
 
 /** Port name prefix used by the DevTools panel: `${DEVTOOLS_PORT_PREFIX}:${inspectedTabId}` */
 export const DEVTOOLS_PORT_PREFIX = 'rilog-devtools-panel';
 
-export type TPortMessage = { type: 'rilog/event-added'; event: IExtensionEvent } | { type: 'rilog/event-updated'; event: IExtensionEvent } | { type: 'rilog/events-cleared' };
+export type TPortMessage =
+    | { type: 'rilog/event-added'; event: IExtensionEvent }
+    | { type: 'rilog/event-updated'; event: IExtensionEvent }
+    | { type: 'rilog/events-cleared' }
+    | { type: 'rilog/notify'; title: string; body?: string; extensionEventId: string };

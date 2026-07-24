@@ -24,13 +24,99 @@ export async function deleteRule(ruleId: string): Promise<IRilogRule[]> {
     return rules;
 }
 
-function getByPath(obj: unknown, path: string): unknown {
-    return path.split('.').reduce<unknown>((acc, key) => (acc && typeof acc === 'object' ? (acc as Record<string, unknown>)[key] : undefined), obj);
+const PATH_SEGMENT_RE = /^([^[]*)(\[(\d*)\])?$/;
+
+/**
+ * Dot-path resolver with array support:
+ *  - `content[0].isFavorite` reads a specific index.
+ *  - `content[].isFavorite` fans out over every element of the array, matching if ANY satisfies
+ *    the rest of the path — for when you don't care which index it's at.
+ */
+function resolvePathValues(obj: unknown, path: string): unknown[] {
+    const segments = path.split('.').filter(Boolean);
+    let current: unknown[] = [obj];
+
+    for (const segment of segments) {
+        const parsed = segment.match(PATH_SEGMENT_RE);
+        const key = parsed?.[1] ?? segment;
+        const hasBracket = parsed?.[2] !== undefined;
+        const indexStr = parsed?.[3];
+        const next: unknown[] = [];
+
+        for (const item of current) {
+            if (item === null || typeof item !== 'object') continue;
+            const value = key ? (item as Record<string, unknown>)[key] : item;
+
+            if (hasBracket) {
+                if (!Array.isArray(value)) continue;
+                if (indexStr) {
+                    const idx = Number(indexStr);
+                    if (idx < value.length) next.push(value[idx]);
+                } else {
+                    next.push(...value);
+                }
+            } else {
+                next.push(value);
+            }
+        }
+
+        current = next;
+    }
+
+    return current;
 }
 
-function matchRequest(rule: IRilogRule, item: IRilogRequestItem): boolean {
-    const { match } = rule;
+/** Turns plain typed text into a real value with no JSON syntax required: `null`/`true`/`false`
+ * and plain numbers are recognized, anything else (including things that merely look numeric
+ * but aren't meant to be, e.g. leave as-is) is compared as a string. */
+function parseTypedLiteral(raw: string): unknown {
+    const trimmed = raw.trim();
+    if (trimmed === 'null') return null;
+    if (trimmed === 'true') return true;
+    if (trimmed === 'false') return false;
+    if (trimmed !== '' && !Number.isNaN(Number(trimmed))) return Number(trimmed);
+    return raw;
+}
 
+function valuesEqual(a: unknown, b: unknown): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function matchBodyPath(match: IRilogRule['match'], dataSources: unknown[]): boolean {
+    if (!match.bodyPath) return true;
+
+    const values = dataSources.flatMap((data) => resolvePathValues(data, match.bodyPath!));
+    if (values.length === 0) return false;
+
+    const operator = match.bodyOperator ?? 'exists';
+    if (operator === 'exists') return true;
+
+    const target = parseTypedLiteral(match.bodyValue ?? '');
+    if (operator === 'equals') return values.some((v) => valuesEqual(v, target));
+    if (operator === 'notEquals') return values.every((v) => !valuesEqual(v, target));
+    if (operator === 'contains') return values.some((v) => String(v).toLowerCase().includes(String(target).toLowerCase()));
+
+    return true;
+}
+
+const STATUS_WILDCARD_RE = /^([0-9])\*\*$/;
+
+/** `pattern` is either an exact code ("503") or a hundred-range wildcard ("5**" for any 500-599). */
+function matchStatusPattern(pattern: string, actual: string | null | undefined): boolean {
+    const trimmed = pattern.trim();
+    const wildcard = trimmed.match(STATUS_WILDCARD_RE);
+    const code = Number(actual);
+    if (Number.isNaN(code)) return false;
+
+    if (wildcard) {
+        const hundred = Number(wildcard[1]) * 100;
+        return code >= hundred && code < hundred + 100;
+    }
+
+    return String(code) === trimmed;
+}
+
+function matchRequestSpecifics(match: IRilogRule['match'], item: IRilogRequestItem): boolean {
     if (match.urlPattern) {
         try {
             if (!new RegExp(match.urlPattern, 'i').test(item.request.url)) return false;
@@ -41,25 +127,13 @@ function matchRequest(rule: IRilogRule, item: IRilogRequestItem): boolean {
 
     if (match.method?.length && !match.method.includes(item.request.method)) return false;
 
-    if (match.status) {
-        const status = Number(item.response.status);
-        if (!Number.isNaN(status)) {
-            if (match.status.min !== undefined && status < match.status.min) return false;
-            if (match.status.max !== undefined && status > match.status.max) return false;
-        }
-    }
-
-    if (match.bodyPath) {
-        const value = getByPath(item.request.data, match.bodyPath) ?? getByPath(item.response.data, match.bodyPath);
-        if (value === undefined) return false;
-        if (match.bodyValue !== undefined && JSON.stringify(value) !== JSON.stringify(match.bodyValue)) return false;
-    }
+    if (match.status && !matchStatusPattern(match.status, item.response.status)) return false;
 
     return true;
 }
 
-function matchClick(rule: IRilogRule, click: IRilogClick): boolean {
-    const selector = rule.match.clickSelector?.trim();
+function matchClickSpecifics(match: IRilogRule['match'], click: IRilogClick): boolean {
+    const selector = match.clickSelector?.trim();
     if (!selector) return true;
 
     if (selector.startsWith('#')) return click.id === selector.slice(1);
@@ -67,21 +141,39 @@ function matchClick(rule: IRilogRule, click: IRilogClick): boolean {
     return click.nodeName.toLowerCase() === selector.toLowerCase();
 }
 
+/**
+ * A rule has exactly one eventType (see types/rules.ts), so there is no "any type" case to fall
+ * through — every branch below either matches its own criteria or explicitly returns false.
+ */
 export function matchRule(rule: IRilogRule, extEvent: IExtensionEvent): boolean {
     if (!rule.enabled) return false;
-    if (rule.eventTypes.length && !rule.eventTypes.includes(extEvent.event.type)) return false;
+    if (rule.eventType !== extEvent.event.type) return false;
 
     const { event } = extEvent;
-    if (event.type === ERilogEvent.REQUEST) return matchRequest(rule, event.data as IRilogRequestItem);
-    if (event.type === ERilogEvent.CLICK) return matchClick(rule, event.data as IRilogClick);
-    return true;
+    const { match } = rule;
+
+    if (event.type === ERilogEvent.REQUEST) {
+        const item = event.data as IRilogRequestItem;
+        if (!matchRequestSpecifics(match, item)) return false;
+        return matchBodyPath(match, [item.request.data, item.response.data]);
+    }
+
+    if (event.type === ERilogEvent.CLICK) {
+        const click = event.data as IRilogClick;
+        if (!matchClickSpecifics(match, click)) return false;
+        return matchBodyPath(match, [click]);
+    }
+
+    // INPUT / CONSOLE_WARN / CONSOLE_ERROR / DEBUG_MESSAGE — generic body-path match against
+    // the event's own data (e.g. bodyPath "message" against a console event).
+    return matchBodyPath(match, [event.data]);
 }
 
 export function matchAllRules(rules: IRilogRule[], extEvent: IExtensionEvent): IRilogRule[] {
     return rules.filter((rule) => matchRule(rule, extEvent));
 }
 
-function summarizeEvent(extEvent: IExtensionEvent): string {
+export function summarizeEvent(extEvent: IExtensionEvent): string {
     const { event } = extEvent;
     if (event.type === ERilogEvent.REQUEST) {
         const item = event.data as IRilogRequestItem;

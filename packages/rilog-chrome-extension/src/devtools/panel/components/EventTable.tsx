@@ -1,8 +1,17 @@
+import { useEffect, useRef } from 'react';
 import { IExtensionEvent } from '../../../types/messages';
 import { EventTypeBadge } from '../../../ui/EventTypeBadge';
-import { formatTime, isRequestEvent, statusColorVar, summarizeEvent } from '../../../ui/eventFormat';
+import { formatTime, isRequestEvent, requestSeverity, statusColorVar, summarizeEvent } from '../../../ui/eventFormat';
 
-export function EventTable({ events, selectedId, onSelect }: { events: IExtensionEvent[]; selectedId: string | null; onSelect: (id: string) => void }) {
+export function EventTable({ events, selectedId, onSelect, autoScroll }: { events: IExtensionEvent[]; selectedId: string | null; onSelect: (id: string) => void; autoScroll: boolean }) {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!autoScroll) return;
+        const el = containerRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+    }, [events.length, autoScroll]);
+
     if (!events.length) {
         return (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-faint)', fontSize: 13 }}>
@@ -12,11 +21,19 @@ export function EventTable({ events, selectedId, onSelect }: { events: IExtensio
     }
 
     return (
-        <div style={{ flex: 1, overflow: 'auto' }}>
+        <div ref={containerRef} style={{ flex: 1, overflow: 'auto' }}>
             {events.map((extEvent) => {
                 const { primary, secondary, status } = summarizeEvent(extEvent.event);
                 const isSelected = extEvent.id === selectedId;
                 const isRequest = isRequestEvent(extEvent.event);
+                const severity = isRequest ? requestSeverity(status) : 'ok';
+
+                // Failed requests (5xx, network errors/timeouts) get a persistent red left border +
+                // tint so they're scannable at a glance, not just a small colored status number.
+                // 4xx gets the same treatment in amber — a real error, but usually less severe.
+                const severityBorder = severity === 'error' ? 'var(--status-5xx)' : severity === 'warn' ? 'var(--status-4xx)' : 'transparent';
+                const severityBg = severity === 'error' ? 'var(--type-console-error-bg)' : severity === 'warn' ? 'var(--type-console-warn-bg)' : 'transparent';
+                const restingBg = isSelected ? 'var(--row-selected)' : severityBg;
 
                 return (
                     <div
@@ -26,17 +43,18 @@ export function EventTable({ events, selectedId, onSelect }: { events: IExtensio
                             display: 'flex',
                             alignItems: 'center',
                             gap: 10,
-                            padding: '6px 14px',
+                            padding: '6px 14px 6px 11px',
                             borderBottom: '1px solid var(--border)',
-                            background: isSelected ? 'var(--row-selected)' : 'transparent',
+                            borderLeft: `3px solid ${severityBorder}`,
+                            background: restingBg,
                             cursor: 'pointer',
                             fontSize: 12.5,
                         }}
                         onMouseEnter={(e) => {
-                            if (!isSelected) e.currentTarget.style.background = 'var(--row-hover)';
+                            if (!isSelected) e.currentTarget.style.background = severity === 'ok' ? 'var(--row-hover)' : severity === 'error' ? 'rgba(255,92,104,0.22)' : 'rgba(224,166,61,0.22)';
                         }}
                         onMouseLeave={(e) => {
-                            if (!isSelected) e.currentTarget.style.background = 'transparent';
+                            if (!isSelected) e.currentTarget.style.background = restingBg;
                         }}
                     >
                         <span

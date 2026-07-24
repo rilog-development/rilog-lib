@@ -1,5 +1,7 @@
+import { ERilogEvent, IRilogRequestItem } from '@rilog-development/rilog-shared';
 import { DEVTOOLS_PORT_PREFIX, IExtensionEvent, TPortMessage, TRuntimeMessage, TRuntimeResponse } from '../types/messages';
-import { matchAllRules, runNotifyActions, getRules, saveRule, deleteRule } from './rules';
+import { matchAllRules, runNotifyActions, summarizeEvent, getRules, saveRule, deleteRule } from './rules';
+import { getSettings, isUrlIgnored, saveSettings } from './settings';
 import { addEvent, clearEvents, dropTab, getEvent, getEvents } from './store';
 import { LocalShareAdapter } from './share/LocalShareAdapter';
 
@@ -52,15 +54,37 @@ async function handleEvent(message: Extract<TRuntimeMessage, { type: 'rilog/even
         receivedAt: Date.now(),
     };
 
+    // The simple global "ignored URL" denylist (Settings) is checked before rules even run —
+    // it's the lightweight path for "just don't track this domain" without writing a rule.
+    if (extEvent.event.type === ERilogEvent.REQUEST) {
+        const settings = await getSettings();
+        const url = (extEvent.event.data as IRilogRequestItem).request.url;
+        if (isUrlIgnored(url, settings.ignoredUrlPatterns)) return;
+    }
+
     const rules = await getRules();
     const matched = matchAllRules(rules, extEvent);
+
+    // "ignore" rules mean "don't capture this at all" — drop before it's ever stored/shown/notified.
+    if (matched.some((r) => r.actions.some((a) => a.type === 'ignore'))) return;
+
     extEvent.matchedRuleIds = matched.map((r) => r.id);
 
-    const result = addEvent(tabId, extEvent);
+    const result = await addEvent(tabId, extEvent);
     if (result.kind === 'dropped') return;
 
     runNotifyActions(matched, extEvent);
     broadcastToTab(tabId, { type: result.kind === 'added' ? 'rilog/event-added' : 'rilog/event-updated', event: result.event });
+
+    // Native chrome.notifications works even when the panel isn't open; this additionally drives
+    // an in-panel toast + sound for whoever is actively watching the panel right now.
+    for (const rule of matched) {
+        for (const action of rule.actions) {
+            if (action.type === 'notify') {
+                broadcastToTab(tabId, { type: 'rilog/notify', title: action.title || rule.name || 'Rilog', body: action.body || summarizeEvent(extEvent), extensionEventId: extEvent.id });
+            }
+        }
+    }
 }
 
 chrome.runtime.onMessage.addListener((message: TRuntimeMessage, sender, sendResponse: (response: TRuntimeResponse) => void) => {
@@ -74,11 +98,11 @@ chrome.runtime.onMessage.addListener((message: TRuntimeMessage, sender, sendResp
                     return;
                 }
                 case 'rilog/get-events': {
-                    sendResponse({ type: 'rilog/events', events: getEvents(message.tabId) });
+                    sendResponse({ type: 'rilog/events', events: await getEvents(message.tabId) });
                     return;
                 }
                 case 'rilog/clear-events': {
-                    clearEvents(message.tabId);
+                    await clearEvents(message.tabId);
                     broadcastToTab(message.tabId, { type: 'rilog/events-cleared' });
                     sendResponse({ type: 'rilog/ok' });
                     return;
@@ -96,13 +120,21 @@ chrome.runtime.onMessage.addListener((message: TRuntimeMessage, sender, sendResp
                     return;
                 }
                 case 'rilog/share-event': {
-                    const extEvent = getEvent(message.tabId, message.extensionEventId);
+                    const extEvent = await getEvent(message.tabId, message.extensionEventId);
                     if (!extEvent) {
                         sendResponse({ type: 'rilog/error', message: 'Event not found' });
                         return;
                     }
                     const result = await shareAdapter.publish(extEvent.event);
                     sendResponse({ type: 'rilog/share-result', url: result.url });
+                    return;
+                }
+                case 'rilog/get-settings': {
+                    sendResponse({ type: 'rilog/settings', settings: await getSettings() });
+                    return;
+                }
+                case 'rilog/save-settings': {
+                    sendResponse({ type: 'rilog/settings', settings: await saveSettings(message.settings) });
                     return;
                 }
             }

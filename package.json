@@ -5,8 +5,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace=@rilog-development/rilog-lib",
-    "test": "npm run test --workspace=@rilog-development/rilog-lib",
-    "lint": "npm run lint --workspace=@rilog-development/rilog-lib"
+    "build:lib": "npm run build --workspace=@rilog-development/rilog-lib",
+    "test:lib": "npm run test --workspace=@rilog-development/rilog-lib",
+    "lint:lib": "npm run lint --workspace=@rilog-development/rilog-lib",
+    "build:ext": "npm run build --workspace=rilog-chrome-extension",
+    "dev:ext": "npm run dev --workspace=rilog-chrome-extension"
   }
 }

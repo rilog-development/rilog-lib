@@ -37,13 +37,23 @@ export function typeColorVar(type: ERilogEvent): { fg: string; bg: string } {
     }
 }
 
-export function statusColorVar(status: string | number | null | undefined): string {
+export type TRequestSeverity = 'ok' | 'warn' | 'error';
+
+/** Non-numeric statuses ("network_error", "timeout", from capture.ts) are real failures too —
+ * previously these fell through to a neutral color and matched no status filter at all. */
+export function requestSeverity(status: string | number | null | undefined): TRequestSeverity {
     const code = Number(status);
-    if (Number.isNaN(code)) return 'var(--text-muted)';
-    if (code >= 500) return 'var(--status-5xx)';
-    if (code >= 400) return 'var(--status-4xx)';
-    if (code >= 200) return 'var(--status-2xx)';
-    return 'var(--text-muted)';
+    if (Number.isNaN(code)) return 'error';
+    if (code >= 500) return 'error';
+    if (code >= 400) return 'warn';
+    return 'ok';
+}
+
+export function statusColorVar(status: string | number | null | undefined): string {
+    const severity = requestSeverity(status);
+    if (severity === 'error') return 'var(--status-5xx)';
+    if (severity === 'warn') return 'var(--status-4xx)';
+    return 'var(--status-2xx)';
 }
 
 export function formatTime(dateLike: string | number): string {

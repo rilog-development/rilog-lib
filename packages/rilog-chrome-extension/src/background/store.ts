@@ -3,6 +3,7 @@ import { IExtensionEvent } from '../types/messages';
 
 const MAX_EVENTS_PER_TAB = 2000;
 const DEDUPE_WINDOW_MS = 4000;
+const EVENTS_KEY_PREFIX = 'rilog_events_tab_';
 
 interface IRecentRequest {
     key: string;
@@ -11,8 +12,25 @@ interface IRecentRequest {
     addedAt: number;
 }
 
-const store = new Map<number, IExtensionEvent[]>();
+// Short-lived dedupe bookkeeping only — safe to lose on a service worker restart (worst case a
+// handful of duplicate rows right around the restart). The actual event log below must survive
+// restarts, so it lives in chrome.storage.session, not a module-level variable: MV3 service
+// workers are ephemeral and get unloaded after ~30s idle, wiping any plain in-memory state.
 const recentRequests = new Map<number, IRecentRequest[]>();
+
+function storageKey(tabId: number): string {
+    return `${EVENTS_KEY_PREFIX}${tabId}`;
+}
+
+async function readEvents(tabId: number): Promise<IExtensionEvent[]> {
+    const key = storageKey(tabId);
+    const result = await chrome.storage.session.get(key);
+    return (result[key] as IExtensionEvent[] | undefined) ?? [];
+}
+
+async function writeEvents(tabId: number, events: IExtensionEvent[]): Promise<void> {
+    await chrome.storage.session.set({ [storageKey(tabId)]: events });
+}
 
 function requestDedupeKey(extEvent: IExtensionEvent): string | null {
     if (extEvent.event.type !== ERilogEvent.REQUEST) return null;
@@ -27,8 +45,8 @@ export type TAddResult = { kind: 'added'; event: IExtensionEvent } | { kind: 'up
  * request. We prefer the bridge version (it already went through rilog-lib's own sensitive-data
  * masking) when both show up within a short window for the same method+url.
  */
-export function addEvent(tabId: number, extEvent: IExtensionEvent): TAddResult {
-    const list = store.get(tabId) ?? [];
+export async function addEvent(tabId: number, extEvent: IExtensionEvent): Promise<TAddResult> {
+    const list = await readEvents(tabId);
     const key = requestDedupeKey(extEvent);
 
     if (key) {
@@ -45,7 +63,7 @@ export function addEvent(tabId: number, extEvent: IExtensionEvent): TAddResult {
                     list[idx] = extEvent;
                     recents[matchIdx] = { key, extensionEventId: extEvent.id, source: 'bridge', addedAt: now };
                     recentRequests.set(tabId, recents);
-                    store.set(tabId, list);
+                    await writeEvents(tabId, list);
                     return { kind: 'updated', event: extEvent };
                 }
             }
@@ -61,24 +79,25 @@ export function addEvent(tabId: number, extEvent: IExtensionEvent): TAddResult {
 
     list.push(extEvent);
     if (list.length > MAX_EVENTS_PER_TAB) list.splice(0, list.length - MAX_EVENTS_PER_TAB);
-    store.set(tabId, list);
+    await writeEvents(tabId, list);
     return { kind: 'added', event: extEvent };
 }
 
-export function getEvents(tabId: number): IExtensionEvent[] {
-    return store.get(tabId) ?? [];
+export async function getEvents(tabId: number): Promise<IExtensionEvent[]> {
+    return readEvents(tabId);
 }
 
-export function getEvent(tabId: number, extensionEventId: string): IExtensionEvent | undefined {
-    return store.get(tabId)?.find((e) => e.id === extensionEventId);
+export async function getEvent(tabId: number, extensionEventId: string): Promise<IExtensionEvent | undefined> {
+    const list = await readEvents(tabId);
+    return list.find((e) => e.id === extensionEventId);
 }
 
-export function clearEvents(tabId: number): void {
-    store.delete(tabId);
+export async function clearEvents(tabId: number): Promise<void> {
+    await chrome.storage.session.remove(storageKey(tabId));
     recentRequests.delete(tabId);
 }
 
-export function dropTab(tabId: number): void {
-    store.delete(tabId);
+export async function dropTab(tabId: number): Promise<void> {
+    await chrome.storage.session.remove(storageKey(tabId));
     recentRequests.delete(tabId);
 }
