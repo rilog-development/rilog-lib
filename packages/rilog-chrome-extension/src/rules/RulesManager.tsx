@@ -59,8 +59,9 @@ export function RulesManager() {
     return (
         <div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 20 }}>
-                Rules match captured events by type, URL, status, body, or click selector. Besides notifying you, pinning, or routing into a named
-                filter tab, an <b>Ignore</b> action stops matching events from being captured at all (e.g. analytics/health-check noise).
+                Rules match captured events by type, URL, status, body, or click selector. Besides notifying you or routing into a named filter tab, a{' '}
+                <b>Pin</b> action surfaces matches under a built-in "Pinned" tab in Events, and an <b>Ignore</b> action stops matching events from being
+                captured at all (e.g. analytics/health-check noise).
             </p>
 
             {editing ? (

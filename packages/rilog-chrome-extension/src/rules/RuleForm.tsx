@@ -179,9 +179,6 @@ export function RuleForm({ rule, onSave, onCancel }: { rule: IRilogRule; onSave:
                         <button className="rilog-icon-btn" style={{ width: 'auto', padding: '4px 10px' }} onClick={() => addAction({ type: 'pin' })}>
                             + Pin
                         </button>
-                        <button className="rilog-icon-btn" style={{ width: 'auto', padding: '4px 10px' }} onClick={() => addAction({ type: 'console' })}>
-                            + Console log
-                        </button>
                         <button
                             className="rilog-icon-btn"
                             style={{ width: 'auto', padding: '4px 10px', color: 'var(--type-console-error)' }}

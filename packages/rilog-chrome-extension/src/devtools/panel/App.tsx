@@ -142,6 +142,9 @@ export function App() {
 
     const filterTabNames = useMemo(() => {
         const names = new Set<string>();
+        // "Pinned" is a built-in tab, not a user-named filterTab — any enabled rule with a Pin
+        // action routes its matches there automatically, no extra config needed.
+        if (rules.some((r) => r.enabled && r.actions.some((a) => a.type === 'pin'))) names.add('Pinned');
         for (const rule of rules) {
             if (rule.filterTab?.enabled && rule.filterTab.name) names.add(rule.filterTab.name);
         }
@@ -161,7 +164,10 @@ export function App() {
             if (activeTypes.size && !activeTypes.has(event.type)) return false;
 
             if (activeFilterTab !== 'all') {
-                const rulesForTab = rules.filter((r) => r.filterTab?.enabled && r.filterTab.name === activeFilterTab);
+                const rulesForTab =
+                    activeFilterTab === 'Pinned'
+                        ? rules.filter((r) => r.actions.some((a) => a.type === 'pin'))
+                        : rules.filter((r) => r.filterTab?.enabled && r.filterTab.name === activeFilterTab);
                 if (!rulesForTab.some((r) => extEvent.matchedRuleIds.includes(r.id))) return false;
             }
 

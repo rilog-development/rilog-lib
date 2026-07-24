@@ -18,7 +18,6 @@ export interface IRilogRuleMatch {
 export type TRilogRuleAction =
     | { type: 'notify'; title: string; body?: string }
     | { type: 'pin' }
-    | { type: 'console' }
     | { type: 'ignore' }; // don't capture matching events at all (e.g. analytics/health-check noise)
 
 export interface IRilogFilterTab {

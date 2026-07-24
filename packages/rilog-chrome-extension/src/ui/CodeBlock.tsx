@@ -79,7 +79,7 @@ function ExpandedModal({ parsed, text, onClose }: { parsed: unknown; text: strin
         <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
             <div
                 onClick={(e) => e.stopPropagation()}
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow)', display: 'flex', flexDirection: 'column', maxWidth: '86vw', maxHeight: '86vh' }}
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow)', display: 'flex', flexDirection: 'column', width: '96vw', maxWidth: '96vw', maxHeight: '92vh' }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: 0.4 }}>JSON</span>
@@ -89,7 +89,11 @@ function ExpandedModal({ parsed, text, onClose }: { parsed: unknown; text: strin
                         ✕
                     </button>
                 </div>
-                <div style={{ padding: 16, overflow: 'auto', maxWidth: '84vw', maxHeight: '78vh' }}>{parsed !== null && typeof parsed === 'object' ? <JsonView value={parsed} /> : <pre style={{ margin: 0, color: 'var(--code-text)', fontSize: 13, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{text}</pre>}</div>
+                <div style={{ padding: 16, overflow: 'auto', maxHeight: '86vh' }}>
+                    <div style={{ background: 'var(--code-bg)', color: 'var(--code-text)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+                        {parsed !== null && typeof parsed === 'object' ? <JsonView value={parsed} /> : <pre style={{ margin: 0, fontSize: 13, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{text}</pre>}
+                    </div>
+                </div>
             </div>
         </div>
     );

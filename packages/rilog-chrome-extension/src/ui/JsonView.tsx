@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 
 function PrimitiveValue({ value }: { value: unknown }) {
     if (value === null) return <span style={{ color: 'var(--text-faint)' }}>null</span>;
@@ -9,40 +9,61 @@ function PrimitiveValue({ value }: { value: unknown }) {
     return <span>{String(value)}</span>;
 }
 
-function JsonNode({ label, value, depth }: { label?: string; value: unknown; depth: number }) {
-    const isObject = value !== null && typeof value === 'object';
-    const isArray = Array.isArray(value);
-    const [collapsed, setCollapsed] = useState(false);
+interface IRow {
+    path: string;
+    depth: number;
+    content: ReactNode;
+    togglePath?: string;
+}
 
+/** Flattens the JSON tree into one entry per visible line so we can number lines like a code
+ * editor — a recursive component tree has no single place to count "how many lines came before". */
+function buildRows(value: unknown, label: string | undefined, depth: number, path: string, collapsedPaths: Set<string>, rows: IRow[]) {
+    const isObject = value !== null && typeof value === 'object';
     const labelNode = label !== undefined && <span style={{ color: 'var(--text-muted)' }}>{label}: </span>;
 
     if (!isObject) {
-        return (
-            <div style={{ paddingLeft: depth * 14 }}>
-                {labelNode}
-                <PrimitiveValue value={value} />
-            </div>
-        );
+        rows.push({
+            path,
+            depth,
+            content: (
+                <>
+                    {labelNode}
+                    <PrimitiveValue value={value} />
+                </>
+            ),
+        });
+        return;
     }
 
+    const isArray = Array.isArray(value);
     const entries = isArray ? (value as unknown[]).map((v, i) => [String(i), v] as const) : Object.entries(value as Record<string, unknown>);
     const [open, close] = isArray ? ['[', ']'] : ['{', '}'];
 
     if (entries.length === 0) {
-        return (
-            <div style={{ paddingLeft: depth * 14 }}>
-                {labelNode}
-                <span style={{ color: 'var(--text-faint)' }}>
-                    {open}
-                    {close}
-                </span>
-            </div>
-        );
+        rows.push({
+            path,
+            depth,
+            content: (
+                <>
+                    {labelNode}
+                    <span style={{ color: 'var(--text-faint)' }}>
+                        {open}
+                        {close}
+                    </span>
+                </>
+            ),
+        });
+        return;
     }
 
-    return (
-        <div>
-            <div style={{ paddingLeft: depth * 14, cursor: 'pointer', userSelect: 'none' }} onClick={() => setCollapsed((c) => !c)}>
+    const collapsed = collapsedPaths.has(path);
+    rows.push({
+        path,
+        depth,
+        togglePath: path,
+        content: (
+            <>
                 <span style={{ display: 'inline-block', width: 12, color: 'var(--text-faint)' }}>{collapsed ? '▶' : '▼'}</span>
                 {labelNode}
                 <span style={{ color: 'var(--text-faint)' }}>
@@ -54,23 +75,64 @@ function JsonNode({ label, value, depth }: { label?: string; value: unknown; dep
                         </span>
                     )}
                 </span>
-            </div>
-            {!collapsed && (
-                <>
-                    {entries.map(([key, val]) => (
-                        <JsonNode key={key} label={isArray ? undefined : key} value={val} depth={depth + 1} />
-                    ))}
-                    <div style={{ paddingLeft: depth * 14, color: 'var(--text-faint)' }}>{close}</div>
-                </>
-            )}
-        </div>
-    );
+            </>
+        ),
+    });
+
+    if (!collapsed) {
+        for (const [key, val] of entries) {
+            buildRows(val, isArray ? undefined : key, depth + 1, `${path}.${key}`, collapsedPaths, rows);
+        }
+        rows.push({ path: `${path}:close`, depth, content: <span style={{ color: 'var(--text-faint)' }}>{close}</span> });
+    }
 }
 
 export function JsonView({ value }: { value: unknown }) {
+    const [collapsedPaths, setCollapsedPaths] = useState<Set<string>>(new Set());
+
+    const toggle = (path: string) =>
+        setCollapsedPaths((prev) => {
+            const next = new Set(prev);
+            if (next.has(path)) next.delete(path);
+            else next.add(path);
+            return next;
+        });
+
+    const rows = useMemo(() => {
+        const acc: IRow[] = [];
+        buildRows(value, undefined, 0, '$', collapsedPaths, acc);
+        return acc;
+    }, [value, collapsedPaths]);
+
+    const lineNoWidth = Math.max(18, String(rows.length).length * 8) + 10;
+
     return (
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.7 }}>
-            <JsonNode value={value} depth={0} />
+            {rows.map((row, i) => (
+                <div key={row.path} style={{ display: 'flex' }}>
+                    <div
+                        style={{
+                            width: lineNoWidth,
+                            flexShrink: 0,
+                            textAlign: 'right',
+                            paddingRight: 10,
+                            marginRight: 10,
+                            color: 'var(--text-faint)',
+                            opacity: 0.55,
+                            userSelect: 'none',
+                            borderRight: '1px solid var(--border)',
+                        }}
+                    >
+                        {i + 1}
+                    </div>
+                    <div
+                        style={{ paddingLeft: row.depth * 14, flex: 1, cursor: row.togglePath ? 'pointer' : undefined, userSelect: row.togglePath ? 'none' : undefined }}
+                        onClick={row.togglePath ? () => toggle(row.togglePath!) : undefined}
+                    >
+                        {row.content}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }
