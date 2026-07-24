@@ -33,6 +33,7 @@ export type TRuntimeMessage =
     | { type: 'rilog/get-rules' }
     | { type: 'rilog/save-rule'; rule: IRilogRule }
     | { type: 'rilog/delete-rule'; ruleId: string }
+    | { type: 'rilog/import-rules'; rules: IRilogRule[] }
     | { type: 'rilog/share-event'; extensionEventId: string; tabId: number }
     | { type: 'rilog/get-settings' }
     | { type: 'rilog/save-settings'; settings: IRilogSettings };

@@ -24,6 +24,19 @@ export async function deleteRule(ruleId: string): Promise<IRilogRule[]> {
     return rules;
 }
 
+/** Upserts a whole batch in one read-modify-write — importing rule-by-rule via saveRule() would
+ * race, since each call reads storage independently and later writes could clobber earlier ones. */
+export async function importRules(imported: IRilogRule[]): Promise<IRilogRule[]> {
+    const rules = await getRules();
+    for (const rule of imported) {
+        const idx = rules.findIndex((r) => r.id === rule.id);
+        if (idx !== -1) rules[idx] = rule;
+        else rules.push(rule);
+    }
+    await chrome.storage.local.set({ [RULES_STORAGE_KEY]: rules });
+    return rules;
+}
+
 const PATH_SEGMENT_RE = /^([^[]*)(\[(\d*)\])?$/;
 
 /**

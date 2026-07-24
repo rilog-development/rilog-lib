@@ -224,7 +224,7 @@ export function App() {
             </div>
 
             <div style={{ display: view === 'rules' ? 'flex' : 'none', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                <RulesView />
+                <RulesView onRulesChanged={setRules} />
             </div>
 
             <div style={{ display: view === 'settings' ? 'flex' : 'none', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>

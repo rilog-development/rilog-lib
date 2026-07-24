@@ -1,6 +1,6 @@
 import { ERilogEvent, IRilogRequestItem } from '@rilog-development/rilog-shared';
 import { DEVTOOLS_PORT_PREFIX, IExtensionEvent, TPortMessage, TRuntimeMessage, TRuntimeResponse } from '../types/messages';
-import { matchAllRules, runNotifyActions, summarizeEvent, getRules, saveRule, deleteRule } from './rules';
+import { matchAllRules, runNotifyActions, summarizeEvent, getRules, saveRule, deleteRule, importRules } from './rules';
 import { getSettings, isUrlIgnored, saveSettings } from './settings';
 import { addEvent, clearEvents, dropTab, getEvent, getEvents } from './store';
 import { LocalShareAdapter } from './share/LocalShareAdapter';
@@ -117,6 +117,10 @@ chrome.runtime.onMessage.addListener((message: TRuntimeMessage, sender, sendResp
                 }
                 case 'rilog/delete-rule': {
                     sendResponse({ type: 'rilog/rules', rules: await deleteRule(message.ruleId) });
+                    return;
+                }
+                case 'rilog/import-rules': {
+                    sendResponse({ type: 'rilog/rules', rules: await importRules(message.rules) });
                     return;
                 }
                 case 'rilog/share-event': {
