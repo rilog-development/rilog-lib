@@ -127,13 +127,13 @@ export function DetailPanel({
                         <Section title="Request">
                             <Field label="URL" value={requestItem.request.url} />
                             <Field label="Method" value={requestItem.request.method} />
-                            <Field label="Timestamp" value={new Date(requestItem.request.timestamp).toISOString()} />
+                            <Field label="Timestamp" value={formatTime(requestItem.request.timestamp)} />
                             <Field label="Headers" value={<CodeBlock value={requestItem.request.headers} maxHeight={sideBySide ? 160 : 120} />} />
                             <Field label="Body" value={<CodeBlock value={requestItem.request.data} maxHeight={sideBySide ? 320 : 220} />} />
                         </Section>
                         <Section title="Response">
                             <Field label="Status" value={<span style={{ color: statusColorVar(requestItem.response.status), fontWeight: 700 }}>{requestItem.response.status}</span>} />
-                            <Field label="Timestamp" value={new Date(requestItem.response.timestamp).toISOString()} />
+                            <Field label="Timestamp" value={formatTime(requestItem.response.timestamp)} />
                             {requestItem.duration && <Field label="Duration" value={`${requestItem.duration} ms`} />}
                             <Field label="Body" value={<CodeBlock value={requestItem.response.data} maxHeight={sideBySide ? 320 : 220} />} />
                         </Section>

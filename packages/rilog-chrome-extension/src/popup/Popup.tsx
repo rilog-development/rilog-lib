@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CAPTURE_ENABLED_STORAGE_KEY, TRuntimeResponse } from '../types/messages';
+import { Logo } from '../ui/Logo';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useTheme } from '../ui/useTheme';
 
@@ -32,8 +33,8 @@ export function Popup() {
     return (
         <div style={{ padding: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <span style={{ display: 'inline-flex', width: 20, height: 20, borderRadius: 5, background: 'var(--accent)', color: 'var(--accent-contrast)', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>R</span>
-                <span style={{ fontWeight: 700, fontSize: 14 }}>Rilog DevTools</span>
+                <Logo height={18} />
+                <span style={{ fontWeight: 600, fontSize: 12.5, color: 'var(--text-muted)' }}>DevTools</span>
                 <div style={{ flex: 1 }} />
                 <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </div>

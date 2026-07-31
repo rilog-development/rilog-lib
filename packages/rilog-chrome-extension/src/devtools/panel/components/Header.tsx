@@ -1,5 +1,6 @@
 import { ReactNode, useRef } from 'react';
 import { GearIcon } from '../../../ui/GearIcon';
+import { Logo } from '../../../ui/Logo';
 import { TPanelView } from '../App';
 
 function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
@@ -62,24 +63,7 @@ export function Header({
                 flexShrink: 0,
             }}
         >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14, letterSpacing: 0.2 }}>
-                <span
-                    style={{
-                        display: 'inline-flex',
-                        width: 20,
-                        height: 20,
-                        borderRadius: 5,
-                        background: 'var(--accent)',
-                        color: 'var(--accent-contrast)',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 12,
-                    }}
-                >
-                    R
-                </span>
-                Rilog
-            </div>
+            <Logo height={20} />
 
             <div style={{ display: 'flex', gap: 4, background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: 2 }}>
                 <TabButton active={view === 'events'} onClick={() => onViewChange('events')}>

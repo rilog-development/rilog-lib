@@ -108,7 +108,7 @@ export function CodeBlock({ value, maxHeight = 220 }: { value: unknown; maxHeigh
         <div style={{ position: 'relative' }}>
             <Rendered parsed={parsed} text={text} maxHeight={maxHeight} />
             <div style={{ position: 'absolute', top: 6, right: 6, display: 'flex', gap: 4 }}>
-                <button onClick={() => setExpanded(true)} className="rilog-icon-btn" title="Expand" style={{ width: 'auto', padding: '3px 8px', fontSize: 11, fontWeight: 600 }}>
+                <button onClick={() => setExpanded(true)} className="rilog-icon-btn" title="Expand" style={{ fontSize: 16 }}>
                     ⤢
                 </button>
                 <CopyButton text={text} />

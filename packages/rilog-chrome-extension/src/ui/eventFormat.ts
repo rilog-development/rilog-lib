@@ -56,10 +56,25 @@ export function statusColorVar(status: string | number | null | undefined): stri
     return 'var(--status-2xx)';
 }
 
-export function formatTime(dateLike: string | number): string {
+function pad(n: number): string {
+    return String(n).padStart(2, '0');
+}
+
+function toDate(dateLike: string | number): Date {
     const ms = typeof dateLike === 'number' ? dateLike : Number(dateLike);
-    const d = Number.isNaN(ms) ? new Date(dateLike) : new Date(ms);
-    return d.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return Number.isNaN(ms) ? new Date(dateLike) : new Date(ms);
+}
+
+/** Fixed DD.MM.YYYY HH:mm:ss — locale-independent so it doesn't depend on the machine's
+ * regional format (and doesn't come out as a raw ISO string like the request/response timestamps did). */
+export function formatTime(dateLike: string | number): string {
+    const d = toDate(dateLike);
+    return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+export function formatTimeOnly(dateLike: string | number): string {
+    const d = toDate(dateLike);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 /** One-line row summary — mirrors what the rilog-local-server dashboard shows per row. */
