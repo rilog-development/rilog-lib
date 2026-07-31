@@ -219,7 +219,7 @@ export function App() {
                 <FilterBar value={filters} onChange={setFilters} />
                 <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: dock === 'right' ? 'row' : 'column' }}>
                     <EventTable events={filtered} selectedId={selectedId} onSelect={setSelectedId} autoScroll={settings.autoScroll} />
-                    {selected && <DetailPanel extEvent={selected} tabId={tabId} onClose={() => setSelectedId(null)} rules={rules} dock={dock} onDockChange={setDock} />}
+                    {selected && <DetailPanel extEvent={selected} tabId={tabId} onClose={() => setSelectedId(null)} rules={rules} dock={dock} onDockChange={setDock} settings={settings} />}
                 </div>
             </div>
 

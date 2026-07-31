@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { ERilogEvent, IRilogRequestItem } from '@rilog-development/rilog-shared';
 import { IExtensionEvent, TRuntimeResponse } from '../../../types/messages';
 import { IRilogRule } from '../../../types/rules';
+import { IRilogSettings } from '../../../types/settings';
 import { CodeBlock } from '../../../ui/CodeBlock';
 import { DockIcon } from '../../../ui/DockIcon';
 import { EventTypeBadge } from '../../../ui/EventTypeBadge';
@@ -34,6 +35,7 @@ export function DetailPanel({
     rules,
     dock,
     onDockChange,
+    settings,
 }: {
     extEvent: IExtensionEvent;
     tabId: number;
@@ -41,6 +43,7 @@ export function DetailPanel({
     rules: IRilogRule[];
     dock: TDock;
     onDockChange: (dock: TDock) => void;
+    settings: IRilogSettings;
 }) {
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [sharing, setSharing] = useState(false);
@@ -92,9 +95,11 @@ export function DetailPanel({
                 <EventTypeBadge type={event.type} />
                 <span style={{ fontSize: 12, color: 'var(--text-faint)' }}>{formatTime(event.date)}</span>
                 <div style={{ flex: 1 }} />
-                <button onClick={onShare} disabled={sharing} className="rilog-icon-btn" style={{ width: 'auto', padding: '4px 10px', fontSize: 11, fontWeight: 600 }}>
-                    {sharing ? '…' : 'Share'}
-                </button>
+                {settings.featureFlags.share && (
+                    <button onClick={onShare} disabled={sharing} className="rilog-icon-btn" style={{ width: 'auto', padding: '4px 10px', fontSize: 11, fontWeight: 600 }}>
+                        {sharing ? '…' : 'Share'}
+                    </button>
+                )}
                 <button onClick={() => onDockChange('bottom')} className="rilog-icon-btn" title="Dock to bottom" style={{ color: dock === 'bottom' ? 'var(--accent)' : undefined }}>
                     <DockIcon position="bottom" />
                 </button>

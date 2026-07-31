@@ -49,6 +49,21 @@ export function SettingsView({ settings, onSaved }: { settings: IRilogSettings; 
                 </label>
             </div>
 
+            <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, color: 'var(--text-faint)', marginBottom: 6 }}>Feature flags</div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer' }}>
+                    <input
+                        type="checkbox"
+                        checked={draft.featureFlags.share}
+                        onChange={(e) => persist({ ...draft, featureFlags: { ...draft.featureFlags, share: e.target.checked } })}
+                    />
+                    Show the Share button on the event detail panel
+                </label>
+                <p style={{ color: 'var(--text-muted)', fontSize: 12.5, marginTop: 4, marginBottom: 0 }}>
+                    Off by default — sharing copies the full request/response, including bodies, to a shareable link.
+                </p>
+            </div>
+
             <div>
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, color: 'var(--text-faint)', marginBottom: 6 }}>Ignored URLs</div>
                 <p style={{ color: 'var(--text-muted)', fontSize: 12.5, marginTop: 0, marginBottom: 12 }}>
